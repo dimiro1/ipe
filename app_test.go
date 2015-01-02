@@ -54,6 +54,17 @@ func Test_add_channels(t *testing.T) {
 
 }
 
+func Test_AllChannels(t *testing.T) {
+	app := newApp()
+	app.AddChannel(NewChannel("private-test", ""))
+	app.AddChannel(NewChannel("presence-test", ""))
+	app.AddChannel(NewChannel("test", ""))
+
+	if len(app.AllChannels()) != 3 {
+		t.Error("Must have 3 channels")
+	}
+}
+
 func Test_New_Connection(t *testing.T) {
 	app := newApp()
 
@@ -61,7 +72,8 @@ func Test_New_Connection(t *testing.T) {
 		t.Error("Length of connections before test must be 0")
 	}
 
-	app.NewConnection("1", "", nil)
+	conn := NewConnection("1", "", nil)
+	app.AddConnection(conn)
 
 	if len(app.Connections) != 1 {
 		t.Error("Length os connections after test must be 1")
@@ -70,7 +82,8 @@ func Test_New_Connection(t *testing.T) {
 
 func Test_find_connection(t *testing.T) {
 	app := newApp()
-	app.NewConnection("1", "", nil)
+	conn := NewConnection("1", "", nil)
+	app.AddConnection(conn)
 
 	conn, err := app.FindConnection("1")
 
@@ -143,13 +156,4 @@ func Test_find_or_create_channels(t *testing.T) {
 		t.Error("Opps wrong channel")
 	}
 
-}
-
-// How to test this???
-func TestRandomID(t *testing.T) {
-	n := randomID()
-
-	if n < 0 {
-		t.Error("Must be greater than or equal zero")
-	}
 }
