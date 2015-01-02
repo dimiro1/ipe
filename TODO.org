@@ -1,0 +1,17 @@
+Tarefas IPE
+
+** DONE Autenticação API Rest
+** DONE Autenticação Websockets
+** TODO Console de log
+** TODO Ping e Pong
+** TODO Escrever testes automatizados
+** TODO Refatorar partes do código, remover repetições
+** TODO SSL
+** TODO Otimizações
+** TODO Segurança, tempo de expiração, etc
+** TODO Coletor de conexões abandonadas. Tempo de vida e go routine checking from time to time.
+
+Objetivos
+
+** TODO Implementação Funcional.
+** TODO Testes automatizados após o projeto pronto.
