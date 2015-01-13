@@ -64,7 +64,7 @@ func NewMemberRemovedHook(channel *Channel, s *Subscriber) HookEvent {
 }
 
 func NewClientHook(channel *Channel, s *Subscription, event string, data interface{}) HookEvent {
-	return HookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Subscriber.SocketID, UserId: s.Subscriber.Id}
+	return HookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Subscriber.SocketID}
 }
 
 // channel_occupied
@@ -91,6 +91,11 @@ func (a *App) TriggerChannelVacatedHook(c *Channel) {
 // }
 func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event string, data interface{}) {
 	event := NewClientHook(c, s, client_event, data)
+
+	if c.IsPresence() {
+		event.UserId = s.Subscriber.Id
+	}
+
 	triggerHook(event.Name, a, c, event)
 }
 
