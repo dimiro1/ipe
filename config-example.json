@@ -1,5 +1,6 @@
 {
 	"Host": ":8080",
+	"Expvar": true,
 	"Apps": [
 		{
 			"ApplicationDisabled": false,
@@ -9,7 +10,8 @@
 			"Name": "App 1",
 			"AppID": "321",
 			"UserEvents": true,
-			"WebHooks": true
+			"WebHooks": true,
+			"URLWebHook": "http://127.0.0.1:4567/php/hook.php"
 		},
 		{
 			"ApplicationDisabled": false,
@@ -19,7 +21,8 @@
 			"Name": "App 2",
 			"AppID": "123",
 			"UserEvents": true,
-			"WebHooks": false
+			"WebHooks": false,
+			"URLWebHook": "http://127.0.0.1:4567/php/hook.php"
 		}
 	]
 }
