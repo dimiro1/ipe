@@ -8,7 +8,7 @@ Why I wrote this software?
 3. I use Pusher in some projects;
 4. I really like Pusher;
 
-Where this name come from?
+Where this name came from?
 --------------------------
 
 Here in Brazil we have this beatiful tree called Ipê, it comes in differente colors: yellow, pink, white, purple.
