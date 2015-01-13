@@ -9,7 +9,6 @@ import (
 	"errors"
 	"strings"
 	"sync"
-
 	"time"
 
 	log "github.com/golang/glog"
@@ -47,7 +46,7 @@ type Channel struct {
 
 	CreatedAt     time.Time
 	ChannelID     string
-	Subscriptions []*Subscription
+	Subscriptions map[string]*Subscription
 }
 
 // Return true if the channel has at least one subscriber
@@ -58,6 +57,11 @@ func (c *Channel) IsOccupied() bool {
 // Check if the type of the channel is presence or is private
 func (c *Channel) IsPresenceOrPrivate() bool {
 	return c.IsPresence() || c.IsPrivate()
+}
+
+// Check if the type of the channel is public
+func (c *Channel) IsPublic() bool {
+	return !c.IsPresence() && !c.IsPrivate()
 }
 
 // Check if the type of the channel is presence
@@ -86,7 +90,7 @@ func (c *Channel) Subscribe(a *App, s *Subscriber, data string) {
 	log.Infof("Subscribing %s to channel %s", s.SocketID, c.ChannelID)
 
 	c.Lock()
-	c.Subscriptions = append(c.Subscriptions, NewSubscription(s, data))
+	c.Subscriptions[s.SocketID] = NewSubscription(s, data)
 	c.Unlock()
 
 	if c.IsPresence() {
@@ -116,12 +120,8 @@ func (c *Channel) Subscribe(a *App, s *Subscriber, data string) {
 
 // IsSubscribed check if the user is subscribed
 func (c *Channel) IsSubscribed(s *Subscriber) bool {
-	for _, subs := range c.Subscriptions {
-		if subs.Subscriber == s {
-			return true
-		}
-	}
-	return false
+	_, exists := c.Subscriptions[s.SocketID]
+	return exists
 }
 
 // Remove the subscriber from the channel
@@ -132,17 +132,13 @@ func (c *Channel) Unsubscribe(a *App, s *Subscriber) error {
 	c.Lock()
 	defer c.Unlock()
 
-	index := -1
-	for i, subs := range c.Subscriptions {
-		if subs.Subscriber == s {
-			index = i
-			break
-		}
-	}
-	if index == -1 {
+	_, exists := c.Subscriptions[s.SocketID]
+
+	if !exists {
 		return errors.New("Subscription not found")
 	}
-	c.Subscriptions = append(c.Subscriptions[:index], c.Subscriptions[index+1:]...)
+
+	delete(c.Subscriptions, s.SocketID)
 
 	if c.IsPresence() {
 		// Publish pusher_internal:member_removed
@@ -162,7 +158,7 @@ func (c *Channel) Unsubscribe(a *App, s *Subscriber) error {
 func NewChannel(channelID string) *Channel {
 	log.Infof("Creating a new channel: %s", channelID)
 
-	return &Channel{ChannelID: channelID, CreatedAt: time.Now()}
+	return &Channel{ChannelID: channelID, CreatedAt: time.Now(), Subscriptions: make(map[string]*Subscription)}
 }
 
 // This function generate a sequencial ID

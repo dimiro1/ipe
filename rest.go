@@ -136,7 +136,7 @@ func GetChannels(w http.ResponseWriter, r *http.Request) {
 
 	switch filter {
 	case "presence-":
-		for _, c := range app.PresenceChannels {
+		for _, c := range app.PresenceChannels() {
 			if requestedUserCount {
 				channels[c.ChannelID] = struct {
 					UserCount int `json:"user_count"`
@@ -148,15 +148,15 @@ func GetChannels(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	case "public-":
-		for _, c := range app.PublicChannels {
+		for _, c := range app.PublicChannels() {
 			channels[c.ChannelID] = struct{}{}
 		}
 	case "private-":
-		for _, c := range app.PrivateChannels {
+		for _, c := range app.PrivateChannels() {
 			channels[c.ChannelID] = struct{}{}
 		}
 	default:
-		for _, c := range app.AllChannels() {
+		for _, c := range app.Channels {
 			channels[c.ChannelID] = struct{}{}
 		}
 	}

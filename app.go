@@ -25,24 +25,56 @@ type App struct {
 	WebHooks            bool
 	URLWebHook          string
 
-	PublicChannels   []*Channel `json:"-"`
-	PresenceChannels []*Channel `json:"-"`
-	PrivateChannels  []*Channel `json:"-"`
-
+	Channels    map[string]*Channel    `json:"-"`
 	Subscribers map[string]*Subscriber `json:"-"`
 }
 
-// Returns a list of all channels in this app
-func (a *App) AllChannels() []*Channel {
+// Alloc memory for Subscribers and Channels
+func (a *App) Init() {
+	a.Subscribers = make(map[string]*Subscriber)
+	a.Channels = make(map[string]*Channel)
+}
+
+// Only Presence channels
+func (a *App) PresenceChannels() []*Channel {
 	var channels []*Channel
 
-	channels = append(channels, a.PrivateChannels...)
-	channels = append(channels, a.PresenceChannels...)
-	channels = append(channels, a.PublicChannels...)
+	for _, c := range a.Channels {
+		if c.IsPresence() {
+			channels = append(channels, c)
+		}
+	}
 
 	return channels
 }
 
+// Only Private channels
+func (a *App) PrivateChannels() []*Channel {
+	var channels []*Channel
+
+	for _, c := range a.Channels {
+		if c.IsPrivate() {
+			channels = append(channels, c)
+		}
+	}
+
+	return channels
+}
+
+// Only Public channels
+func (a *App) PublicChannels() []*Channel {
+	var channels []*Channel
+
+	for _, c := range a.Channels {
+		if c.IsPublic() {
+			channels = append(channels, c)
+		}
+	}
+
+	return channels
+}
+
+// Disconnect Socket
 func (a *App) Disconnect(socketID string) {
 	log.Infof("Disconnecting socket %+v", socketID)
 
@@ -54,7 +86,7 @@ func (a *App) Disconnect(socketID string) {
 	}
 
 	// Unsubscribe from channels
-	for _, c := range a.AllChannels() {
+	for _, c := range a.Channels {
 		if c.IsSubscribed(s) {
 			c.Unsubscribe(a, s)
 		}
@@ -72,7 +104,7 @@ func (a *App) Disconnect(socketID string) {
 	a.Unlock()
 }
 
-// Create a new Subscriber
+// Connect a new Subscriber
 func (a *App) Connect(s *Subscriber) {
 	log.Infof("Adding a new Subscriber %s to app %s", s.SocketID, a.Name)
 	a.Lock()
@@ -97,15 +129,7 @@ func (a *App) AddChannel(c *Channel) {
 	log.Infof("Adding a new channel %s to app %s", c.ChannelID, a.Name)
 
 	a.Lock()
-
-	if c.IsPresence() {
-		a.PresenceChannels = append(a.PresenceChannels, c)
-	} else if c.IsPrivate() {
-		a.PrivateChannels = append(a.PrivateChannels, c)
-	} else {
-		a.PublicChannels = append(a.PublicChannels, c)
-	}
-
+	a.Channels[c.ChannelID] = c
 	a.Unlock()
 }
 
@@ -125,10 +149,10 @@ func (a *App) FindOrCreateChannelByChannelID(n string) *Channel {
 // Find the channel by channel ID
 func (a *App) FindChannelByChannelID(n string) (*Channel, error) {
 
-	for _, c := range a.AllChannels() {
-		if c.ChannelID == n {
-			return c, nil
-		}
+	c, exists := a.Channels[n]
+
+	if exists {
+		return c, nil
 	}
 
 	return nil, errors.New("Channel does not exists")

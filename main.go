@@ -33,7 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	Conf.Initialize()
+	Conf.Init()
 
 	router := NewRouter()
 

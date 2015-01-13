@@ -9,9 +9,9 @@ IPÊ
     - [ ] Escrever testes automatizados
     - [ ] SSL
 	- [ ] Expvar - Canais, inscritos
-    - [ ] Otimizações [0/3]
+    - [-] Otimizações [1/3]
       - [ ] Refatorar partes do código, remover repetições
-      - [ ] Alterar tipos de dados de slices para mapas em alguns locais.
+      - [X] Alterar tipos de dados de slices para mapas em alguns locais.
       - [ ] Remover Canais vazios com uma go routine - Uma especie de coletor de lixo
     - [ ] Segurança, tempo de expiração, etc
     - [X] Dados extra na conexão do usuário. Ver Websockets onOpen

@@ -15,9 +15,10 @@ type ConfigFile struct {
 // Error for App not found
 var AppNotFoundError = errors.New("App not found")
 
-func (c *ConfigFile) Initialize() {
+// Initialize Apps
+func (c *ConfigFile) Init() {
 	for _, app := range c.Apps {
-		app.Subscribers = make(map[string]*Subscriber)
+		app.Init()
 	}
 }
 
