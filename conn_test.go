@@ -4,14 +4,12 @@
 
 package main
 
-import (
-	"testing"
-)
+import "testing"
 
 func Test_New_ID(t *testing.T) {
-	id := newID()
+	_, id := newID()
 
-	if newID() != id+1 {
-		t.Error("Every call to newID must increment the id by one")
+	if _, i := newID(); i != id+1 {
+		t.Errorf("Every call to newID must increment the id by one, got: %s", i)
 	}
 }

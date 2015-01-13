@@ -164,18 +164,18 @@ func NewChannel(channelID string) *Channel {
 }
 
 // This function generate a sequencial ID
-func newID() string {
+func newID() (string, int) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	currentID += 1
 
-	return strconv.Itoa(currentID)
+	return strconv.Itoa(currentID), currentID
 }
 
 // Create a new Subscriber
 func NewSubscriber(socketID string, s *websocket.Conn) *Subscriber {
-	id := newID()
+	id, _ := newID()
 
 	log.Infof("Creating a new Subscriber %+v with id %s", socketID, id)
 
