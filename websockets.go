@@ -239,7 +239,7 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 
 // Generate a new random sessionID
 func randomSessionID() string {
-	b := make([]byte, 20)
+	b := make([]byte, 25)
 
 	if _, err := rand.Read(b); err != nil {
 		panic("websockets: Could not generate a random session ID")
