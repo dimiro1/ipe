@@ -61,7 +61,7 @@ func (c *Channel) IsPresenceOrPrivate() bool {
 
 // Check if the type of the channel is public
 func (c *Channel) IsPublic() bool {
-	return !c.IsPresence() && !c.IsPrivate()
+	return !c.IsPresenceOrPrivate()
 }
 
 // Check if the type of the channel is presence
