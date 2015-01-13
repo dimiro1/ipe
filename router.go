@@ -5,6 +5,7 @@
 package main
 
 import (
+	_ "expvar"
 	"net/http"
 	"os"
 
@@ -16,6 +17,10 @@ import (
 // It add the necessary middlewares
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
+
+	if Conf.Expvar {
+		router.Handle("/debug/vars", http.DefaultServeMux)
+	}
 
 	for _, route := range routes {
 		var handler http.Handler

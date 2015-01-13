@@ -1,14 +1,14 @@
 IPÊ
 ---
 
-  * TODO [7/14]
+  * TODO [8/14]
     - [X] Autenticação API Rest
     - [X] Autenticação Websockets
     - [ ] Console de log
     - [X] Ping e Pong
     - [ ] Escrever testes automatizados
     - [ ] SSL
-	- [ ] Expvar - Canais, inscritos
+	- [X] Expvar - Canais, inscritos
     - [-] Otimizações [1/3]
       - [ ] Refatorar partes do código, remover repetições
       - [X] Alterar tipos de dados de slices para mapas em alguns locais.

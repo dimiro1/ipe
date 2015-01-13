@@ -6,10 +6,27 @@ package main
 
 import (
 	"errors"
+	"expvar"
 	"sync"
 
 	log "github.com/golang/glog"
 )
+
+var (
+	// Exports the quantity of subscribers
+	expSubscribers *expvar.Int
+
+	// Exports the quantity of channels
+	expChannels *expvar.Int
+
+	expMessages *expvar.Int
+)
+
+func init() {
+	expSubscribers = expvar.NewInt("TotalSubscribers")
+	expChannels = expvar.NewInt("TotalChannels")
+	expMessages = expvar.NewInt("TotalMessagesPublished")
+}
 
 // An App
 type App struct {
@@ -94,22 +111,25 @@ func (a *App) Disconnect(socketID string) {
 
 	// Remove from app
 	a.Lock()
+	defer a.Unlock()
+
 	_, exists := a.Subscribers[s.SocketID]
 	if !exists {
 		return
 	}
 
 	delete(a.Subscribers, s.SocketID)
-
-	a.Unlock()
+	expSubscribers.Set(int64(len(a.Subscribers)))
 }
 
 // Connect a new Subscriber
 func (a *App) Connect(s *Subscriber) {
 	log.Infof("Adding a new Subscriber %s to app %s", s.SocketID, a.Name)
 	a.Lock()
+	defer a.Unlock()
+
 	a.Subscribers[s.SocketID] = s
-	a.Unlock()
+	expSubscribers.Set(int64(len(a.Subscribers)))
 }
 
 // Find a Subscriber on this app
@@ -131,6 +151,8 @@ func (a *App) AddChannel(c *Channel) {
 	a.Lock()
 	a.Channels[c.ChannelID] = c
 	a.Unlock()
+
+	expChannels.Set(int64(len(a.Channels)))
 }
 
 // Returns a Channel from this app
@@ -159,6 +181,8 @@ func (a *App) FindChannelByChannelID(n string) (*Channel, error) {
 }
 
 func (a *App) Publish(c *Channel, event RawEvent, ignore string) error {
+	expMessages.Add(1)
+
 	return c.Publish(a, event, ignore)
 }
 
