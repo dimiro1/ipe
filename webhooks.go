@@ -39,12 +39,12 @@ type WebHook struct {
 }
 
 type HookEvent struct {
-	Name     string `json:"name"`
-	Channel  string `json:"channel"`
-	Event    string `json:"event,omitempty"`
-	Data     string `json:"data,omitempty"`
-	SocketID string `json:"socket_id,omitempty"`
-	UserId   string `json:"user_id,omitempty"`
+	Name     string      `json:"name"`
+	Channel  string      `json:"channel"`
+	Event    string      `json:"event,omitempty"`
+	Data     interface{} `json:"data,omitempty"`
+	SocketID string      `json:"socket_id,omitempty"`
+	UserId   string      `json:"user_id,omitempty"`
 }
 
 func NewChannelOcuppiedHook(channel *Channel) HookEvent {
@@ -63,8 +63,8 @@ func NewMemberRemovedHook(channel *Channel, s *Subscriber) HookEvent {
 	return HookEvent{Name: "member_removed", Channel: channel.ChannelID, UserId: s.Id}
 }
 
-func NewClientHook(channel *Channel, s *Subscription, event string) HookEvent {
-	return HookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: s.Data, SocketID: s.Subscriber.SocketID, UserId: s.Subscriber.Id}
+func NewClientHook(channel *Channel, s *Subscription, event string, data interface{}) HookEvent {
+	return HookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Subscriber.SocketID, UserId: s.Subscriber.Id}
 }
 
 // channel_occupied
@@ -89,8 +89,8 @@ func (a *App) TriggerChannelVacatedHook(c *Channel) {
 //   "socket_id": "socket_id of the sending socket",
 //   "user_id": "user_id associated with the sending socket" # Only for presence channels
 // }
-func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event string) {
-	event := NewClientHook(c, s, client_event)
+func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event string, data interface{}) {
+	event := NewClientHook(c, s, client_event, data)
 	triggerHook(event.Name, a, c, event)
 }
 

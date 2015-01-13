@@ -208,7 +208,7 @@ func (c *Channel) Publish(a *App, event RawEvent, ignore string) error {
 		} else {
 			// Webhook
 			if strings.HasPrefix(event.Event, "client-") {
-				a.TriggerClientEventHook(c, subs, event.Event)
+				a.TriggerClientEventHook(c, subs, event.Event, v)
 			}
 		}
 	}
