@@ -1,6 +1,8 @@
 {
 	"Host": ":8080",
 	"Expvar": true,
+	"User": "Username",
+	"Password": "123456",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,

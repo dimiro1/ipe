@@ -8,7 +8,9 @@ import (
 	_ "expvar"
 	"net/http"
 	"os"
+	"strings"
 
+	"github.com/goji/httpauth"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -19,7 +21,11 @@ func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	if Conf.Expvar {
-		router.Handle("/debug/vars", http.DefaultServeMux)
+		if len(strings.TrimSpace(Conf.User)) == 0 || len(strings.TrimSpace(Conf.Password)) == 0 {
+			panic("Your are exporting debug variables and you are not defining an User and a Password")
+		}
+
+		router.Handle("/debug/vars", httpauth.SimpleBasicAuth(Conf.User, Conf.Password)(http.DefaultServeMux))
 	}
 
 	for _, route := range routes {

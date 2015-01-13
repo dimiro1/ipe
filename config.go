@@ -8,9 +8,11 @@ import "errors"
 
 // The config file
 type ConfigFile struct {
-	Host   string // The host, eg: :8080 will start on 0.0.0.0:8080
-	Expvar bool
-	Apps   []*App
+	Host     string // The host, eg: :8080 will start on 0.0.0.0:8080
+	Expvar   bool
+	User     string
+	Password string
+	Apps     []*App
 }
 
 // Error for App not found
