@@ -4,7 +4,10 @@
 
 package main
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 // The config file
 type ConfigFile struct {
@@ -23,6 +26,10 @@ func (c *ConfigFile) Init() {
 	for _, app := range c.Apps {
 		app.Init()
 	}
+}
+
+func (c *ConfigFile) WasProvidedUserAndPassword() bool {
+	return len(strings.TrimSpace(c.User)) > 0 && len(strings.TrimSpace(c.Password)) > 0
 }
 
 // Returns an App with by appID
