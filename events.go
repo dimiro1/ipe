@@ -4,6 +4,8 @@
 
 package main
 
+import "encoding/json"
+
 // {
 //     "event": "pusher:subscribe",
 //     "data": {
@@ -15,7 +17,7 @@ package main
 type SubscribeEventData struct {
 	Channel     string `json:"channel"`
 	Auth        string `json:"auth,omitempty"`
-	ChannelData string `json:"channelData,omitempty"`
+	ChannelData string `json:"channel_data,omitempty"`
 }
 
 type SubscribeEvent struct {
@@ -57,11 +59,54 @@ func NewUnsubscribeEvent(channel string) UnsubscribeEvent {
 type SubscriptionSucceededEvent struct {
 	Event   string `json:"event"`
 	Channel string `json:"channel"`
+	Data    string `json:"data"`
 }
 
 // Create a new subscription succeed event for the specified channel
-func NewSubscriptionSucceededEvent(channel string) SubscriptionSucceededEvent {
-	return SubscriptionSucceededEvent{Event: "pusher_internal:subscription_succeeded", Channel: channel}
+func NewSubscriptionSucceededEvent(channel, data string) SubscriptionSucceededEvent {
+	return SubscriptionSucceededEvent{Event: "pusher_internal:subscription_succeeded", Channel: channel, Data: data}
+}
+
+// Data Subscription Succeed
+
+// "{
+//     \"presence\": {
+//        \"ids\": [\"11814b369700141b222a3f3791cec2d9\",\"71dd6a29da2a4833336d2a964becf820\"],
+//        \"hash\": {
+//           \"11814b369700141b222a3f3791cec2d9\": {
+//              \"name\":\"Phil Leggetter\",
+//              \"twitter\": \"@leggetter\"
+//           },
+//           \"71dd6a29da2a4833336d2a964becf820\": {
+//              \"name\":\"Max Williams\",
+//              \"twitter\": \"@maxthelion\"
+//           }
+//        },
+//        \"count\": 2
+//     }
+// }"
+type SubscriptionSucceeedEventPresenceData struct {
+	Ids   []string          `json:"ids"`
+	Hash  map[string]string `json:"hash"`
+	count int               `json:"count"`
+}
+
+func NewSubscriptionSucceedEventPresenceData(c *Channel) SubscriptionSucceeedEventPresenceData {
+	event := SubscriptionSucceeedEventPresenceData{}
+
+	var ids []string
+	hash := make(map[string]string, c.TotalSubscriptions())
+
+	for _, s := range c.Subscriptions {
+		ids = append(ids, s.Subscriber.SocketID)
+		hash[s.Subscriber.SocketID] = s.Data
+	}
+
+	event.Ids = ids
+	event.Hash = hash
+	event.count = c.TotalSubscriptions()
+
+	return event
 }
 
 // {
@@ -99,18 +144,36 @@ func NewPingEvent() PingEvent {
 //         "code": 4000
 //     }
 // }
-type ErrorEventData struct {
-	Message string `json:"message"`
-	Code    int    `json:"code"`
-}
 type ErrorEvent struct {
-	Event string         `json:"event"`
-	Data  ErrorEventData `json:"data"`
+	Event string      `json:"event"`
+	Data  interface{} `json:"data"`
 }
 
 // Create a new error event
+// Pusher protocol is very strange in some parts
+// It send null in some errors.
+// So I created this GENERIC_ERROR thing, just to verify if the json must have null on the error code
 func NewErrorEvent(code int, message string) ErrorEvent {
-	data := ErrorEventData{Message: message, Code: code}
+	var data interface{}
+
+	if code == GENERIC_ERROR {
+		data = struct {
+			Code    *int   `json:"code"`
+			Message string `json:"message"`
+		}{
+			nil,
+			message,
+		}
+	} else {
+		data = struct {
+			Code    int    `json:"code"`
+			Message string `json:"message"`
+		}{
+			code,
+			message,
+		}
+	}
+
 	return ErrorEvent{Event: "pusher:error", Data: data}
 }
 
@@ -127,35 +190,71 @@ type ConnectionEstablishedEventData struct {
 }
 
 type ConnectionEstablishedEvent struct {
-	Event string                         `json:"event"`
-	Data  ConnectionEstablishedEventData `json:"data"`
+	Event string `json:"event"`
+	Data  string `json:"data"`
 }
 
 // Create a new connection established event using the specified socketId
 func NewConnectionEstablishedEvent(socketId string) ConnectionEstablishedEvent {
 	data := ConnectionEstablishedEventData{SocketId: socketId, ActivityTimeout: 120}
-	return ConnectionEstablishedEvent{Event: "pusher:connection_established", Data: data}
+
+	b, err := json.Marshal(data)
+
+	if err != nil {
+		panic("events: Could not Marshal json ConnectionEstablishedEvent")
+	}
+
+	return ConnectionEstablishedEvent{Event: "pusher:connection_established", Data: string(b)}
+}
+
+// {
+//   "event": "pusher_internal:member_added",
+//   "channel": "presence-example-channel",
+//   "data": String
+// }
+type MemberAddedEvent struct {
+	Event   string `json:"event"`
+	Channel string `json:"channel"`
+	Data    string `json:"data"`
+}
+
+func NewMemberAddedEvent(channel, data string) MemberAddedEvent {
+	return MemberAddedEvent{Event: "pusher_internal:member_added", Channel: channel, Data: data}
+}
+
+// {
+//   "event": "pusher_internal:member_removed",
+//   "channel": "presence-example-channel",
+//   "data": String
+// }
+type MemberRemovedEvent struct {
+	Event   string `json:"event"`
+	Channel string `json:"channel"`
+	Data    string `json:"data"`
+}
+
+func NewMemberRemovedEvent(channel, data string) MemberRemovedEvent {
+	return MemberRemovedEvent{Event: "pusher_internal:member_removed", Channel: channel, Data: data}
 }
 
 // {
 //     "event": "client-?",
 //     "channel": "The channel",
-//     "data": {
-//         "message": "A Message"
-//     }
+//     "data": {}
 // }
-type ClientEventData struct {
-	Message string `json:"data"`
-}
-
-type ClientEvent struct {
+type RawEvent struct {
 	Event   string          `json:"event"`
 	Channel string          `json:"channel"`
-	Data    ClientEventData `json:"data"`
+	Data    json.RawMessage `json:"data"`
 }
 
-// Create a new custom client event
-func NewClientEvent(name, channel, message string) ClientEvent {
-	data := ClientEventData{Message: message}
-	return ClientEvent{Event: "pusher:client-" + name, Channel: channel, Data: data}
+type ResponseEvent struct {
+	Event   string      `json:"event"`
+	Channel string      `json:"channel"`
+	Data    interface{} `json:"data"`
+}
+
+// The response event that is broadcasted to the client sockets
+func NewResponseEvent(name, channel string, data interface{}) ResponseEvent {
+	return ResponseEvent{Event: name, Channel: channel, Data: data}
 }

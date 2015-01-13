@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// A route
 type Route struct {
 	Name             string
 	Method           string

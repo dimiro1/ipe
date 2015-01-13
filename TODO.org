@@ -1,17 +1,38 @@
-Tarefas IPE
+IPÊ
+---
 
-** DONE Autenticação API Rest
-** DONE Autenticação Websockets
-** TODO Console de log
-** TODO Ping e Pong
-** TODO Escrever testes automatizados
-** TODO Refatorar partes do código, remover repetições
-** TODO SSL
-** TODO Otimizações
-** TODO Segurança, tempo de expiração, etc
-** TODO Coletor de conexões abandonadas. Tempo de vida e go routine checking from time to time.
+  * TODO [7/14]
+    - [X] Autenticação API Rest
+    - [X] Autenticação Websockets
+    - [ ] Console de log
+    - [X] Ping e Pong
+    - [ ] Escrever testes automatizados
+    - [ ] SSL
+	- [ ] Expvar - Canais, inscritos
+    - [ ] Otimizações [0/3]
+      - [ ] Refatorar partes do código, remover repetições
+      - [ ] Alterar tipos de dados de slices para mapas em alguns locais.
+      - [ ] Remover Canais vazios com uma go routine - Uma especie de coletor de lixo
+    - [ ] Segurança, tempo de expiração, etc
+    - [X] Dados extra na conexão do usuário. Ver Websockets onOpen
+    - [X] Webhooks [5/5]
+	  - [X] Member added
+	  - [X] Member removed
+	  - [X] Channel Occupied
+	  - [X] Channel vacated
+	  - [X] Clients Events
+	- [ ] Events Presence channels [0/3]
+      - [ ] pusher_internal:subscription_succeeded para canais de presença
+      - [ ] pusher_internal:member_added
+      - [ ] pusher_internal:member_removed
+	- [X] Remover inscrições quando o web socket for fechado
+    - [X] Alterar os dados extras da inscrição são relacionados ao canal e não diretamente a inscrição
 
-Objetivos
-
-** TODO Implementação Funcional.
-** TODO Testes automatizados após o projeto pronto.
+  * Objetivos [4/7]
+    - [ ] Implementação Funcional.
+	- [ ] WebHooks
+    - [ ] Presence channels
+    - [X] Private Channels
+    - [X] Public Channels
+    - [X] Easy Instalation
+    - [X] Easy configuration

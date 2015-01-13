@@ -7,14 +7,18 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	log "github.com/golang/glog"
 )
 
 var Conf ConfigFile
 
 func main() {
+	printBanner()
+
 	var filename = flag.String("config", "config.json", "Config file location")
 
 	flag.Parse()
@@ -29,11 +33,18 @@ func main() {
 		log.Fatal(err)
 	}
 
+	Conf.Initialize()
+
 	router := NewRouter()
 
-	log.Printf("Starting Ipê using config file: '%s'", *filename)
+	log.Infof("Starting Ipê using config file: '%s'", *filename)
 
 	if err := http.ListenAndServe(Conf.Host, router); err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
+}
+
+func printBanner() {
+	fmt.Println("\033[32mWelcome to Ipê - Yet another Pusher server clone\033[0m")
+	fmt.Println("\033[33mBy: Claudemiro Alves Feitosa Neto <dimiro1@gmail.com>\033[0m")
 }

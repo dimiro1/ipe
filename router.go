@@ -5,10 +5,15 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+	"os"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
+// NewRouter is a function that returns a new configured Router
+// It add the necessary middlewares
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -22,7 +27,7 @@ func NewRouter() *mux.Router {
 			handler = RestCheckAppDisabledHandler(handler)
 		}
 
-		handler = LogHandler(handler)
+		handler = handlers.CombinedLoggingHandler(os.Stdout, handler)
 
 		router.Methods(route.Method).Path(route.Pattern).Name(route.Name).Handler(handler)
 	}

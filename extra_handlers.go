@@ -6,10 +6,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"net/http"
-	"os"
+
+	"github.com/gorilla/mux"
 )
 
 // Check if the application is disabled
@@ -32,8 +31,4 @@ func RestCheckAppDisabledHandler(h http.Handler) http.Handler {
 
 		h.ServeHTTP(w, r)
 	})
-}
-
-func LogHandler(h http.Handler) http.Handler {
-	return handlers.CombinedLoggingHandler(os.Stdout, h)
 }

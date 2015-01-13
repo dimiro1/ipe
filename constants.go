@@ -15,7 +15,7 @@ const (
 	APPLICATION_DOES_NOT_EXISTS          = 4001
 	APPLICATION_DISABLED                 = 4003
 	APPLICATION_IS_OVER_CONNECTION_QUOTA = 4004 // Not Implemented
-	PATH_NOT_FOUND                       = 4005
+	PATH_NOT_FOUND                       = 4005 // Not Implemented
 	INVALID_VERSION_STRING_FORMAT        = 4006
 	UNSUPPORTED_PROTOCOL_VERSION         = 4007
 	NO_PROTOCOL_VERSION_SUPPLIED         = 4008
@@ -36,8 +36,9 @@ const (
 	// Any other type of error
 	CLIENT_REJECTED_DUE_TO_RATE_LIMIT = 4301 // Not Implemented
 
-	// Pusher send null, This app send -1 on the error
-	GENERIC_ERROR = -1
+	// Pusher send null, This app use this error code to send the null value
+	// see ErrorEvent
+	GENERIC_ERROR = 0
 )
 
 // Only this version is supported

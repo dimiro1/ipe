@@ -7,10 +7,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"log"
 	"net/http"
 	"strings"
+
+	log "github.com/golang/glog"
+	"github.com/gorilla/mux"
 )
 
 // An event consists of a name and data (typically JSON) which may be sent to all subscribers to a particular channel or channels.
@@ -29,15 +30,24 @@ import (
 //
 // POST /apps/{app_id}/events
 func PostEvents(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Name     string   `json:"name"`
-		Data     string   `json:"data"`
-		Channels []string `json:"channels,omitempty"`
-		Channel  string   `json:"channel,omitempty"`
-		SocketID string   `json:"socket_id,omitempty"`
+	vars := mux.Vars(r)
+	appID := vars["app_id"]
+
+	app, err := Conf.GetAppByAppID(appID)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&input)
+	var input struct {
+		Name     string          `json:"name"`
+		Data     json.RawMessage `json:"data"`
+		Channels []string        `json:"channels,omitempty"`
+		Channel  string          `json:"channel,omitempty"`
+		SocketID string          `json:"socket_id,omitempty"`
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&input)
 
 	if err != nil {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -50,8 +60,24 @@ func PostEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Trigger events
+	log.Info(input.Channels)
+	if len(input.Channel) > 0 && len(input.Channels) == 0 {
+		input.Channels = append(input.Channels, input.Channel)
+	}
 
+	for _, c := range input.Channels {
+		channel, err := app.FindChannelByChannelID(c)
+
+		// Channel exists?
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Could not find a channel with id %s", c), http.StatusBadRequest)
+			return
+		}
+
+		app.Publish(channel, RawEvent{Event: input.Name, Channel: c, Data: input.Data}, input.SocketID)
+	}
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{}"))
 }
@@ -115,7 +141,7 @@ func GetChannels(w http.ResponseWriter, r *http.Request) {
 				channels[c.ChannelID] = struct {
 					UserCount int `json:"user_count"`
 				}{
-					c.totalUsers(),
+					c.TotalUsers(),
 				}
 			} else {
 				channels[c.ChannelID] = struct{}{}
@@ -138,8 +164,8 @@ func GetChannels(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
 	if err := json.NewEncoder(w).Encode(channels); err != nil {
+		log.Error(err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		log.Println(err)
 	}
 }
 
@@ -190,8 +216,6 @@ func GetChannel(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Check the kind of channel
-
 	channel, err := app.FindChannelByChannelID(channelName)
 
 	// Channel exists?
@@ -202,7 +226,7 @@ func GetChannel(w http.ResponseWriter, r *http.Request) {
 
 	// If an attribute such as user_count is requested, and the request is not limited
 	// to presence channels, the API will return an error (400 code)
-	if requestedUserCount && !channel.isPresence() {
+	if requestedUserCount && !channel.IsPresence() {
 		http.Error(w, "Attribute user_count is restricted to presence channels", http.StatusBadRequest)
 		return
 	}
@@ -212,25 +236,25 @@ func GetChannel(w http.ResponseWriter, r *http.Request) {
 		Occupied          bool `json:"occupied"`
 		UserCount         int  `json:"user_count,omitempty"`
 		SubscriptionCount int  `json:"subscription_count,omitempty"`
-	}{Occupied: channel.isOccupied()}
+	}{Occupied: channel.IsOccupied()}
 
 	switch {
 	case requestedSubscriptionCount && requestedUserCount:
-		dtoChannel.UserCount = channel.totalUsers()
-		dtoChannel.SubscriptionCount = channel.totalConnections()
+		dtoChannel.UserCount = channel.TotalUsers()
+		dtoChannel.SubscriptionCount = channel.TotalSubscriptions()
 
 	case requestedUserCount:
-		dtoChannel.UserCount = channel.totalUsers()
+		dtoChannel.UserCount = channel.TotalUsers()
 
 	case requestedSubscriptionCount:
-		dtoChannel.SubscriptionCount = channel.totalConnections()
+		dtoChannel.SubscriptionCount = channel.TotalSubscriptions()
 	}
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
 	if err := json.NewEncoder(w).Encode(dtoChannel); err != nil {
+		log.Error(err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		log.Println(err)
 	}
 }
 
@@ -277,10 +301,10 @@ func GetChannelUsers(w http.ResponseWriter, r *http.Request) {
 
 	var users []interface{}
 
-	for _, s := range channel.Connections {
+	for _, s := range channel.Subscriptions {
 		users = append(users, struct {
-			Id int `json:"id"`
-		}{s.Id})
+			Id string `json:"id"`
+		}{s.Subscriber.Id})
 	}
 
 	result["users"] = users
@@ -289,6 +313,6 @@ func GetChannelUsers(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(result); err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		log.Println(err)
+		log.Error(err)
 	}
 }

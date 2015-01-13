@@ -9,7 +9,7 @@ import (
 )
 
 func newApp() App {
-	return App{Name: "Test", AppID: "123", Key: "123", Secret: "123", OnlySSL: false, ApplicationDisabled: false}
+	return App{Name: "Test", AppID: "123", Key: "123", Secret: "123", OnlySSL: false, ApplicationDisabled: false, UserEvents: true}
 }
 
 func Test_add_channels(t *testing.T) {
@@ -65,39 +65,39 @@ func Test_AllChannels(t *testing.T) {
 	}
 }
 
-func Test_New_Connection(t *testing.T) {
+func Test_New_Subscriber(t *testing.T) {
 	app := newApp()
 
-	if len(app.Connections) != 0 {
-		t.Error("Length of connections before test must be 0")
+	if len(app.Subscribers) != 0 {
+		t.Error("Length of subscribers before test must be 0")
 	}
 
-	conn := NewConnection("1", "", nil)
-	app.AddConnection(conn)
+	conn := NewSubscriber("1", "", nil)
+	app.AddSubscriber(conn)
 
-	if len(app.Connections) != 1 {
-		t.Error("Length os connections after test must be 1")
+	if len(app.Subscribers) != 1 {
+		t.Error("Length os subscribers after test must be 1")
 	}
 }
 
-func Test_find_connection(t *testing.T) {
+func Test_find_subscriber(t *testing.T) {
 	app := newApp()
-	conn := NewConnection("1", "", nil)
-	app.AddConnection(conn)
+	conn := NewSubscriber("1", "", nil)
+	app.AddSubscriber(conn)
 
-	conn, err := app.FindConnection("1")
+	conn, err := app.FindSubscriber("1")
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	if conn.SocketID != "1" {
-		t.Error("Wrong connection.")
+		t.Error("Wrong subscriber.")
 	}
 
-	// Find a wrong connection
+	// Find a wrong subscriber
 
-	conn, err = app.FindConnection("DoesNotExists")
+	conn, err = app.FindSubscriber("DoesNotExists")
 
 	if err == nil {
 		t.Error("Opps, Must be nil")

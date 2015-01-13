@@ -1,23 +1,25 @@
 {
 	"Host": ":8080",
-	"SessionSecret": "372843uhudsbdfy4ure8dbyrty73uhf%7327#vbˆB%bB66BˆVFTV#12g2",
-	"SessionName": "ipe",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,
 			"OnlySSL": false,
-			"Secret": "7ad3773142a6692b25b8",
-			"Key": "278d425bdf160c739803",
-			"Name": "Teste",
-			"AppID": "1"
+			"Secret": "7ad3753142a6693b25b9",
+			"Key": "278d525bdf162c739803",
+			"Name": "App 1",
+			"AppID": "321",
+			"UserEvents": true,
+			"WebHooks": true
 		},
 		{
 			"ApplicationDisabled": false,
 			"OnlySSL": false,
-			"Secret": "2189389a989a9ab8921f",
-			"Key": "6a266506823423cf2a1f",
-			"Name": "Apresentacao",
-			"AppID": "2"
+			"Secret": "d6824d2fa32888931504",
+			"Key": "c8b30f611ffb13202976",
+			"Name": "App 2",
+			"AppID": "123",
+			"UserEvents": true,
+			"WebHooks": false
 		}
 	]
 }

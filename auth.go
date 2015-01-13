@@ -5,29 +5,15 @@
 package main
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
+
+	"github.com/gorilla/mux"
+
+	"github.com/dimiro1/ipe/utils"
 )
-
-// Calculate the Mac
-func HashMAC(message, key []byte) string {
-	mac := hmac.New(sha256.New, key)
-	mac.Write(message)
-	expectedMAC := mac.Sum(nil)
-
-	return hex.EncodeToString(expectedMAC)
-}
-
-// Verify the message
-func checkMAC(message, messageMAC, key []byte) bool {
-	return string(messageMAC) == HashMAC(message, key)
-}
 
 // Prepare Querystring
 func prepareQueryString(params url.Values) string {
@@ -63,7 +49,7 @@ func RestAuthenticationHandler(h http.Handler) http.Handler {
 		vars := mux.Vars(r)
 		appID := vars["app_id"]
 
-		currentApp, err := Conf.GetAppByAppID(appID)
+		app, err := Conf.GetAppByAppID(appID)
 
 		if err != nil {
 			http.Error(w, "Not authorized", http.StatusUnauthorized)
@@ -72,14 +58,14 @@ func RestAuthenticationHandler(h http.Handler) http.Handler {
 
 		params := r.URL.Query()
 
-		authSignature := params.Get("auth_signature")
+		signature := params.Get("auth_signature")
 		params.Del("auth_signature")
 
 		queryString := prepareQueryString(params)
 
 		toSign := strings.ToUpper(r.Method) + "\n" + r.URL.Path + "\n" + queryString
 
-		if checkMAC([]byte(toSign), []byte(authSignature), []byte(currentApp.Secret)) {
+		if utils.HashMAC([]byte(toSign), []byte(app.Secret)) == signature {
 			h.ServeHTTP(w, r)
 		} else {
 			http.Error(w, "Not authorized", http.StatusUnauthorized)

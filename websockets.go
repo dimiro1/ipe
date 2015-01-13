@@ -5,15 +5,20 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base32"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
-	"github.com/gorilla/websocket"
-	"log"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
+
+	log "github.com/golang/glog"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
+
+	"github.com/dimiro1/ipe/utils"
 )
 
 var upgrader = websocket.Upgrader{
@@ -22,8 +27,8 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-// Handle open connection.
-func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, session *sessions.Session, app *App) WebsocketError {
+// Handle open Subscriber.
+func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessionID string, app *App) WebsocketError {
 	params := r.URL.Query()
 	p := params.Get("protocol")
 
@@ -46,20 +51,28 @@ func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessio
 		}
 	}
 
-	// Create the new connection
-	connection := NewConnection(session.ID, "", conn)
-	app.AddConnection(connection)
+	// Create the new Subscriber
+	subscriber := NewSubscriber(sessionID, conn)
+	app.Connect(subscriber)
 
 	// Everything went fine. Huhu.
-	if err := conn.WriteJSON(NewConnectionEstablishedEvent(connection.SocketID)); err != nil {
+	if err := conn.WriteJSON(NewConnectionEstablishedEvent(subscriber.SocketID)); err != nil {
 		return NewGenericReconnectImmediatelyError()
 	}
 
 	return nil
 }
 
+// Handle the close event
+func onClose(sessionID string, app *App) {
+	app.Disconnect(sessionID)
+}
+
 // Handle messages
-func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, session *sessions.Session, app *App) WebsocketError {
+//
+// If there is an unrecoverable error then break the loop,
+// otherwise just keep going.
+func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessionID string, app *App) {
 	var event struct {
 		Event string `json:"event"`
 	}
@@ -68,104 +81,137 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 		_, message, err := conn.ReadMessage()
 
 		if err != nil {
-			return NewGenericReconnectImmediatelyError()
+			log.Errorf("%+v", err)
+			switch err {
+			case io.EOF:
+				onClose(sessionID, app)
+			default:
+				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+			}
+			break
 		}
 
 		if err := json.Unmarshal(message, &event); err != nil {
-			return NewGenericReconnectImmediatelyError()
+			emitWSError(NewGenericReconnectImmediatelyError(), conn)
+			break
 		}
+
+		log.Infof("websockets: Handling %s event", event.Event)
 
 		switch event.Event {
 		case "pusher:ping":
 			if err := conn.WriteJSON(NewPongEvent()); err != nil {
-				return NewGenericReconnectImmediatelyError()
+				emitWSError(NewGenericReconnectImmediatelyError(), conn)
 			}
 		case "pusher:subscribe":
 			subscribeEvent := SubscribeEvent{}
 
 			if err := json.Unmarshal(message, &subscribeEvent); err != nil {
-				return NewGenericReconnectImmediatelyError()
+				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				break
 			}
 
-			connection, err := app.FindConnection(session.ID)
+			subscriber, err := app.FindSubscriber(sessionID)
 
 			if err != nil {
-				return NewGenericReconnectImmediatelyError()
+				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				break
 			}
 
 			channelName := strings.TrimSpace(subscribeEvent.Data.Channel)
 
-			// Authentication
-			if strings.HasPrefix(channelName, "presence-") {
-				toSign := fmt.Sprintf("%s:%s:%s", connection.SocketID, channelName, subscribeEvent.Data.ChannelData)
+			isPresence := strings.HasPrefix(channelName, "presence-")
+			isPrivate := strings.HasPrefix(channelName, "private-")
 
-				if subscribeEvent.Data.Auth != HashMAC([]byte(toSign), []byte(app.Secret)) {
-					return NewGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName))
+			if isPresence || isPrivate {
+				toSign := []string{subscriber.SocketID, channelName}
+
+				if isPresence {
+					toSign = append(toSign, subscribeEvent.Data.ChannelData)
 				}
-			} else if strings.HasPrefix(channelName, "private-") {
-				toSign := fmt.Sprintf("%s:%s", connection.SocketID, channelName)
 
-				if subscribeEvent.Data.Auth != HashMAC([]byte(toSign), []byte(app.Secret)) {
-					return NewGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName))
+				expectedAuthKey := fmt.Sprintf("%s:%s", app.Key, utils.HashMAC([]byte(strings.Join(toSign, ":")), []byte(app.Secret)))
+
+				if subscribeEvent.Data.Auth != expectedAuthKey {
+					emitWSError(NewGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName)), conn)
+					continue
 				}
 			}
 
-			channel := app.FindOrCreateChannelByChannelID(channelName, subscribeEvent.Data.ChannelData)
-			channel.Subscribe(connection)
+			channel := app.FindOrCreateChannelByChannelID(channelName)
+			app.Subscribe(channel, subscriber, subscribeEvent.Data.ChannelData)
 
-			if err := conn.WriteJSON(NewSubscriptionSucceededEvent(channel.ChannelID)); err != nil {
-				return NewGenericReconnectImmediatelyError()
+			if err := conn.WriteJSON(NewSubscriptionSucceededEvent(channel.ChannelID, "{}")); err != nil {
+				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				break
 			}
 		case "pusher:unsubscribe":
 			unsubscribeEvent := UnsubscribeEvent{}
 
 			if err := json.Unmarshal(message, &unsubscribeEvent); err != nil {
-				return NewGenericReconnectImmediatelyError()
+				emitWSError(NewGenericReconnectImmediatelyError(), conn)
 			}
 
-			connection, err := app.FindConnection(session.ID)
+			subscriber, err := app.FindSubscriber(sessionID)
 
 			if err != nil {
-				return NewGenericError(fmt.Sprintf("Could not find a connection with the id %s", session.ID))
+				emitWSError(NewGenericError(fmt.Sprintf("Could not find a subscriber with the id %s", sessionID)), conn)
 			}
 
 			channel, err := app.FindChannelByChannelID(unsubscribeEvent.Data.Channel)
 
 			if err != nil {
-				return NewGenericError(fmt.Sprintf("Could not find a channel with the id %s", unsubscribeEvent.Data.Channel))
+				emitWSError(NewGenericError(fmt.Sprintf("Could not find a channel with the id %s", unsubscribeEvent.Data.Channel)), conn)
 			}
 
-			if err := channel.Unsubscribe(connection); err != nil {
-				return NewGenericReconnectImmediatelyError()
+			if err := app.Unsubscribe(channel, subscriber); err != nil {
+				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				break
 			}
-		}
+		default: // CLient Events ??
+			// see http://pusher.com/docs/client_api_guide/client_events#trigger-events
+			if strings.HasPrefix(event.Event, "client-") {
+				if !app.UserEvents {
+					emitWSError(NewGenericError("To send client events, you must enable this feature in the Settings."), conn)
+				}
 
-		return nil
-		// Client Events
-	}
+				clientEvent := RawEvent{}
+
+				if err := json.Unmarshal(message, &clientEvent); err != nil {
+					log.Error(err)
+					emitWSError(NewGenericReconnectImmediatelyError(), conn)
+					break
+				}
+
+				channel, err := app.FindChannelByChannelID(clientEvent.Channel)
+
+				if !channel.IsPresenceOrPrivate() {
+					emitWSError(NewGenericError("Client event rejected - only supported on private and presence channels"), conn)
+					break
+				}
+
+				if err != nil {
+					emitWSError(NewGenericError(fmt.Sprintf("Could not find a channel with the id %s", clientEvent.Channel)), conn)
+				}
+
+				if err := app.Publish(channel, clientEvent, sessionID); err != nil {
+					log.Error(err)
+					emitWSError(NewGenericReconnectImmediatelyError(), conn)
+					break
+				}
+			}
+
+		} // switch
+	} // For
 }
 
 // Websocket GET /app/{key}
 func Websocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
+	defer conn.Close()
 
 	if err != nil {
-		log.Println(err)
-		emitWSError(NewGenericReconnectImmediatelyError(), conn)
-		return
-	}
-
-	var store = sessions.NewFilesystemStore("", []byte(Conf.SessionSecret))
-	session, err := store.Get(r, Conf.SessionName)
-
-	if err != nil {
-		log.Println(err)
-		emitWSError(NewGenericReconnectImmediatelyError(), conn)
-		return
-	}
-
-	if err := session.Save(r, w); err != nil {
-		log.Println(err)
+		log.Error(err)
 		emitWSError(NewGenericReconnectImmediatelyError(), conn)
 		return
 	}
@@ -176,31 +222,38 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 	app, err := Conf.GetAppByKey(appKey)
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		emitWSError(NewApplicationDoesNotExistsError(), conn)
 		return
 	}
 
-	if err := onOpen(conn, w, r, session, app); err != nil {
+	sessionID := randomSessionID()
+
+	if err := onOpen(conn, w, r, sessionID, app); err != nil {
 		emitWSError(err, conn)
 		return
 	}
 
-	if err := onMessage(conn, w, r, session, app); err != nil {
-		emitWSError(err, conn)
+	onMessage(conn, w, r, sessionID, app)
+}
 
-		// Find the connection in app and destroy it
-		return
+// Generate a new random sessionID
+func randomSessionID() string {
+	b := make([]byte, 20)
+
+	if _, err := rand.Read(b); err != nil {
+		panic("websockets: Could not generate a random session ID")
 	}
+
+	return base32.StdEncoding.EncodeToString(b)
 }
 
 // Emit an Websocket ErrorEvent
 func emitWSError(err WebsocketError, conn *websocket.Conn) {
+
 	event := NewErrorEvent(err.GetCode(), err.GetMsg())
 
 	if err := conn.WriteJSON(event); err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
-
-	conn.Close()
 }
