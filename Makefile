@@ -10,13 +10,13 @@ test:
 	go test github.com/dimiro1/ipe
 
 macos:
-	GOOS=darwin GOARHC=x64 go install github.com/dimiro1/ipe
+	GOOS=darwin GOARCH=x64 go install github.com/dimiro1/ipe
 
 linux:
-	GOOS=linux GOARHC=x64 go install github.com/dimiro1/ipe
+	GOOS=linux GOARCH=x64 go install github.com/dimiro1/ipe
 
 windows:
-	GOOS=windows GOARHC=x64 go install github.com/dimiro1/ipe
+	GOOS=windows GOARCH=x64 go install github.com/dimiro1/ipe
 
 raspberry:
 	GOOS=linux GOARCH=arm go install github.com/dimiro1/ipe
