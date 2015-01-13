@@ -4,8 +4,6 @@
 
 package main
 
-import ()
-
 // Error Codes
 const (
 	// 4000 - 4099
