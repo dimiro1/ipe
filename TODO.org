@@ -1,10 +1,9 @@
 IPÊ
 ---
 
-  * TODO [8/14]
+  * TODO [8/13]
     - [X] Autenticação API Rest
     - [X] Autenticação Websockets
-    - [ ] Console de log
     - [X] Ping e Pong
     - [ ] Escrever testes automatizados
     - [ ] SSL
@@ -27,10 +26,11 @@ IPÊ
       - [ ] pusher_internal:member_removed
 	- [X] Remover inscrições quando o web socket for fechado
     - [X] Alterar os dados extras da inscrição são relacionados ao canal e não diretamente a inscrição
+	- [ ] Escrever um README
 
-  * Objetivos [4/7]
+  * Objetivos [5/7]
     - [ ] Implementação Funcional.
-	- [ ] WebHooks
+	- [X] WebHooks
     - [ ] Presence channels
     - [X] Private Channels
     - [X] Public Channels
