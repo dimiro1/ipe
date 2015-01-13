@@ -66,13 +66,7 @@ func PostEvents(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, c := range input.Channels {
-		channel, err := app.FindChannelByChannelID(c)
-
-		// Channel exists?
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Could not find a channel with id %s", c), http.StatusBadRequest)
-			return
-		}
+		channel := app.FindOrCreateChannelByChannelID(c)
 
 		app.Publish(channel, RawEvent{Event: input.Name, Channel: c, Data: input.Data}, input.SocketID)
 	}
