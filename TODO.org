@@ -1,38 +1,38 @@
 IPÊ
 ---
 
-  * TODO [8/13]
-    - [X] Autenticação API Rest
-    - [X] Autenticação Websockets
-    - [X] Ping e Pong
-    - [ ] Escrever testes automatizados
-    - [ ] SSL
-	- [X] Expvar - Canais, inscritos
-    - [-] Otimizações [1/3]
-      - [ ] Refatorar partes do código, remover repetições
-      - [X] Alterar tipos de dados de slices para mapas em alguns locais.
-      - [ ] Remover Canais vazios com uma go routine - Uma especie de coletor de lixo
-    - [ ] Segurança, tempo de expiração, etc
-    - [X] Dados extra na conexão do usuário. Ver Websockets onOpen
-    - [X] Webhooks [5/5]
-	  - [X] Member added
-	  - [X] Member removed
-	  - [X] Channel Occupied
-	  - [X] Channel vacated
-	  - [X] Clients Events
-	- [ ] Events Presence channels [0/3]
-      - [ ] pusher_internal:subscription_succeeded para canais de presença
-      - [ ] pusher_internal:member_added
-      - [ ] pusher_internal:member_removed
-	- [X] Remover inscrições quando o web socket for fechado
-    - [X] Alterar os dados extras da inscrição são relacionados ao canal e não diretamente a inscrição
-	- [ ] Escrever um README
+  * TODO [7/14]
+	* [-] Autenticação API Rest
+    * [X] Autenticação Websockets
+    * [X] Ping e Pong
+    * [ ] Escrever testes automatizados
+    * [ ] SSL
+	* [X] Expvar - Canais, inscritos
+    * [-] Otimizações [1/3]
+	  * [-] Refatorar partes do código, remover repetições
+      * [X] Alterar tipos de dados de slices para mapas em alguns locais.
+      * [ ] Remover Canais vazios com uma go routine - Uma especie de coletor de lixo
+    * [ ] Segurança, tempo de expiração, etc
+    * [X] Dados extra na conexão do usuário. Ver Websockets onOpen
+    * [X] Webhooks [5/5]
+	  * [X] Member added
+	  * [X] Member removed
+	  * [X] Channel Occupied
+	  * [X] Channel vacated
+	  * [X] Clients Events
+	* [ ] Events Presence channels [0/3]
+	  * [ ] pusher_internal:subscription_succeeded para canais de presença
+      * [ ] pusher_internal:member_added
+      * [ ] pusher_internal:member_removed
+	* [X] Remover inscrições quando o web socket for fechado
+    * [X] Alterar os dados extras da inscrição são relacionados ao canal e não diretamente a inscrição
+	* [ ] Escrever um README
 
   * Objetivos [5/7]
-    - [ ] Implementação Funcional.
-	- [X] WebHooks
-    - [ ] Presence channels
-    - [X] Private Channels
-    - [X] Public Channels
-    - [X] Easy Instalation
-    - [X] Easy configuration
+	* [ ] Implementação Funcional.
+	* [X] WebHooks
+    * [ ] Presence channels
+    * [X] Private Channels
+    * [X] Public Channels
+    * [X] Easy Instalation
+    * [X] Easy configuration
