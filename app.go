@@ -7,26 +7,11 @@ package main
 import (
 	"errors"
 	"expvar"
+	"fmt"
 	"sync"
 
 	log "github.com/golang/glog"
 )
-
-var (
-	// Exports the quantity of subscribers
-	expSubscribers *expvar.Int
-
-	// Exports the quantity of channels
-	expChannels *expvar.Int
-
-	expMessages *expvar.Int
-)
-
-func init() {
-	expSubscribers = expvar.NewInt("TotalSubscribers")
-	expChannels = expvar.NewInt("TotalChannels")
-	expMessages = expvar.NewInt("TotalMessagesPublished")
-}
 
 // An App
 type App struct {
@@ -44,12 +29,15 @@ type App struct {
 
 	Channels    map[string]*Channel    `json:"-"`
 	Subscribers map[string]*Subscriber `json:"-"`
+
+	Stats *expvar.Map `json:"-"`
 }
 
 // Alloc memory for Subscribers and Channels
 func (a *App) Init() {
 	a.Subscribers = make(map[string]*Subscriber)
 	a.Channels = make(map[string]*Channel)
+	a.Stats = expvar.NewMap(fmt.Sprintf("%s (%s)", a.Name, a.AppID))
 }
 
 // Only Presence channels
@@ -119,7 +107,8 @@ func (a *App) Disconnect(socketID string) {
 	}
 
 	delete(a.Subscribers, s.SocketID)
-	expSubscribers.Set(int64(len(a.Subscribers)))
+
+	a.Stats.Add("TotalSubscribers", -1)
 }
 
 // Connect a new Subscriber
@@ -129,7 +118,8 @@ func (a *App) Connect(s *Subscriber) {
 	defer a.Unlock()
 
 	a.Subscribers[s.SocketID] = s
-	expSubscribers.Set(int64(len(a.Subscribers)))
+
+	a.Stats.Add("TotalSubscribers", 1)
 }
 
 // Find a Subscriber on this app
@@ -149,10 +139,22 @@ func (a *App) AddChannel(c *Channel) {
 	log.Infof("Adding a new channel %s to app %s", c.ChannelID, a.Name)
 
 	a.Lock()
+	defer a.Unlock()
 	a.Channels[c.ChannelID] = c
-	a.Unlock()
 
-	expChannels.Set(int64(len(a.Channels)))
+	if c.IsPresence() {
+		a.Stats.Add("TotalPresenceChannels", 1)
+	}
+
+	if c.IsPrivate() {
+		a.Stats.Add("TotalPrivateChannels", 1)
+	}
+
+	if c.IsPublic() {
+		a.Stats.Add("TotalPublicChannels", 1)
+	}
+
+	a.Stats.Add("TotalChannels", 1)
 }
 
 // Returns a Channel from this app
@@ -181,7 +183,7 @@ func (a *App) FindChannelByChannelID(n string) (*Channel, error) {
 }
 
 func (a *App) Publish(c *Channel, event RawEvent, ignore string) error {
-	expMessages.Add(1)
+	a.Stats.Add("TotalUniqueMessages", 1)
 
 	return c.Publish(a, event, ignore)
 }

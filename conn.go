@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"strconv"
+
 	log "github.com/golang/glog"
 	"github.com/gorilla/websocket"
 )
@@ -168,14 +170,14 @@ func newID() string {
 
 	currentID += 1
 
-	return string(currentID)
+	return strconv.Itoa(currentID)
 }
 
 // Create a new Subscriber
 func NewSubscriber(socketID string, s *websocket.Conn) *Subscriber {
 	id := newID()
 
-	log.Infof("Creating a new Subscriber %+v with id %d", socketID, id)
+	log.Infof("Creating a new Subscriber %+v with id %s", socketID, id)
 
 	return &Subscriber{Id: id, SocketID: socketID, Socket: s}
 }
