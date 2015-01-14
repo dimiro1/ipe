@@ -28,6 +28,9 @@ IPÊ
     * [X] Alterar os dados extras da inscrição são relacionados ao canal e não diretamente a inscrição
 	* [ ] Escrever um README
 
+  * Dúvidas
+	* [X] Atualmente o ID do usuário em canais de presença está como string, o protocolo não deixa claro, já ví exemplos onde a chave é um inteiro. Nesse caso essa chave terá que ser um RawMessage, O campo Data inteiro??
+
   * Objetivos [5/7]
 	* [ ] Implementação Funcional.
 	* [X] WebHooks
