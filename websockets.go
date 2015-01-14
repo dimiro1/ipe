@@ -131,7 +131,6 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 				}
 
 				expectedAuthKey := fmt.Sprintf("%s:%s", app.Key, utils.HashMAC([]byte(strings.Join(toSign, ":")), []byte(app.Secret)))
-
 				if subscribeEvent.Data.Auth != expectedAuthKey {
 					emitWSError(NewGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName)), conn)
 					continue
@@ -139,11 +138,10 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 			}
 
 			channel := app.FindOrCreateChannelByChannelID(channelName)
-			app.Subscribe(channel, subscriber, subscribeEvent.Data.ChannelData)
+			log.Info(subscribeEvent.Data.ChannelData)
 
-			if err := conn.WriteJSON(NewSubscriptionSucceededEvent(channel.ChannelID, "{}")); err != nil {
+			if err := app.Subscribe(channel, subscriber, subscribeEvent.Data.ChannelData); err != nil {
 				emitWSError(NewGenericReconnectImmediatelyError(), conn)
-				break
 			}
 		case "pusher:unsubscribe":
 			unsubscribeEvent := UnsubscribeEvent{}

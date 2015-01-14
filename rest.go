@@ -157,7 +157,10 @@ func GetChannels(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
-	if err := json.NewEncoder(w).Encode(channels); err != nil {
+	js := make(map[string]interface{}, 1)
+	js["channels"] = channels
+
+	if err := json.NewEncoder(w).Encode(js); err != nil {
 		log.Error(err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
@@ -257,8 +260,8 @@ func GetChannel(w http.ResponseWriter, r *http.Request) {
 // Example:
 // {
 //  "users": [
-//    { "id": 1 },
-//    { "id": 2 }
+//    { "id": "1" },
+//    { "id": "2" }
 //  ]
 // }
 //
@@ -298,7 +301,7 @@ func GetChannelUsers(w http.ResponseWriter, r *http.Request) {
 	for _, s := range channel.Subscriptions {
 		users = append(users, struct {
 			Id string `json:"id"`
-		}{s.Subscriber.Id})
+		}{s.Id})
 	}
 
 	result["users"] = users

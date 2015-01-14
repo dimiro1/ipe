@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	log "github.com/golang/glog"
 	"github.com/gorilla/mux"
 
 	"github.com/dimiro1/ipe/utils"
@@ -52,6 +53,7 @@ func RestAuthenticationHandler(h http.Handler) http.Handler {
 		app, err := Conf.GetAppByAppID(appID)
 
 		if err != nil {
+			log.Error(err)
 			http.Error(w, "Not authorized", http.StatusUnauthorized)
 			return
 		}
@@ -68,6 +70,7 @@ func RestAuthenticationHandler(h http.Handler) http.Handler {
 		if utils.HashMAC([]byte(toSign), []byte(app.Secret)) == signature {
 			h.ServeHTTP(w, r)
 		} else {
+			log.Error("Not authorized")
 			http.Error(w, "Not authorized", http.StatusUnauthorized)
 		}
 	})

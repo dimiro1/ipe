@@ -4,7 +4,11 @@
 
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	log "github.com/golang/glog"
+)
 
 // {
 //     "event": "pusher:subscribe",
@@ -86,25 +90,29 @@ func NewSubscriptionSucceededEvent(channel, data string) SubscriptionSucceededEv
 //     }
 // }"
 type SubscriptionSucceeedEventPresenceData struct {
-	Ids   []string          `json:"ids"`
-	Hash  map[string]string `json:"hash"`
-	count int               `json:"count"`
+	Ids   []string               `json:"ids"`
+	Hash  map[string]interface{} `json:"hash"`
+	Count int                    `json:"count"`
 }
 
 func NewSubscriptionSucceedEventPresenceData(c *Channel) SubscriptionSucceeedEventPresenceData {
 	event := SubscriptionSucceeedEventPresenceData{}
 
 	var ids []string
-	hash := make(map[string]string, c.TotalSubscriptions())
+	hash := make(map[string]interface{}, c.TotalSubscriptions())
 
 	for _, s := range c.Subscriptions {
-		ids = append(ids, s.Subscriber.SocketID)
-		hash[s.Subscriber.SocketID] = s.Data
+		// Do you have any other idea?
+		var js interface{}
+		json.Unmarshal([]byte(s.Data), &js)
+
+		hash[s.Id] = js
+		ids = append(ids, s.Id)
 	}
 
 	event.Ids = ids
 	event.Hash = hash
-	event.count = c.TotalSubscriptions()
+	event.Count = c.TotalSubscriptions()
 
 	return event
 }
@@ -233,8 +241,18 @@ type MemberRemovedEvent struct {
 	Data    string `json:"data"`
 }
 
-func NewMemberRemovedEvent(channel, data string) MemberRemovedEvent {
-	return MemberRemovedEvent{Event: "pusher_internal:member_removed", Channel: channel, Data: data}
+func NewMemberRemovedEvent(channel string, s *Subscription) MemberRemovedEvent {
+	data, err := json.Marshal(struct {
+		UserID string `json:"user_id"`
+	}{
+		UserID: s.Id,
+	})
+
+	if err != nil {
+		log.Error(err)
+	}
+
+	return MemberRemovedEvent{Event: "pusher_internal:member_removed", Channel: channel, Data: string(data)}
 }
 
 // {

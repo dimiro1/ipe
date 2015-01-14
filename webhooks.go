@@ -55,11 +55,11 @@ func NewChannelVacatedHook(channel *Channel) HookEvent {
 	return HookEvent{Name: "channel_vacated", Channel: channel.ChannelID}
 }
 
-func NewMemberAddedHook(channel *Channel, s *Subscriber) HookEvent {
+func NewMemberAddedHook(channel *Channel, s *Subscription) HookEvent {
 	return HookEvent{Name: "member_added", Channel: channel.ChannelID, UserId: s.Id}
 }
 
-func NewMemberRemovedHook(channel *Channel, s *Subscriber) HookEvent {
+func NewMemberRemovedHook(channel *Channel, s *Subscription) HookEvent {
 	return HookEvent{Name: "member_removed", Channel: channel.ChannelID, UserId: s.Id}
 }
 
@@ -93,7 +93,7 @@ func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event s
 	event := NewClientHook(c, s, client_event, data)
 
 	if c.IsPresence() {
-		event.UserId = s.Subscriber.Id
+		event.UserId = s.Id
 	}
 
 	triggerHook(event.Name, a, c, event)
@@ -104,7 +104,7 @@ func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event s
 //   "channel": "presence-your_channel_name",
 //   "user_id": "a_user_id"
 // }
-func (a *App) TriggerMemberAddedHook(c *Channel, s *Subscriber) {
+func (a *App) TriggerMemberAddedHook(c *Channel, s *Subscription) {
 	event := NewMemberAddedHook(c, s)
 	triggerHook(event.Name, a, c, event)
 }
@@ -114,14 +114,14 @@ func (a *App) TriggerMemberAddedHook(c *Channel, s *Subscriber) {
 //   "channel": "presence-your_channel_name",
 //   "user_id": "a_user_id"
 // }
-func (a *App) TriggerMemberRemovedHook(c *Channel, s *Subscriber) {
+func (a *App) TriggerMemberRemovedHook(c *Channel, s *Subscription) {
 	event := NewMemberRemovedHook(c, s)
 	triggerHook(event.Name, a, c, event)
 }
 
 func triggerHook(name string, app *App, c *Channel, event HookEvent) {
 	if !app.WebHooks {
-		log.Infof("Checking webhooks enabled for app: %+v", app)
+		log.Infof("Checking webhooks enabled for app: %s", app.Name)
 		return
 	}
 

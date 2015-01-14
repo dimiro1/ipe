@@ -102,6 +102,7 @@ func (a *App) Disconnect(socketID string) {
 	defer a.Unlock()
 
 	_, exists := a.Subscribers[s.SocketID]
+
 	if !exists {
 		return
 	}
@@ -192,6 +193,6 @@ func (a *App) Unsubscribe(c *Channel, s *Subscriber) error {
 	return c.Unsubscribe(a, s)
 }
 
-func (a *App) Subscribe(c *Channel, s *Subscriber, data string) {
-	c.Subscribe(a, s, data)
+func (a *App) Subscribe(c *Channel, s *Subscriber, data string) error {
+	return c.Subscribe(a, s, data)
 }
