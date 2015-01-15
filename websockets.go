@@ -52,11 +52,11 @@ func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessio
 	}
 
 	// Create the new Subscriber
-	subscriber := NewSubscriber(sessionID, conn)
-	app.Connect(subscriber)
+	connection := NewConnection(sessionID, conn)
+	app.Connect(connection)
 
 	// Everything went fine. Huhu.
-	if err := conn.WriteJSON(NewConnectionEstablishedEvent(subscriber.SocketID)); err != nil {
+	if err := conn.WriteJSON(NewConnectionEstablishedEvent(connection.SocketID)); err != nil {
 		return NewGenericReconnectImmediatelyError()
 	}
 
@@ -111,7 +111,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 				break
 			}
 
-			subscriber, err := app.FindSubscriber(sessionID)
+			connection, err := app.FindConnection(sessionID)
 
 			if err != nil {
 				emitWSError(NewGenericReconnectImmediatelyError(), conn)
@@ -124,7 +124,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 			isPrivate := strings.HasPrefix(channelName, "private-")
 
 			if isPresence || isPrivate {
-				toSign := []string{subscriber.SocketID, channelName}
+				toSign := []string{connection.SocketID, channelName}
 
 				if isPresence {
 					toSign = append(toSign, subscribeEvent.Data.ChannelData)
@@ -140,7 +140,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 			channel := app.FindOrCreateChannelByChannelID(channelName)
 			log.Info(subscribeEvent.Data.ChannelData)
 
-			if err := app.Subscribe(channel, subscriber, subscribeEvent.Data.ChannelData); err != nil {
+			if err := app.Subscribe(channel, connection, subscribeEvent.Data.ChannelData); err != nil {
 				emitWSError(NewGenericReconnectImmediatelyError(), conn)
 			}
 		case "pusher:unsubscribe":
@@ -150,10 +150,10 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 				emitWSError(NewGenericReconnectImmediatelyError(), conn)
 			}
 
-			subscriber, err := app.FindSubscriber(sessionID)
+			connection, err := app.FindConnection(sessionID)
 
 			if err != nil {
-				emitWSError(NewGenericError(fmt.Sprintf("Could not find a subscriber with the id %s", sessionID)), conn)
+				emitWSError(NewGenericError(fmt.Sprintf("Could not find a connection with the id %s", sessionID)), conn)
 			}
 
 			channel, err := app.FindChannelByChannelID(unsubscribeEvent.Data.Channel)
@@ -162,7 +162,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 				emitWSError(NewGenericError(fmt.Sprintf("Could not find a channel with the id %s", unsubscribeEvent.Data.Channel)), conn)
 			}
 
-			if err := app.Unsubscribe(channel, subscriber); err != nil {
+			if err := app.Unsubscribe(channel, connection); err != nil {
 				emitWSError(NewGenericReconnectImmediatelyError(), conn)
 				break
 			}

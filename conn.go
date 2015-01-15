@@ -15,31 +15,31 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// A subscriber
-type Subscriber struct {
+// An User Connection
+type Connection struct {
 	SocketID string
 	Socket   *websocket.Conn
 }
 
 // A Channel Subscription
 type Subscription struct {
-	Subscriber *Subscriber
+	Connection *Connection
 	Id         string
 	Data       string
 }
 
-// Create a new Subscription
-func NewSubscription(subscriber *Subscriber, data string) *Subscription {
-	return &Subscription{Subscriber: subscriber, Data: data}
-}
-
-// A channel
+// A Channel
 type Channel struct {
 	sync.Mutex
 
 	CreatedAt     time.Time
 	ChannelID     string
 	Subscriptions map[string]*Subscription
+}
+
+// Create a new Subscription
+func NewSubscription(conn *Connection, data string) *Subscription {
+	return &Subscription{Connection: conn, Data: data}
 }
 
 // Return true if the channel has at least one subscriber
@@ -84,17 +84,16 @@ func (c *Channel) TotalUsers() int {
 }
 
 // Add a new subscriber to the channel
-func (c *Channel) Subscribe(a *App, s *Subscriber, channelData string) error {
-	log.Infof("Subscribing %s to channel %s", s.SocketID, c.ChannelID)
+func (c *Channel) Subscribe(a *App, conn *Connection, channelData string) error {
+	log.Infof("Subscribing %s to channel %s", conn.SocketID, c.ChannelID)
 
 	c.Lock()
 	defer c.Unlock()
 
-	subscription := NewSubscription(s, channelData)
-	c.Subscriptions[s.SocketID] = subscription
+	subscription := NewSubscription(conn, channelData)
+	c.Subscriptions[conn.SocketID] = subscription
 
 	if c.IsPresence() {
-
 		// User Info Data
 		var info struct {
 			UserID   string          `json:"user_id"`
@@ -121,7 +120,6 @@ func (c *Channel) Subscribe(a *App, s *Subscriber, channelData string) error {
 
 		// Publish pusher_internal:member_added
 		c.PublishMemberAddedEvent(a, channelData, subscription)
-
 		// WebHook
 		a.TriggerMemberAddedHook(c, subscription)
 
@@ -136,9 +134,9 @@ func (c *Channel) Subscribe(a *App, s *Subscriber, channelData string) error {
 			return err
 		}
 
-		s.Publish(NewSubscriptionSucceededEvent(c.ChannelID, string(js)))
+		conn.Publish(NewSubscriptionSucceededEvent(c.ChannelID, string(js)))
 	} else {
-		s.Publish(NewSubscriptionSucceededEvent(c.ChannelID, "{}"))
+		conn.Publish(NewSubscriptionSucceededEvent(c.ChannelID, "{}"))
 	}
 
 	// WebHook
@@ -150,31 +148,30 @@ func (c *Channel) Subscribe(a *App, s *Subscriber, channelData string) error {
 }
 
 // IsSubscribed check if the user is subscribed
-func (c *Channel) IsSubscribed(s *Subscriber) bool {
-	_, exists := c.Subscriptions[s.SocketID]
+func (c *Channel) IsSubscribed(conn *Connection) bool {
+	_, exists := c.Subscriptions[conn.SocketID]
 	return exists
 }
 
 // Remove the subscriber from the channel
 // It destroy the channel if the channels does not have any subscribers.
-func (c *Channel) Unsubscribe(a *App, s *Subscriber) error {
-	log.Infof("Unsubscribing %s from channel %s", s.SocketID, c.ChannelID)
+func (c *Channel) Unsubscribe(a *App, conn *Connection) error {
+	log.Infof("Unsubscribing %s from channel %s", conn.SocketID, c.ChannelID)
 
 	c.Lock()
 	defer c.Unlock()
 
-	subscription, exists := c.Subscriptions[s.SocketID]
+	subscription, exists := c.Subscriptions[conn.SocketID]
 
 	if !exists {
 		return errors.New("Subscription not found")
 	}
 
-	delete(c.Subscriptions, s.SocketID)
+	delete(c.Subscriptions, conn.SocketID)
 
 	if c.IsPresence() {
 		// Publish pusher_internal:member_removed
 		c.PublishMemberRemovedEvent(a, subscription)
-
 		// Webhook
 		a.TriggerMemberRemovedHook(c, subscription)
 	}
@@ -195,17 +192,17 @@ func NewChannel(channelID string) *Channel {
 }
 
 // Create a new Subscriber
-func NewSubscriber(socketID string, s *websocket.Conn) *Subscriber {
+func NewConnection(socketID string, s *websocket.Conn) *Connection {
 	log.Infof("Creating a new Subscriber %+v", socketID)
 
-	return &Subscriber{SocketID: socketID, Socket: s}
+	return &Connection{SocketID: socketID, Socket: s}
 }
 
 // Publish a MemberAddedEvent to all subscriptions
 func (c *Channel) PublishMemberAddedEvent(a *App, data string, subscription *Subscription) {
 	for _, subs := range c.Subscriptions {
 		if subs != subscription {
-			subs.Subscriber.Publish(NewMemberAddedEvent(c.ChannelID, data))
+			subs.Connection.Publish(NewMemberAddedEvent(c.ChannelID, data))
 		}
 	}
 }
@@ -214,7 +211,7 @@ func (c *Channel) PublishMemberAddedEvent(a *App, data string, subscription *Sub
 func (c *Channel) PublishMemberRemovedEvent(a *App, subscription *Subscription) {
 	for _, subs := range c.Subscriptions {
 		if subs != subscription {
-			subs.Subscriber.Publish(NewMemberRemovedEvent(c.ChannelID, subscription))
+			subs.Connection.Publish(NewMemberRemovedEvent(c.ChannelID, subscription))
 		}
 	}
 }
@@ -236,8 +233,8 @@ func (c *Channel) Publish(a *App, event RawEvent, ignore string) error {
 	log.Infof("Publishing message %+v to channel %s", v, c.ChannelID)
 
 	for _, subs := range c.Subscriptions {
-		if subs.Subscriber.SocketID != ignore {
-			subs.Subscriber.Publish(NewResponseEvent(event.Event, event.Channel, v))
+		if subs.Connection.SocketID != ignore {
+			subs.Connection.Publish(NewResponseEvent(event.Event, event.Channel, v))
 		} else {
 			// Webhook
 			if strings.HasPrefix(event.Event, "client-") {
@@ -250,10 +247,10 @@ func (c *Channel) Publish(a *App, event RawEvent, ignore string) error {
 }
 
 // Publish the message to websocket atached to this client
-func (s *Subscriber) Publish(m interface{}) {
+func (conn *Connection) Publish(m interface{}) {
 	go func() {
-		if err := s.Socket.WriteJSON(m); err != nil {
-			log.Errorf("Error sending message to subscriber %+v, %s", s, err)
+		if err := conn.Socket.WriteJSON(m); err != nil {
+			log.Errorf("Error publishing message to connection %+v, %s", conn, err)
 		}
 	}()
 }

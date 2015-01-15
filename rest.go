@@ -255,7 +255,7 @@ func GetChannel(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Allowed only to presence-channels
+// Allowed only for presence-channels
 //
 // Example:
 // {

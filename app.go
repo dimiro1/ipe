@@ -28,14 +28,14 @@ type App struct {
 	URLWebHook          string
 
 	Channels    map[string]*Channel    `json:"-"`
-	Subscribers map[string]*Subscriber `json:"-"`
+	Connections map[string]*Connection `json:"-"`
 
 	Stats *expvar.Map `json:"-"`
 }
 
-// Alloc memory for Subscribers and Channels
+// Alloc memory for Connections and Channels
 func (a *App) Init() {
-	a.Subscribers = make(map[string]*Subscriber)
+	a.Connections = make(map[string]*Connection)
 	a.Channels = make(map[string]*Channel)
 	a.Stats = expvar.NewMap(fmt.Sprintf("%s (%s)", a.Name, a.AppID))
 }
@@ -83,7 +83,7 @@ func (a *App) PublicChannels() []*Channel {
 func (a *App) Disconnect(socketID string) {
 	log.Infof("Disconnecting socket %+v", socketID)
 
-	s, err := a.FindSubscriber(socketID)
+	conn, err := a.FindConnection(socketID)
 
 	if err != nil {
 		log.Infof("Socket not found, %+v", err)
@@ -92,8 +92,8 @@ func (a *App) Disconnect(socketID string) {
 
 	// Unsubscribe from channels
 	for _, c := range a.Channels {
-		if c.IsSubscribed(s) {
-			c.Unsubscribe(a, s)
+		if c.IsSubscribed(conn) {
+			c.Unsubscribe(a, conn)
 		}
 	}
 
@@ -101,38 +101,37 @@ func (a *App) Disconnect(socketID string) {
 	a.Lock()
 	defer a.Unlock()
 
-	_, exists := a.Subscribers[s.SocketID]
+	_, exists := a.Connections[conn.SocketID]
 
 	if !exists {
 		return
 	}
 
-	delete(a.Subscribers, s.SocketID)
+	delete(a.Connections, conn.SocketID)
 
-	a.Stats.Add("TotalSubscribers", -1)
+	a.Stats.Add("TotalConnections", -1)
 }
 
 // Connect a new Subscriber
-func (a *App) Connect(s *Subscriber) {
-	log.Infof("Adding a new Subscriber %s to app %s", s.SocketID, a.Name)
+func (a *App) Connect(conn *Connection) {
+	log.Infof("Adding a new Connection %s to app %s", conn.SocketID, a.Name)
 	a.Lock()
 	defer a.Unlock()
 
-	a.Subscribers[s.SocketID] = s
+	a.Connections[conn.SocketID] = conn
 
-	a.Stats.Add("TotalSubscribers", 1)
+	a.Stats.Add("TotalConnections", 1)
 }
 
-// Find a Subscriber on this app
-func (a *App) FindSubscriber(socketID string) (*Subscriber, error) {
-
-	s, exists := a.Subscribers[socketID]
+// Find a Connection on this app
+func (a *App) FindConnection(socketID string) (*Connection, error) {
+	conn, exists := a.Connections[socketID]
 
 	if exists {
-		return s, nil
+		return conn, nil
 	}
 
-	return nil, errors.New("Subscriber not found")
+	return nil, errors.New("Connection not found")
 }
 
 // Add a new Channel to this APP
@@ -141,6 +140,7 @@ func (a *App) AddChannel(c *Channel) {
 
 	a.Lock()
 	defer a.Unlock()
+
 	a.Channels[c.ChannelID] = c
 
 	if c.IsPresence() {
@@ -173,7 +173,6 @@ func (a *App) FindOrCreateChannelByChannelID(n string) *Channel {
 
 // Find the channel by channel ID
 func (a *App) FindChannelByChannelID(n string) (*Channel, error) {
-
 	c, exists := a.Channels[n]
 
 	if exists {
@@ -189,10 +188,10 @@ func (a *App) Publish(c *Channel, event RawEvent, ignore string) error {
 	return c.Publish(a, event, ignore)
 }
 
-func (a *App) Unsubscribe(c *Channel, s *Subscriber) error {
-	return c.Unsubscribe(a, s)
+func (a *App) Unsubscribe(c *Channel, conn *Connection) error {
+	return c.Unsubscribe(a, conn)
 }
 
-func (a *App) Subscribe(c *Channel, s *Subscriber, data string) error {
-	return c.Subscribe(a, s, data)
+func (a *App) Subscribe(c *Channel, conn *Connection, data string) error {
+	return c.Subscribe(a, conn, data)
 }

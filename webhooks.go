@@ -64,7 +64,7 @@ func NewMemberRemovedHook(channel *Channel, s *Subscription) HookEvent {
 }
 
 func NewClientHook(channel *Channel, s *Subscription, event string, data interface{}) HookEvent {
-	return HookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Subscriber.SocketID}
+	return HookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Connection.SocketID}
 }
 
 // channel_occupied
