@@ -1,15 +1,15 @@
 IPÊ
 ---
 
-  * TODO [7/14]
-	* [-] Autenticação API Rest
+  * TODO [9/14]
+	* [X] Autenticação API Rest
     * [X] Autenticação Websockets
     * [X] Ping e Pong
     * [ ] Escrever testes automatizados
     * [ ] SSL
 	* [X] Expvar - Canais, inscritos
     * [-] Otimizações [1/3]
-	  * [-] Refatorar partes do código, remover repetições
+	  * [ ] Refatorar partes do código, remover repetições
       * [X] Alterar tipos de dados de slices para mapas em alguns locais.
       * [ ] Remover Canais vazios com uma go routine - Uma especie de coletor de lixo
     * [ ] Segurança, tempo de expiração, etc
@@ -20,10 +20,10 @@ IPÊ
 	  * [X] Channel Occupied
 	  * [X] Channel vacated
 	  * [X] Clients Events
-	* [ ] Events Presence channels [0/3]
-	  * [ ] pusher_internal:subscription_succeeded para canais de presença
-      * [ ] pusher_internal:member_added
-      * [ ] pusher_internal:member_removed
+	* [X] Events Presence channels [3/3]
+	  * [X] pusher_internal:subscription_succeeded para canais de presença
+      * [X] pusher_internal:member_added
+      * [X] pusher_internal:member_removed
 	* [X] Remover inscrições quando o web socket for fechado
     * [X] Alterar os dados extras da inscrição são relacionados ao canal e não diretamente a inscrição
 	* [ ] Escrever um README
@@ -31,10 +31,10 @@ IPÊ
   * Dúvidas
 	* [X] Atualmente o ID do usuário em canais de presença está como string, o protocolo não deixa claro, já ví exemplos onde a chave é um inteiro. Nesse caso essa chave terá que ser um RawMessage, O campo Data inteiro??
 
-  * Objetivos [5/7]
-	* [ ] Implementação Funcional.
+  * Objetivos [7/7]
+	* [X] Implementação Funcional.
 	* [X] WebHooks
-    * [ ] Presence channels
+    * [X] Presence channels
     * [X] Private Channels
     * [X] Public Channels
     * [X] Easy Instalation
