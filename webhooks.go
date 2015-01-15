@@ -121,7 +121,7 @@ func (a *App) TriggerMemberRemovedHook(c *Channel, s *Subscription) {
 
 func triggerHook(name string, app *App, c *Channel, event HookEvent) {
 	if !app.WebHooks {
-		log.Infof("Checking webhooks enabled for app: %s", app.Name)
+		log.Infof("Webhooks are not enabled for app: %s", app.Name)
 		return
 	}
 
@@ -145,7 +145,6 @@ func triggerHook(name string, app *App, c *Channel, event HookEvent) {
 		var req *http.Request
 
 		req, err = http.NewRequest("POST", app.URLWebHook, bytes.NewReader(js))
-
 		if err != nil {
 			log.Errorf("Error creating request: %+v", err)
 			return

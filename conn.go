@@ -126,7 +126,7 @@ func (c *Channel) Subscribe(a *App, s *Subscriber, channelData string) error {
 		a.TriggerMemberAddedHook(c, subscription)
 
 		// pusher_internal:subscription_succeeded
-		data := make(map[string]SubscriptionSucceeedEventPresenceData, 1)
+		data := make(map[string]SubscriptionSucceeedEventPresenceData)
 		data["presence"] = NewSubscriptionSucceedEventPresenceData(c)
 
 		js, err = json.Marshal(data)
@@ -180,7 +180,7 @@ func (c *Channel) Unsubscribe(a *App, s *Subscriber) error {
 	}
 
 	// WebHook
-	if c.TotalSubscriptions() == 0 {
+	if !c.IsOccupied() {
 		a.TriggerChannelVacatedHook(c)
 	}
 
@@ -202,25 +202,21 @@ func NewSubscriber(socketID string, s *websocket.Conn) *Subscriber {
 }
 
 // Publish a MemberAddedEvent to all subscriptions
-func (c *Channel) PublishMemberAddedEvent(a *App, data string, subscription *Subscription) error {
+func (c *Channel) PublishMemberAddedEvent(a *App, data string, subscription *Subscription) {
 	for _, subs := range c.Subscriptions {
 		if subs != subscription {
 			subs.Subscriber.Publish(NewMemberAddedEvent(c.ChannelID, data))
 		}
 	}
-
-	return nil
 }
 
 // Publish a MemberRemovedEvent to all subscriptions
-func (c *Channel) PublishMemberRemovedEvent(a *App, subscription *Subscription) error {
+func (c *Channel) PublishMemberRemovedEvent(a *App, subscription *Subscription) {
 	for _, subs := range c.Subscriptions {
 		if subs != subscription {
 			subs.Subscriber.Publish(NewMemberRemovedEvent(c.ChannelID, subscription))
 		}
 	}
-
-	return nil
 }
 
 // Publish messages to all Subscribers
