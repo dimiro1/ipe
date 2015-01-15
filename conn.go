@@ -73,9 +73,14 @@ func (c *Channel) TotalSubscriptions() int {
 }
 
 // Get the total of users.
-// For now, totalUsers is equal to totalSubscribers
 func (c *Channel) TotalUsers() int {
-	return c.TotalSubscriptions()
+	total := make(map[string]int)
+
+	for _, s := range c.Subscriptions {
+		total[s.Id]++
+	}
+
+	return len(total)
 }
 
 // Add a new subscriber to the channel
