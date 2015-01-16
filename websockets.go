@@ -204,11 +204,14 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 // Websocket GET /app/{key}
 func Websocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
-	defer conn.Close()
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
 
 	if err != nil {
 		log.Error(err)
-		emitWSError(NewGenericReconnectImmediatelyError(), conn)
 		return
 	}
 
