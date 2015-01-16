@@ -126,6 +126,7 @@ crashlytics-build.properties
 auto-save-list
 tramp
 .\#*
+flymake*
 
 # Org-mode
 .org-id-locations
