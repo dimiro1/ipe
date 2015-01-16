@@ -134,6 +134,29 @@ func (a *App) FindConnection(socketID string) (*Connection, error) {
 	return nil, errors.New("Connection not found")
 }
 
+// DeleteChannel removes the channel from app
+func (a *App) RemoveChannel(c *Channel) {
+	log.Infof("Remove the channel %s from app %s", c.ChannelID, a.Name)
+	a.Lock()
+	defer a.Unlock()
+
+	delete(a.Channels, c.ChannelID)
+
+	if c.IsPresence() {
+		a.Stats.Add("TotalPresenceChannels", -1)
+	}
+
+	if c.IsPrivate() {
+		a.Stats.Add("TotalPrivateChannels", -1)
+	}
+
+	if c.IsPublic() {
+		a.Stats.Add("TotalPublicChannels", -1)
+	}
+
+	a.Stats.Add("TotalChannels", -1)
+}
+
 // Add a new Channel to this APP
 func (a *App) AddChannel(c *Channel) {
 	log.Infof("Adding a new channel %s to app %s", c.ChannelID, a.Name)

@@ -176,9 +176,12 @@ func (c *Channel) Unsubscribe(a *App, conn *Connection) error {
 		a.TriggerMemberRemovedHook(c, subscription)
 	}
 
-	// WebHook
 	if !c.IsOccupied() {
+		// WebHook
 		a.TriggerChannelVacatedHook(c)
+
+		// Remove the empty Channel
+		a.RemoveChannel(c)
 	}
 
 	return nil
