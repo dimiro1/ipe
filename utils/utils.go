@@ -6,7 +6,9 @@ package utils
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base32"
 	"encoding/hex"
 )
 
@@ -17,4 +19,15 @@ func HashMAC(message, key []byte) string {
 	expected := mac.Sum(nil)
 
 	return hex.EncodeToString(expected)
+}
+
+// Generate a new random Hash
+func RandomHash() string {
+	b := make([]byte, 25)
+
+	if _, err := rand.Read(b); err != nil {
+		panic("websockets: Could not generate a random session ID")
+	}
+
+	return base32.StdEncoding.EncodeToString(b)
 }

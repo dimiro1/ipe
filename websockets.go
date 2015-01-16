@@ -5,8 +5,6 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/base32"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -225,7 +223,7 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID := randomSessionID()
+	sessionID := utils.RandomHash()
 
 	if err := onOpen(conn, w, r, sessionID, app); err != nil {
 		emitWSError(err, conn)
@@ -233,17 +231,6 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	onMessage(conn, w, r, sessionID, app)
-}
-
-// Generate a new random sessionID
-func randomSessionID() string {
-	b := make([]byte, 25)
-
-	if _, err := rand.Read(b); err != nil {
-		panic("websockets: Could not generate a random session ID")
-	}
-
-	return base32.StdEncoding.EncodeToString(b)
 }
 
 // Emit an Websocket ErrorEvent
