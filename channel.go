@@ -12,21 +12,7 @@ import (
 	"time"
 
 	log "github.com/golang/glog"
-	"github.com/gorilla/websocket"
 )
-
-// An User Connection
-type Connection struct {
-	SocketID string
-	Socket   *websocket.Conn
-}
-
-// A Channel Subscription
-type Subscription struct {
-	Connection *Connection
-	Id         string
-	Data       string
-}
 
 // A Channel
 type Channel struct {
@@ -35,11 +21,6 @@ type Channel struct {
 	CreatedAt     time.Time
 	ChannelID     string
 	Subscriptions map[string]*Subscription
-}
-
-// Create a new Subscription
-func NewSubscription(conn *Connection, data string) *Subscription {
-	return &Subscription{Connection: conn, Data: data}
 }
 
 // Return true if the channel has at least one subscriber
@@ -194,13 +175,6 @@ func NewChannel(channelID string) *Channel {
 	return &Channel{ChannelID: channelID, CreatedAt: time.Now(), Subscriptions: make(map[string]*Subscription)}
 }
 
-// Create a new Subscriber
-func NewConnection(socketID string, s *websocket.Conn) *Connection {
-	log.Infof("Creating a new Subscriber %+v", socketID)
-
-	return &Connection{SocketID: socketID, Socket: s}
-}
-
 // Publish a MemberAddedEvent to all subscriptions
 func (c *Channel) PublishMemberAddedEvent(a *App, data string, subscription *Subscription) {
 	for _, subs := range c.Subscriptions {
@@ -247,13 +221,4 @@ func (c *Channel) Publish(a *App, event RawEvent, ignore string) error {
 	}
 
 	return nil
-}
-
-// Publish the message to websocket atached to this client
-func (conn *Connection) Publish(m interface{}) {
-	go func() {
-		if err := conn.Socket.WriteJSON(m); err != nil {
-			log.Errorf("Error publishing message to connection %+v, %s", conn, err)
-		}
-	}()
 }
