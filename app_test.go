@@ -76,24 +76,24 @@ func Test_AllChannels(t *testing.T) {
 func Test_New_Subscriber(t *testing.T) {
 	app := newApp()
 
-	if len(app.Subscribers) != 0 {
+	if len(app.Connections) != 0 {
 		t.Error("Length of subscribers before test must be 0")
 	}
 
-	conn := NewSubscriber("1", nil)
+	conn := NewConnection("1", nil)
 	app.Connect(conn)
 
-	if len(app.Subscribers) != 1 {
+	if len(app.Connections) != 1 {
 		t.Error("Length os subscribers after test must be 1")
 	}
 }
 
 func Test_find_subscriber(t *testing.T) {
 	app := newApp()
-	conn := NewSubscriber("1", nil)
+	conn := NewConnection("1", nil)
 	app.Connect(conn)
 
-	conn, err := app.FindSubscriber("1")
+	conn, err := app.FindConnection("1")
 
 	if err != nil {
 		t.Error(err)
@@ -105,7 +105,7 @@ func Test_find_subscriber(t *testing.T) {
 
 	// Find a wrong subscriber
 
-	conn, err = app.FindSubscriber("DoesNotExists")
+	conn, err = app.FindConnection("DoesNotExists")
 
 	if err == nil {
 		t.Error("Opps, Must be nil")
