@@ -7,10 +7,8 @@ package main
 import (
 	_ "expvar"
 	"net/http"
-	"os"
 
 	"github.com/goji/httpauth"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -36,8 +34,6 @@ func NewRouter() *mux.Router {
 			handler = RestAuthenticationHandler(handler)
 			handler = RestCheckAppDisabledHandler(handler)
 		}
-
-		handler = handlers.CombinedLoggingHandler(os.Stdout, handler)
 
 		router.Methods(route.Method).Path(route.Pattern).Name(route.Name).Handler(handler)
 	}
