@@ -40,21 +40,21 @@ $ go install github.com/dimiro1/ipe
 
 ```json
 {
-	"Host": ":8080",      // Host and Port
-	"Expvar": true,       // Export variables to /debug/vars
-	"User": "Username",   // Username for Expvar
-	"Password": "123456", // Password for Expvar
+	"Host": ":8080",
+	"Expvar": true,
+	"User": "Username",
+	"Password": "123456",
 	"Apps": [
 		{
-			"ApplicationDisabled": false, // Disable this app
-			"OnlySSL": false,             // If this application is avaibale only in SSL
-			"Secret": "APP_SECRET", // The secret key, do't tell anyone
-			"Key": "APP_KEY",       // Application Key
-			"Name": "APP_NAME",     // This app name
-			"AppID": "APP_ID",      // This app ID
-			"UserEvents": true,     // true if Client events are enabled
-			"WebHooks": true,       // true if WebHooks are enabled
-			"URLWebHook": "http://localhost:4567/php/hook.php" // Url for webhooks
+			"ApplicationDisabled": false,
+			"OnlySSL": false,
+			"Secret": "APP_SECRET",
+			"Key": "APP_KEY",
+			"Name": "APP_NAME",
+			"AppID": "APP_ID",
+			"UserEvents": true,
+			"WebHooks": true,
+			"URLWebHook": "http://localhost:4567/php/hook.php"
 		}
 	]
 }
