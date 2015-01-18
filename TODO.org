@@ -1,15 +1,15 @@
 IPÊ
 ---
 
-  * TODO [9/14]
+  * TODO [11/14]
 	* [X] Autenticação API Rest
     * [X] Autenticação Websockets
     * [X] Ping e Pong
     * [ ] Escrever testes automatizados
     * [ ] SSL
 	* [X] Expvar - Canais, inscritos
-    * [-] Otimizações [2/3]
-	  * [ ] Refatorar partes do código, remover repetições
+    * [X] Otimizações [3/3]
+	  * [X] Refatorar partes do código, remover repetições
       * [X] Alterar tipos de dados de slices para mapas em alguns locais.
       * [X] Remover Canais vazios.
     * [ ] Segurança, tempo de expiração, etc
@@ -26,7 +26,7 @@ IPÊ
       * [X] pusher_internal:member_removed
 	* [X] Remover inscrições quando o web socket for fechado
     * [X] Alterar os dados extras da inscrição são relacionados ao canal e não diretamente a inscrição
-	* [ ] Escrever um README
+	* [X] Escrever um README
 
   * Dúvidas
 	* [X] Atualmente o ID do usuário em canais de presença está como string, o protocolo não deixa claro, já ví exemplos onde a chave é um inteiro. Nesse caso essa chave terá que ser um RawMessage, O campo Data inteiro??
