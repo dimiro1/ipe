@@ -27,11 +27,9 @@ This software is written in Go - the WYSIWYG lang
 
 This software use the standard GOPATH structure and Godep as "dependency manager", so, install [godep](https://github.com/tools/godep) first.
 
-Then from the project directory execute:
-
 ```console
-$ godep restore
-$ go install github.com/dimiro1/ipe
+$ go get github.com/tools/godep
+$ godep get github.com/dimiro1/ipe
 ```
 
 # How to configure?
