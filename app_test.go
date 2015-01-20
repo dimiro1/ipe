@@ -20,6 +20,92 @@ func newApp() App {
 	return a
 }
 
+func TestConnect(t *testing.T) {
+	app := newApp()
+
+	app.Connect(NewConnection("socketID", nil))
+
+	if len(app.Connections) != 1 {
+		t.Errorf("Connections must be 1, but was %d", len(app.Connections))
+	}
+
+}
+
+func TestDisconnect(t *testing.T) {
+	app := newApp()
+
+	app.Connect(NewConnection("socketID", nil))
+	app.Disconnect("socketID")
+
+	if len(app.Connections) != 0 {
+		t.Errorf("Connections must be 0, but was %d", len(app.Connections))
+	}
+
+}
+
+func TestFindConnection(t *testing.T) {
+	app := newApp()
+
+	app.Connect(NewConnection("socketID", nil))
+
+	if _, err := app.FindConnection("socketID"); err != nil {
+		t.Error("Must find Connection")
+	}
+
+	if _, err := app.FindConnection("NotFound"); err == nil {
+		t.Error("Must not found Connection")
+	}
+
+}
+
+func TestFindChannelByChannelID(t *testing.T) {
+	app := newApp()
+
+	channel := NewChannel("ID")
+	app.AddChannel(channel)
+
+	if _, err := app.FindChannelByChannelID("ID"); err != nil {
+		t.Error("Channel not found")
+	}
+}
+
+func TestFindOrCreateChannelByChannelID(t *testing.T) {
+	app := newApp()
+
+	if len(app.Channels) != 0 {
+		t.Error("Length of channels must be 0 before test")
+	}
+
+	app.FindOrCreateChannelByChannelID("ID")
+
+	if len(app.Channels) != 1 {
+		t.Error("Length of channels must be 1 after test")
+	}
+
+}
+
+func TestRemoveChannel(t *testing.T) {
+	app := newApp()
+
+	if len(app.Channels) != 0 {
+		t.Error("Length of channels must be 0 before test")
+	}
+
+	channel := NewChannel("ID")
+	app.AddChannel(channel)
+
+	if len(app.Channels) != 1 {
+		t.Error("Length of channels after insert must be 1")
+	}
+
+	app.RemoveChannel(channel)
+
+	if len(app.Channels) != 0 {
+		t.Error("Length of channels must be 0 after remove")
+	}
+
+}
+
 func Test_add_channels(t *testing.T) {
 
 	app := newApp()
