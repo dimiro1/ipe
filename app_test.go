@@ -11,13 +11,13 @@ import (
 
 var id = 0
 
-func newApp() App {
+func newApp() *App {
 
 	a := App{Name: "Test", AppID: strconv.Itoa(id), Key: "123", Secret: "123", OnlySSL: false, ApplicationDisabled: false, UserEvents: true}
 	a.Init()
 
 	id++
-	return a
+	return &a
 }
 
 func TestConnect(t *testing.T) {
