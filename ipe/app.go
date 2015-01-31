@@ -187,7 +187,7 @@ func (a *App) FindOrCreateChannelByChannelID(n string) *Channel {
 	c, err := a.FindChannelByChannelID(n)
 
 	if err != nil {
-		c = NewChannel(n)
+		c = newChannel(n)
 		a.AddChannel(c)
 	}
 

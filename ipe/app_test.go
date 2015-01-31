@@ -61,7 +61,7 @@ func TestFindConnection(t *testing.T) {
 func TestFindChannelByChannelID(t *testing.T) {
 	app := newApp()
 
-	channel := NewChannel("ID")
+	channel := newChannel("ID")
 	app.AddChannel(channel)
 
 	if _, err := app.FindChannelByChannelID("ID"); err != nil {
@@ -91,7 +91,7 @@ func TestRemoveChannel(t *testing.T) {
 		t.Error("Length of channels must be 0 before test")
 	}
 
-	channel := NewChannel("ID")
+	channel := newChannel("ID")
 	app.AddChannel(channel)
 
 	if len(app.Channels) != 1 {
@@ -116,7 +116,7 @@ func Test_add_channels(t *testing.T) {
 		t.Error("Length of public channels must be 0 before test")
 	}
 
-	app.AddChannel(NewChannel("ID"))
+	app.AddChannel(newChannel("ID"))
 
 	if len(app.PublicChannels()) != 1 {
 		t.Error("Length os public channels after insert must be 1")
@@ -128,7 +128,7 @@ func Test_add_channels(t *testing.T) {
 		t.Error("Length of presence channels must be 0 before test")
 	}
 
-	app.AddChannel(NewChannel("presence-test"))
+	app.AddChannel(newChannel("presence-test"))
 
 	if len(app.PresenceChannels()) != 1 {
 		t.Error("Length os presence channels after insert must be 1")
@@ -140,7 +140,7 @@ func Test_add_channels(t *testing.T) {
 		t.Error("Length of private channels must be 0 before test")
 	}
 
-	app.AddChannel(NewChannel("private-test"))
+	app.AddChannel(newChannel("private-test"))
 
 	if len(app.PrivateChannels()) != 1 {
 		t.Error("Length os private channels after insert must be 1")
@@ -150,9 +150,9 @@ func Test_add_channels(t *testing.T) {
 
 func Test_AllChannels(t *testing.T) {
 	app := newApp()
-	app.AddChannel(NewChannel("private-test"))
-	app.AddChannel(NewChannel("presence-test"))
-	app.AddChannel(NewChannel("test"))
+	app.AddChannel(newChannel("private-test"))
+	app.AddChannel(newChannel("presence-test"))
+	app.AddChannel(newChannel("test"))
 
 	if len(app.Channels) != 3 {
 		t.Error("Must have 3 channels")

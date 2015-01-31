@@ -7,7 +7,7 @@ package ipe
 import "testing"
 
 func TestIsOccupied(t *testing.T) {
-	c := NewChannel("ID")
+	c := newChannel("ID")
 
 	if c.IsOccupied() {
 		t.Error("Channels must be empty")
@@ -21,7 +21,7 @@ func TestIsOccupied(t *testing.T) {
 }
 
 func TestIsPrivate(t *testing.T) {
-	c := NewChannel("private-channel")
+	c := newChannel("private-channel")
 
 	if !c.IsPrivate() {
 		t.Error("The Channel must be private")
@@ -29,7 +29,7 @@ func TestIsPrivate(t *testing.T) {
 }
 
 func TestIsPresence(t *testing.T) {
-	c := NewChannel("presence-channel")
+	c := newChannel("presence-channel")
 
 	if !c.IsPresence() {
 		t.Error("The Channel must be presence")
@@ -37,7 +37,7 @@ func TestIsPresence(t *testing.T) {
 }
 
 func TestIsPublic(t *testing.T) {
-	c := NewChannel("channel")
+	c := newChannel("channel")
 
 	if !c.IsPublic() {
 		t.Error("The Channel must be public")
@@ -45,13 +45,13 @@ func TestIsPublic(t *testing.T) {
 }
 
 func TestIsPrivateOrPresence(t *testing.T) {
-	c := NewChannel("private-channel")
+	c := newChannel("private-channel")
 
 	if !c.IsPresenceOrPrivate() {
 		t.Error("The Channel must be private or presence")
 	}
 
-	c = NewChannel("presence-channel")
+	c = newChannel("presence-channel")
 
 	if !c.IsPresenceOrPrivate() {
 		t.Error("The Channel must be private or presence")
@@ -59,7 +59,7 @@ func TestIsPrivateOrPresence(t *testing.T) {
 }
 
 func TestTotalSubscriptions(t *testing.T) {
-	c := NewChannel("ID")
+	c := newChannel("ID")
 
 	if c.TotalSubscriptions() != len(c.Subscriptions) {
 		t.Error("TotalSubscriptions must be equal to len of total subscriptions")
@@ -67,7 +67,7 @@ func TestTotalSubscriptions(t *testing.T) {
 }
 
 func TestTotalUsers(t *testing.T) {
-	c := NewChannel("ID")
+	c := newChannel("ID")
 
 	c.Subscriptions["1"] = newSubscription(newConnection("ID", nil), "")
 	c.Subscriptions["2"] = newSubscription(newConnection("ID", nil), "")
@@ -83,7 +83,7 @@ func TestTotalUsers(t *testing.T) {
 }
 
 func TestIsSubscribed(t *testing.T) {
-	c := NewChannel("ID")
+	c := newChannel("ID")
 	conn := newConnection("ID", nil)
 
 	if c.IsSubscribed(conn) {

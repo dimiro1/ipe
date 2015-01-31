@@ -169,7 +169,7 @@ func (c *Channel) Unsubscribe(a *App, conn *Connection) error {
 }
 
 // Create a new Channel
-func NewChannel(channelID string) *Channel {
+func newChannel(channelID string) *Channel {
 	log.Infof("Creating a new channel: %s", channelID)
 
 	return &Channel{ChannelID: channelID, CreatedAt: time.Now(), Subscriptions: make(map[string]*Subscription)}
