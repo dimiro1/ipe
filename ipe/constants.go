@@ -27,8 +27,8 @@ const (
 	// Indicate an error resulting in the connection being closed by Pusher,
 	// and the client my reconnect immediately
 	GENERIC_RECONNECT_IMMEDIATELY = 4200
-	PONG_REPLY_NOT_RECEIVED       = 4201 // Ping was sent to the client, but no reply was received
-	CLOSED_AFTER_INACTIVITY       = 4202 // Client has been inactive for a long time (24 hours) and client does not suppot ping.
+	PONG_REPLY_NOT_RECEIVED       = 4201 // Ping was sent to the client, but no reply was received; Not Implemented
+	CLOSED_AFTER_INACTIVITY       = 4202 // Client has been inactive for a long time (24 hours) and client does not suppot ping.; Not Implemented
 
 	// 4300 - 4399
 	// Any other type of error
@@ -42,6 +42,6 @@ const (
 // Only this version is supported
 const SUPPORTED_PROTOCOL_VERSION = 7
 
-// // Maximun event size permitted 20 kB
+// // Maximun event size permitted 10 kB
 // See: http://blogs.gnome.org/cneumair/2008/09/30/1-kb-1024-bytes-no-1-kb-1000-bytes/
 const MAX_DATA_EVENT_SIZE = 10 * 1000
