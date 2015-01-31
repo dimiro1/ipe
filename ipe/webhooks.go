@@ -33,12 +33,12 @@ import (
 //
 //     X-Pusher-Key: A Pusher app may have multiple tokens. The oldest active token will be used, identified by this key.
 //     X-Pusher-Signature: A HMAC SHA256 hex digest formed by signing the POST payload (body) with the token’s secret.
-type WebHook struct {
+type webHook struct {
 	TimeMs int64       `json:"time_ms"`
-	Events []HookEvent `json:"events"`
+	Events []hookEvent `json:"events"`
 }
 
-type HookEvent struct {
+type hookEvent struct {
 	Name     string      `json:"name"`
 	Channel  string      `json:"channel"`
 	Event    string      `json:"event,omitempty"`
@@ -47,36 +47,36 @@ type HookEvent struct {
 	UserId   string      `json:"user_id,omitempty"`
 }
 
-func newChannelOcuppiedHook(channel *Channel) HookEvent {
-	return HookEvent{Name: "channel_occupied", Channel: channel.ChannelID}
+func newChannelOcuppiedHook(channel *channel) hookEvent {
+	return hookEvent{Name: "channel_occupied", Channel: channel.ChannelID}
 }
 
-func newChannelVacatedHook(channel *Channel) HookEvent {
-	return HookEvent{Name: "channel_vacated", Channel: channel.ChannelID}
+func newChannelVacatedHook(channel *channel) hookEvent {
+	return hookEvent{Name: "channel_vacated", Channel: channel.ChannelID}
 }
 
-func newMemberAddedHook(channel *Channel, s *Subscription) HookEvent {
-	return HookEvent{Name: "member_added", Channel: channel.ChannelID, UserId: s.Id}
+func newMemberAddedHook(channel *channel, s *subscription) hookEvent {
+	return hookEvent{Name: "member_added", Channel: channel.ChannelID, UserId: s.Id}
 }
 
-func newMemberRemovedHook(channel *Channel, s *Subscription) HookEvent {
-	return HookEvent{Name: "member_removed", Channel: channel.ChannelID, UserId: s.Id}
+func newMemberRemovedHook(channel *channel, s *subscription) hookEvent {
+	return hookEvent{Name: "member_removed", Channel: channel.ChannelID, UserId: s.Id}
 }
 
-func newClientHook(channel *Channel, s *Subscription, event string, data interface{}) HookEvent {
-	return HookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Connection.SocketID}
+func newClientHook(channel *channel, s *subscription, event string, data interface{}) hookEvent {
+	return hookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Connection.SocketID}
 }
 
 // channel_occupied
 // { "name": "channel_occupied", "channel": "test_channel" }
-func (a *App) TriggerChannelOccupiedHook(c *Channel) {
+func (a *app) TriggerChannelOccupiedHook(c *channel) {
 	event := newChannelOcuppiedHook(c)
 	triggerHook(event.Name, a, c, event)
 }
 
 // channel_vacated
 // { "name": "channel_vacated", "channel": "test_channel" }
-func (a *App) TriggerChannelVacatedHook(c *Channel) {
+func (a *app) TriggerChannelVacatedHook(c *channel) {
 	event := newChannelVacatedHook(c)
 	triggerHook(event.Name, a, c, event)
 }
@@ -89,7 +89,7 @@ func (a *App) TriggerChannelVacatedHook(c *Channel) {
 //   "socket_id": "socket_id of the sending socket",
 //   "user_id": "user_id associated with the sending socket" # Only for presence channels
 // }
-func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event string, data interface{}) {
+func (a *app) TriggerClientEventHook(c *channel, s *subscription, client_event string, data interface{}) {
 	event := newClientHook(c, s, client_event, data)
 
 	if c.IsPresence() {
@@ -104,7 +104,7 @@ func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event s
 //   "channel": "presence-your_channel_name",
 //   "user_id": "a_user_id"
 // }
-func (a *App) TriggerMemberAddedHook(c *Channel, s *Subscription) {
+func (a *app) TriggerMemberAddedHook(c *channel, s *subscription) {
 	event := newMemberAddedHook(c, s)
 	triggerHook(event.Name, a, c, event)
 }
@@ -114,21 +114,21 @@ func (a *App) TriggerMemberAddedHook(c *Channel, s *Subscription) {
 //   "channel": "presence-your_channel_name",
 //   "user_id": "a_user_id"
 // }
-func (a *App) TriggerMemberRemovedHook(c *Channel, s *Subscription) {
+func (a *app) TriggerMemberRemovedHook(c *channel, s *subscription) {
 	event := newMemberRemovedHook(c, s)
 	triggerHook(event.Name, a, c, event)
 }
 
-func triggerHook(name string, app *App, c *Channel, event HookEvent) {
-	if !app.WebHooks {
-		log.Infof("Webhooks are not enabled for app: %s", app.Name)
+func triggerHook(name string, a *app, c *channel, event hookEvent) {
+	if !a.WebHooks {
+		log.Infof("Webhooks are not enabled for app: %s", a.Name)
 		return
 	}
 
 	go func() {
 		log.Infof("Triggering %s event", name)
 
-		hook := WebHook{TimeMs: time.Now().Unix()}
+		hook := webHook{TimeMs: time.Now().Unix()}
 
 		hook.Events = append(hook.Events, event)
 
@@ -144,15 +144,15 @@ func triggerHook(name string, app *App, c *Channel, event HookEvent) {
 
 		var req *http.Request
 
-		req, err = http.NewRequest("POST", app.URLWebHook, bytes.NewReader(js))
+		req, err = http.NewRequest("POST", a.URLWebHook, bytes.NewReader(js))
 		if err != nil {
 			log.Errorf("Error creating request: %+v", err)
 			return
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("X-Pusher-Key", app.Key)
-		req.Header.Set("X-Pusher-Signature", utils.HashMAC(js, []byte(app.Secret)))
+		req.Header.Set("X-Pusher-Key", a.Key)
+		req.Header.Set("X-Pusher-Signature", utils.HashMAC(js, []byte(a.Secret)))
 
 		log.V(1).Infof("%+v", req.Header)
 		log.V(1).Infof("%+v", string(js))

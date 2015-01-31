@@ -68,7 +68,7 @@ func postEvents(w http.ResponseWriter, r *http.Request) {
 	for _, c := range input.Channels {
 		channel := app.FindOrCreateChannelByChannelID(c)
 
-		app.Publish(channel, RawEvent{Event: input.Name, Channel: c, Data: input.Data}, input.SocketID)
+		app.Publish(channel, rawEvent{Event: input.Name, Channel: c, Data: input.Data}, input.SocketID)
 	}
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")

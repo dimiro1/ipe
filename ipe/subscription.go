@@ -5,13 +5,13 @@
 package ipe
 
 // A Channel Subscription
-type Subscription struct {
-	Connection *Connection
+type subscription struct {
+	Connection *connection
 	Id         string
 	Data       string
 }
 
 // Create a new Subscription
-func newSubscription(conn *Connection, data string) *Subscription {
-	return &Subscription{Connection: conn, Data: data}
+func newSubscription(conn *connection, data string) *subscription {
+	return &subscription{Connection: conn, Data: data}
 }

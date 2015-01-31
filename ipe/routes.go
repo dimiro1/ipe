@@ -9,7 +9,7 @@ import (
 )
 
 // A route
-type Route struct {
+type route struct {
 	Name             string
 	Method           string
 	Pattern          string
@@ -17,38 +17,36 @@ type Route struct {
 	RequiresRestAuth bool
 }
 
-type Routes []Route
-
-var routes = Routes{
-	Route{
+var routes = []route{
+	route{
 		"PostEvents",
 		"POST",
 		"/apps/{app_id}/events",
 		postEvents,
 		true,
 	},
-	Route{
+	route{
 		"GetChannels",
 		"GET",
 		"/apps/{app_id}/channels",
 		getChannels,
 		true,
 	},
-	Route{
+	route{
 		"GetChannel",
 		"GET",
 		"/apps/{app_id}/channels/{channel_name}",
 		getChannel,
 		true,
 	},
-	Route{
+	route{
 		"GetChannelUsers",
 		"GET",
 		"/apps/{app_id}/channels/{channel_name}/users",
 		getChannelUsers,
 		true,
 	},
-	Route{
+	route{
 		"Websocket",
 		"GET",
 		"/app/{key}",

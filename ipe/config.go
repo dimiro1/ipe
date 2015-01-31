@@ -10,44 +10,44 @@ import (
 )
 
 // The config file
-type ConfigFile struct {
+type configFile struct {
 	Host     string // The host, eg: :8080 will start on 0.0.0.0:8080
 	Expvar   bool
 	User     string
 	Password string
-	Apps     []*App
+	Apps     []*app
 }
 
 // Error for App not found
 var AppNotFoundError = errors.New("App not found")
 
 // Initialize Apps
-func (c *ConfigFile) Init() {
+func (c *configFile) Init() {
 	for _, app := range c.Apps {
 		app.Init()
 	}
 }
 
-func (c *ConfigFile) WasProvidedUserAndPassword() bool {
+func (c *configFile) WasProvidedUserAndPassword() bool {
 	return len(strings.TrimSpace(c.User)) > 0 && len(strings.TrimSpace(c.Password)) > 0
 }
 
 // Returns an App with by appID
-func (c *ConfigFile) GetAppByAppID(appID string) (*App, error) {
-	for _, app := range c.Apps {
-		if app.AppID == appID {
-			return app, nil
+func (c *configFile) GetAppByAppID(appID string) (*app, error) {
+	for _, a := range c.Apps {
+		if a.AppID == appID {
+			return a, nil
 		}
 	}
-	return &App{}, AppNotFoundError
+	return &app{}, AppNotFoundError
 }
 
 // Returns an App with by key
-func (c *ConfigFile) GetAppByKey(key string) (*App, error) {
-	for _, app := range c.Apps {
-		if app.Key == key {
-			return app, nil
+func (c *configFile) GetAppByKey(key string) (*app, error) {
+	for _, a := range c.Apps {
+		if a.Key == key {
+			return a, nil
 		}
 	}
-	return &App{}, AppNotFoundError
+	return &app{}, AppNotFoundError
 }

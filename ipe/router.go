@@ -14,7 +14,7 @@ import (
 
 // NewRouter is a function that returns a new configured Router
 // It add the necessary middlewares
-func NewRouter() *mux.Router {
+func newRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	if Conf.Expvar {

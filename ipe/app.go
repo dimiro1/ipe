@@ -14,7 +14,7 @@ import (
 )
 
 // An App
-type App struct {
+type app struct {
 	sync.Mutex
 
 	Name                string
@@ -27,22 +27,22 @@ type App struct {
 	WebHooks            bool
 	URLWebHook          string
 
-	Channels    map[string]*Channel    `json:"-"`
-	Connections map[string]*Connection `json:"-"`
+	Channels    map[string]*channel    `json:"-"`
+	Connections map[string]*connection `json:"-"`
 
 	Stats *expvar.Map `json:"-"`
 }
 
 // Alloc memory for Connections and Channels
-func (a *App) Init() {
-	a.Connections = make(map[string]*Connection)
-	a.Channels = make(map[string]*Channel)
+func (a *app) Init() {
+	a.Connections = make(map[string]*connection)
+	a.Channels = make(map[string]*channel)
 	a.Stats = expvar.NewMap(fmt.Sprintf("%s (%s)", a.Name, a.AppID))
 }
 
 // Only Presence channels
-func (a *App) PresenceChannels() []*Channel {
-	var channels []*Channel
+func (a *app) PresenceChannels() []*channel {
+	var channels []*channel
 
 	for _, c := range a.Channels {
 		if c.IsPresence() {
@@ -54,8 +54,8 @@ func (a *App) PresenceChannels() []*Channel {
 }
 
 // Only Private channels
-func (a *App) PrivateChannels() []*Channel {
-	var channels []*Channel
+func (a *app) PrivateChannels() []*channel {
+	var channels []*channel
 
 	for _, c := range a.Channels {
 		if c.IsPrivate() {
@@ -67,8 +67,8 @@ func (a *App) PrivateChannels() []*Channel {
 }
 
 // Only Public channels
-func (a *App) PublicChannels() []*Channel {
-	var channels []*Channel
+func (a *app) PublicChannels() []*channel {
+	var channels []*channel
 
 	for _, c := range a.Channels {
 		if c.IsPublic() {
@@ -80,7 +80,7 @@ func (a *App) PublicChannels() []*Channel {
 }
 
 // Disconnect Socket
-func (a *App) Disconnect(socketID string) {
+func (a *app) Disconnect(socketID string) {
 	log.Infof("Disconnecting socket %+v", socketID)
 
 	conn, err := a.FindConnection(socketID)
@@ -113,7 +113,7 @@ func (a *App) Disconnect(socketID string) {
 }
 
 // Connect a new Subscriber
-func (a *App) Connect(conn *Connection) {
+func (a *app) Connect(conn *connection) {
 	log.Infof("Adding a new Connection %s to app %s", conn.SocketID, a.Name)
 	a.Lock()
 	defer a.Unlock()
@@ -124,7 +124,7 @@ func (a *App) Connect(conn *Connection) {
 }
 
 // Find a Connection on this app
-func (a *App) FindConnection(socketID string) (*Connection, error) {
+func (a *app) FindConnection(socketID string) (*connection, error) {
 	conn, exists := a.Connections[socketID]
 
 	if exists {
@@ -135,7 +135,7 @@ func (a *App) FindConnection(socketID string) (*Connection, error) {
 }
 
 // DeleteChannel removes the channel from app
-func (a *App) RemoveChannel(c *Channel) {
+func (a *app) RemoveChannel(c *channel) {
 	log.Infof("Remove the channel %s from app %s", c.ChannelID, a.Name)
 	a.Lock()
 	defer a.Unlock()
@@ -158,7 +158,7 @@ func (a *App) RemoveChannel(c *Channel) {
 }
 
 // Add a new Channel to this APP
-func (a *App) AddChannel(c *Channel) {
+func (a *app) AddChannel(c *channel) {
 	log.Infof("Adding a new channel %s to app %s", c.ChannelID, a.Name)
 
 	a.Lock()
@@ -183,7 +183,7 @@ func (a *App) AddChannel(c *Channel) {
 
 // Returns a Channel from this app
 // If not found then the channel is created and added to this app
-func (a *App) FindOrCreateChannelByChannelID(n string) *Channel {
+func (a *app) FindOrCreateChannelByChannelID(n string) *channel {
 	c, err := a.FindChannelByChannelID(n)
 
 	if err != nil {
@@ -195,7 +195,7 @@ func (a *App) FindOrCreateChannelByChannelID(n string) *Channel {
 }
 
 // Find the channel by channel ID
-func (a *App) FindChannelByChannelID(n string) (*Channel, error) {
+func (a *app) FindChannelByChannelID(n string) (*channel, error) {
 	c, exists := a.Channels[n]
 
 	if exists {
@@ -205,16 +205,16 @@ func (a *App) FindChannelByChannelID(n string) (*Channel, error) {
 	return nil, errors.New("Channel does not exists")
 }
 
-func (a *App) Publish(c *Channel, event RawEvent, ignore string) error {
+func (a *app) Publish(c *channel, event rawEvent, ignore string) error {
 	a.Stats.Add("TotalUniqueMessages", 1)
 
 	return c.Publish(a, event, ignore)
 }
 
-func (a *App) Unsubscribe(c *Channel, conn *Connection) error {
+func (a *app) Unsubscribe(c *channel, conn *connection) error {
 	return c.Unsubscribe(a, conn)
 }
 
-func (a *App) Subscribe(c *Channel, conn *Connection, data string) error {
+func (a *app) Subscribe(c *channel, conn *connection, data string) error {
 	return c.Subscribe(a, conn, data)
 }

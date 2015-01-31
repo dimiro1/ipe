@@ -10,20 +10,20 @@ import (
 )
 
 // An User Connection
-type Connection struct {
+type connection struct {
 	SocketID string
 	Socket   *websocket.Conn
 }
 
 // Create a new Subscriber
-func newConnection(socketID string, s *websocket.Conn) *Connection {
+func newConnection(socketID string, s *websocket.Conn) *connection {
 	log.Infof("Creating a new Subscriber %+v", socketID)
 
-	return &Connection{SocketID: socketID, Socket: s}
+	return &connection{SocketID: socketID, Socket: s}
 }
 
 // Publish the message to websocket atached to this client
-func (conn *Connection) Publish(m interface{}) {
+func (conn *connection) Publish(m interface{}) {
 	go func() {
 		if err := conn.Socket.WriteJSON(m); err != nil {
 			log.Errorf("Error publishing message to connection %+v, %s", conn, err)

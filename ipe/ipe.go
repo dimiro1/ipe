@@ -11,7 +11,7 @@ import (
 )
 
 // Conf holds the global configuration state
-var Conf ConfigFile
+var Conf configFile
 
 // Start Parse the configuration file and starts the ipe server
 func Start(configfile string) error {
@@ -26,7 +26,7 @@ func Start(configfile string) error {
 	}
 
 	Conf.Init()
-	router := NewRouter()
+	router := newRouter()
 
 	if err := http.ListenAndServe(Conf.Host, router); err != nil {
 		return err

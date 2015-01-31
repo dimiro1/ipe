@@ -26,7 +26,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // Handle open Subscriber.
-func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessionID string, app *App) WebsocketError {
+func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessionID string, app *app) websocketError {
 	params := r.URL.Query()
 	p := params.Get("protocol")
 
@@ -62,7 +62,7 @@ func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessio
 }
 
 // Handle the close event
-func onClose(sessionID string, app *App) {
+func onClose(sessionID string, app *app) {
 	app.Disconnect(sessionID)
 }
 
@@ -70,7 +70,7 @@ func onClose(sessionID string, app *App) {
 //
 // If there is an unrecoverable error then break the loop,
 // otherwise just keep going.
-func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessionID string, app *App) {
+func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessionID string, app *app) {
 	var event struct {
 		Event string `json:"event"`
 	}
@@ -102,7 +102,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 				emitWSError(newGenericReconnectImmediatelyError(), conn)
 			}
 		case "pusher:subscribe":
-			subscribeEvent := SubscribeEvent{}
+			subscribeEvent := subscribeEvent{}
 
 			if err := json.Unmarshal(message, &subscribeEvent); err != nil {
 				emitWSError(newGenericReconnectImmediatelyError(), conn)
@@ -142,7 +142,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 				emitWSError(newGenericReconnectImmediatelyError(), conn)
 			}
 		case "pusher:unsubscribe":
-			unsubscribeEvent := UnsubscribeEvent{}
+			unsubscribeEvent := unsubscribeEvent{}
 
 			if err := json.Unmarshal(message, &unsubscribeEvent); err != nil {
 				emitWSError(newGenericReconnectImmediatelyError(), conn)
@@ -171,7 +171,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 					emitWSError(newGenericError("To send client events, you must enable this feature in the Settings."), conn)
 				}
 
-				clientEvent := RawEvent{}
+				clientEvent := rawEvent{}
 
 				if err := json.Unmarshal(message, &clientEvent); err != nil {
 					log.Error(err)
@@ -237,7 +237,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Emit an Websocket ErrorEvent
-func emitWSError(err WebsocketError, conn *websocket.Conn) {
+func emitWSError(err websocketError, conn *websocket.Conn) {
 
 	event := newErrorEvent(err.GetCode(), err.GetMsg())
 

@@ -11,9 +11,9 @@ import (
 
 var id = 0
 
-func newApp() *App {
+func newApp() *app {
 
-	a := App{Name: "Test", AppID: strconv.Itoa(id), Key: "123", Secret: "123", OnlySSL: false, ApplicationDisabled: false, UserEvents: true}
+	a := app{Name: "Test", AppID: strconv.Itoa(id), Key: "123", Secret: "123", OnlySSL: false, ApplicationDisabled: false, UserEvents: true}
 	a.Init()
 
 	id++
