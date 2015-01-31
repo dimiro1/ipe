@@ -13,7 +13,7 @@ func TestIsOccupied(t *testing.T) {
 		t.Error("Channels must be empty")
 	}
 
-	c.Subscriptions["ID"] = NewSubscription(NewConnection("ID", nil), "")
+	c.Subscriptions["ID"] = newSubscription(newConnection("ID", nil), "")
 
 	if !c.IsOccupied() {
 		t.Error("Channels must be empty")
@@ -69,8 +69,8 @@ func TestTotalSubscriptions(t *testing.T) {
 func TestTotalUsers(t *testing.T) {
 	c := NewChannel("ID")
 
-	c.Subscriptions["1"] = NewSubscription(NewConnection("ID", nil), "")
-	c.Subscriptions["2"] = NewSubscription(NewConnection("ID", nil), "")
+	c.Subscriptions["1"] = newSubscription(newConnection("ID", nil), "")
+	c.Subscriptions["2"] = newSubscription(newConnection("ID", nil), "")
 
 	if c.TotalSubscriptions() != len(c.Subscriptions) {
 		t.Error("TotalSubscriptions must be equal to len of total subscriptions")
@@ -84,13 +84,13 @@ func TestTotalUsers(t *testing.T) {
 
 func TestIsSubscribed(t *testing.T) {
 	c := NewChannel("ID")
-	conn := NewConnection("ID", nil)
+	conn := newConnection("ID", nil)
 
 	if c.IsSubscribed(conn) {
 		t.Error("Must not be subscribed")
 	}
 
-	c.Subscriptions["ID"] = NewSubscription(conn, "")
+	c.Subscriptions["ID"] = newSubscription(conn, "")
 
 	if !c.IsSubscribed(conn) {
 		t.Error("Must be subscribed")

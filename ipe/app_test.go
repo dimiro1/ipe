@@ -23,7 +23,7 @@ func newApp() *App {
 func TestConnect(t *testing.T) {
 	app := newApp()
 
-	app.Connect(NewConnection("socketID", nil))
+	app.Connect(newConnection("socketID", nil))
 
 	if len(app.Connections) != 1 {
 		t.Errorf("Connections must be 1, but was %d", len(app.Connections))
@@ -34,7 +34,7 @@ func TestConnect(t *testing.T) {
 func TestDisconnect(t *testing.T) {
 	app := newApp()
 
-	app.Connect(NewConnection("socketID", nil))
+	app.Connect(newConnection("socketID", nil))
 	app.Disconnect("socketID")
 
 	if len(app.Connections) != 0 {
@@ -46,7 +46,7 @@ func TestDisconnect(t *testing.T) {
 func TestFindConnection(t *testing.T) {
 	app := newApp()
 
-	app.Connect(NewConnection("socketID", nil))
+	app.Connect(newConnection("socketID", nil))
 
 	if _, err := app.FindConnection("socketID"); err != nil {
 		t.Error("Must find Connection")
@@ -166,7 +166,7 @@ func Test_New_Subscriber(t *testing.T) {
 		t.Error("Length of subscribers before test must be 0")
 	}
 
-	conn := NewConnection("1", nil)
+	conn := newConnection("1", nil)
 	app.Connect(conn)
 
 	if len(app.Connections) != 1 {
@@ -176,7 +176,7 @@ func Test_New_Subscriber(t *testing.T) {
 
 func Test_find_subscriber(t *testing.T) {
 	app := newApp()
-	conn := NewConnection("1", nil)
+	conn := newConnection("1", nil)
 	app.Connect(conn)
 
 	conn, err := app.FindConnection("1")
