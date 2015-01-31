@@ -5,45 +5,26 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 
+	"github.com/dimiro1/ipe/ipe"
 	log "github.com/golang/glog"
 )
 
-var Conf ConfigFile
-
+// Main function, initialze the system
 func main() {
-	printBanner()
-
 	var filename = flag.String("config", "config.json", "Config file location")
-
 	flag.Parse()
 
-	file, err := ioutil.ReadFile(*filename)
+	printBanner()
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := json.Unmarshal(file, &Conf); err != nil {
-		log.Fatal(err)
-	}
-
-	Conf.Init()
-
-	router := NewRouter()
-
-	log.Infof("Starting Ipê using config file: '%s'", *filename)
-
-	if err := http.ListenAndServe(Conf.Host, router); err != nil {
+	if err := ipe.Start(*filename); err != nil {
 		log.Fatal(err)
 	}
 }
 
+// Print a beatifull banner
 func printBanner() {
 	fmt.Print("\033[36m")
 	fmt.Print(`
