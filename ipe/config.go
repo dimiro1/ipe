@@ -18,9 +18,6 @@ type configFile struct {
 	Apps     []*app
 }
 
-// Error for App not found
-var AppNotFoundError = errors.New("App not found")
-
 // Initialize Apps
 func (c *configFile) Init() {
 	for _, app := range c.Apps {
@@ -39,7 +36,7 @@ func (c *configFile) GetAppByAppID(appID string) (*app, error) {
 			return a, nil
 		}
 	}
-	return &app{}, AppNotFoundError
+	return &app{}, errors.New("App not found")
 }
 
 // Returns an App with by key
@@ -49,5 +46,5 @@ func (c *configFile) GetAppByKey(key string) (*app, error) {
 			return a, nil
 		}
 	}
-	return &app{}, AppNotFoundError
+	return &app{}, errors.New("App not found")
 }

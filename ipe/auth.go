@@ -50,7 +50,7 @@ func restAuthenticationHandler(h http.Handler) http.Handler {
 		vars := mux.Vars(r)
 		appID := vars["app_id"]
 
-		app, err := Conf.GetAppByAppID(appID)
+		app, err := conf.GetAppByAppID(appID)
 
 		if err != nil {
 			log.Error(err)

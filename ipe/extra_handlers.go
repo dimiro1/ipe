@@ -17,7 +17,7 @@ func restCheckAppDisabledHandler(h http.Handler) http.Handler {
 		vars := mux.Vars(r)
 		appID := vars["app_id"]
 
-		currentApp, err := Conf.GetAppByAppID(appID)
+		currentApp, err := conf.GetAppByAppID(appID)
 
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusForbidden)

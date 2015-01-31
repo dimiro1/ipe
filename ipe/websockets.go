@@ -218,7 +218,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	appKey := vars["key"]
 
-	app, err := Conf.GetAppByKey(appKey)
+	app, err := conf.GetAppByKey(appKey)
 
 	if err != nil {
 		log.Error(err)

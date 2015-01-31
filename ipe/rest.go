@@ -33,7 +33,7 @@ func postEvents(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	appID := vars["app_id"]
 
-	app, err := Conf.GetAppByAppID(appID)
+	app, err := conf.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
@@ -120,7 +120,7 @@ func getChannels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app, err := Conf.GetAppByAppID(appID)
+	app, err := conf.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
@@ -183,7 +183,7 @@ func getChannel(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	appID := vars["app_id"]
-	app, err := Conf.GetAppByAppID(appID)
+	app, err := conf.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
@@ -279,7 +279,7 @@ func getChannelUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app, err := Conf.GetAppByAppID(appID)
+	app, err := conf.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)

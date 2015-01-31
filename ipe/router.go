@@ -17,12 +17,12 @@ import (
 func newRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
-	if Conf.Expvar {
-		if !Conf.WasProvidedUserAndPassword() {
+	if conf.Expvar {
+		if !conf.WasProvidedUserAndPassword() {
 			panic("Your are exporting debug variables and looks like you forget to define an User and a Password")
 		}
 
-		router.Handle("/debug/vars", httpauth.SimpleBasicAuth(Conf.User, Conf.Password)(http.DefaultServeMux))
+		router.Handle("/debug/vars", httpauth.SimpleBasicAuth(conf.User, conf.Password)(http.DefaultServeMux))
 	}
 
 	for _, route := range routes {
