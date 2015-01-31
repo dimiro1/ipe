@@ -16,7 +16,7 @@ type Connection struct {
 }
 
 // Create a new Subscriber
-func NewConnection(socketID string, s *websocket.Conn) *Connection {
+func newConnection(socketID string, s *websocket.Conn) *Connection {
 	log.Infof("Creating a new Subscriber %+v", socketID)
 
 	return &Connection{SocketID: socketID, Socket: s}

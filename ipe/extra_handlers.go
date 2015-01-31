@@ -12,7 +12,7 @@ import (
 )
 
 // Check if the application is disabled
-func RestCheckAppDisabledHandler(h http.Handler) http.Handler {
+func restCheckAppDisabledHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		appID := vars["app_id"]

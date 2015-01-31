@@ -31,8 +31,8 @@ func NewRouter() *mux.Router {
 		handler = route.HandlerFunc
 
 		if route.RequiresRestAuth {
-			handler = RestAuthenticationHandler(handler)
-			handler = RestCheckAppDisabledHandler(handler)
+			handler = restAuthenticationHandler(handler)
+			handler = restCheckAppDisabledHandler(handler)
 		}
 
 		router.Methods(route.Method).Path(route.Pattern).Name(route.Name).Handler(handler)

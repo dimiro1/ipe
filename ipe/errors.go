@@ -29,7 +29,7 @@ type UnsupportedProtocolVersionError struct {
 	BaseWebsocketError
 }
 
-func NewUnsupportedProtocolVersionError() UnsupportedProtocolVersionError {
+func newUnsupportedProtocolVersionError() UnsupportedProtocolVersionError {
 	return UnsupportedProtocolVersionError{
 		BaseWebsocketError{Code: UNSUPPORTED_PROTOCOL_VERSION, Msg: "Unsupported protocol version"},
 	}
@@ -41,7 +41,7 @@ type ApplicationDoesNotExistsError struct {
 	BaseWebsocketError
 }
 
-func NewApplicationDoesNotExistsError() ApplicationDoesNotExistsError {
+func newApplicationDoesNotExistsError() ApplicationDoesNotExistsError {
 	return ApplicationDoesNotExistsError{
 		BaseWebsocketError{Code: APPLICATION_DOES_NOT_EXISTS, Msg: "Could not found an app with the given key"},
 	}
@@ -52,7 +52,7 @@ type NoProtocolVersionSuppliedError struct {
 	BaseWebsocketError
 }
 
-func NewNoProtocolVersionSuppliedError() NoProtocolVersionSuppliedError {
+func newNoProtocolVersionSuppliedError() NoProtocolVersionSuppliedError {
 	return NoProtocolVersionSuppliedError{
 		BaseWebsocketError{Code: NO_PROTOCOL_VERSION_SUPPLIED, Msg: "No protocol version supplied"},
 	}
@@ -64,7 +64,7 @@ type ApplicationDisabledError struct {
 	BaseWebsocketError
 }
 
-func NewApplicationDisabledError() NoProtocolVersionSuppliedError {
+func newApplicationDisabledError() NoProtocolVersionSuppliedError {
 	return NoProtocolVersionSuppliedError{
 		BaseWebsocketError{Code: APPLICATION_DISABLED, Msg: "Application disabled"},
 	}
@@ -75,7 +75,7 @@ type ApplicationOnlyAccepsSSLError struct {
 	BaseWebsocketError
 }
 
-func NewApplicationOnlyAccepsSSLError() ApplicationOnlyAccepsSSLError {
+func newApplicationOnlyAccepsSSLError() ApplicationOnlyAccepsSSLError {
 	return ApplicationOnlyAccepsSSLError{
 		BaseWebsocketError{Code: APPLICATION_ONLY_ACCEPTS_SSL, Msg: "Application only accepts SSL connections, reconnect using wss://"},
 	}
@@ -86,7 +86,7 @@ type InvalidVersionStringFormatError struct {
 	BaseWebsocketError
 }
 
-func NewInvalidVersionStringFormatError() InvalidVersionStringFormatError {
+func newInvalidVersionStringFormatError() InvalidVersionStringFormatError {
 	return InvalidVersionStringFormatError{
 		BaseWebsocketError{Code: INVALID_VERSION_STRING_FORMAT, Msg: "Invalid version string format"},
 	}
@@ -99,7 +99,7 @@ type GenericReconnectImmediatelyError struct {
 	BaseWebsocketError
 }
 
-func NewGenericReconnectImmediatelyError() GenericReconnectImmediatelyError {
+func newGenericReconnectImmediatelyError() GenericReconnectImmediatelyError {
 	return GenericReconnectImmediatelyError{
 		BaseWebsocketError{Code: GENERIC_RECONNECT_IMMEDIATELY, Msg: "Generic reconnect immediately"},
 	}
@@ -111,7 +111,7 @@ type GenericError struct {
 	BaseWebsocketError
 }
 
-func NewGenericError(msg string) GenericError {
+func newGenericError(msg string) GenericError {
 	return GenericError{
 		BaseWebsocketError{Code: GENERIC_ERROR, Msg: msg},
 	}

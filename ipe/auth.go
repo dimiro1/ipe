@@ -45,7 +45,7 @@ func prepareQueryString(params url.Values) string {
 //  * The request path (e.g. /some/resource)
 //  * The query parameters sorted by key, with keys converted to lowercase, then joined as in the query string.
 //    Note that the string must not be url escaped (e.g. given the keys auth_key: foo, Name: Something else, you get auth_key=foo&name=Something else)
-func RestAuthenticationHandler(h http.Handler) http.Handler {
+func restAuthenticationHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		appID := vars["app_id"]

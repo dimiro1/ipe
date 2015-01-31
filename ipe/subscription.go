@@ -12,6 +12,6 @@ type Subscription struct {
 }
 
 // Create a new Subscription
-func NewSubscription(conn *Connection, data string) *Subscription {
+func newSubscription(conn *Connection, data string) *Subscription {
 	return &Subscription{Connection: conn, Data: data}
 }

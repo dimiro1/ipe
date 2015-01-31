@@ -71,7 +71,7 @@ func (c *Channel) Subscribe(a *App, conn *Connection, channelData string) error 
 	c.Lock()
 	defer c.Unlock()
 
-	subscription := NewSubscription(conn, channelData)
+	subscription := newSubscription(conn, channelData)
 	c.Subscriptions[conn.SocketID] = subscription
 
 	if c.IsPresence() {
@@ -106,7 +106,7 @@ func (c *Channel) Subscribe(a *App, conn *Connection, channelData string) error 
 
 		// pusher_internal:subscription_succeeded
 		data := make(map[string]SubscriptionSucceeedEventPresenceData)
-		data["presence"] = NewSubscriptionSucceedEventPresenceData(c)
+		data["presence"] = newSubscriptionSucceedEventPresenceData(c)
 
 		js, err = json.Marshal(data)
 
@@ -115,9 +115,9 @@ func (c *Channel) Subscribe(a *App, conn *Connection, channelData string) error 
 			return err
 		}
 
-		conn.Publish(NewSubscriptionSucceededEvent(c.ChannelID, string(js)))
+		conn.Publish(newSubscriptionSucceededEvent(c.ChannelID, string(js)))
 	} else {
-		conn.Publish(NewSubscriptionSucceededEvent(c.ChannelID, "{}"))
+		conn.Publish(newSubscriptionSucceededEvent(c.ChannelID, "{}"))
 	}
 
 	// WebHook
@@ -179,7 +179,7 @@ func NewChannel(channelID string) *Channel {
 func (c *Channel) PublishMemberAddedEvent(a *App, data string, subscription *Subscription) {
 	for _, subs := range c.Subscriptions {
 		if subs != subscription {
-			subs.Connection.Publish(NewMemberAddedEvent(c.ChannelID, data))
+			subs.Connection.Publish(newMemberAddedEvent(c.ChannelID, data))
 		}
 	}
 }
@@ -188,7 +188,7 @@ func (c *Channel) PublishMemberAddedEvent(a *App, data string, subscription *Sub
 func (c *Channel) PublishMemberRemovedEvent(a *App, subscription *Subscription) {
 	for _, subs := range c.Subscriptions {
 		if subs != subscription {
-			subs.Connection.Publish(NewMemberRemovedEvent(c.ChannelID, subscription))
+			subs.Connection.Publish(newMemberRemovedEvent(c.ChannelID, subscription))
 		}
 	}
 }
@@ -211,7 +211,7 @@ func (c *Channel) Publish(a *App, event RawEvent, ignore string) error {
 
 	for _, subs := range c.Subscriptions {
 		if subs.Connection.SocketID != ignore {
-			subs.Connection.Publish(NewResponseEvent(event.Event, event.Channel, v))
+			subs.Connection.Publish(newResponseEvent(event.Event, event.Channel, v))
 		} else {
 			// Webhook
 			if strings.HasPrefix(event.Event, "client-") {

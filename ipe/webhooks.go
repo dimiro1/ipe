@@ -47,37 +47,37 @@ type HookEvent struct {
 	UserId   string      `json:"user_id,omitempty"`
 }
 
-func NewChannelOcuppiedHook(channel *Channel) HookEvent {
+func newChannelOcuppiedHook(channel *Channel) HookEvent {
 	return HookEvent{Name: "channel_occupied", Channel: channel.ChannelID}
 }
 
-func NewChannelVacatedHook(channel *Channel) HookEvent {
+func newChannelVacatedHook(channel *Channel) HookEvent {
 	return HookEvent{Name: "channel_vacated", Channel: channel.ChannelID}
 }
 
-func NewMemberAddedHook(channel *Channel, s *Subscription) HookEvent {
+func newMemberAddedHook(channel *Channel, s *Subscription) HookEvent {
 	return HookEvent{Name: "member_added", Channel: channel.ChannelID, UserId: s.Id}
 }
 
-func NewMemberRemovedHook(channel *Channel, s *Subscription) HookEvent {
+func newMemberRemovedHook(channel *Channel, s *Subscription) HookEvent {
 	return HookEvent{Name: "member_removed", Channel: channel.ChannelID, UserId: s.Id}
 }
 
-func NewClientHook(channel *Channel, s *Subscription, event string, data interface{}) HookEvent {
+func newClientHook(channel *Channel, s *Subscription, event string, data interface{}) HookEvent {
 	return HookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Connection.SocketID}
 }
 
 // channel_occupied
 // { "name": "channel_occupied", "channel": "test_channel" }
 func (a *App) TriggerChannelOccupiedHook(c *Channel) {
-	event := NewChannelOcuppiedHook(c)
+	event := newChannelOcuppiedHook(c)
 	triggerHook(event.Name, a, c, event)
 }
 
 // channel_vacated
 // { "name": "channel_vacated", "channel": "test_channel" }
 func (a *App) TriggerChannelVacatedHook(c *Channel) {
-	event := NewChannelVacatedHook(c)
+	event := newChannelVacatedHook(c)
 	triggerHook(event.Name, a, c, event)
 }
 
@@ -90,7 +90,7 @@ func (a *App) TriggerChannelVacatedHook(c *Channel) {
 //   "user_id": "user_id associated with the sending socket" # Only for presence channels
 // }
 func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event string, data interface{}) {
-	event := NewClientHook(c, s, client_event, data)
+	event := newClientHook(c, s, client_event, data)
 
 	if c.IsPresence() {
 		event.UserId = s.Id
@@ -105,7 +105,7 @@ func (a *App) TriggerClientEventHook(c *Channel, s *Subscription, client_event s
 //   "user_id": "a_user_id"
 // }
 func (a *App) TriggerMemberAddedHook(c *Channel, s *Subscription) {
-	event := NewMemberAddedHook(c, s)
+	event := newMemberAddedHook(c, s)
 	triggerHook(event.Name, a, c, event)
 }
 
@@ -115,7 +115,7 @@ func (a *App) TriggerMemberAddedHook(c *Channel, s *Subscription) {
 //   "user_id": "a_user_id"
 // }
 func (a *App) TriggerMemberRemovedHook(c *Channel, s *Subscription) {
-	event := NewMemberRemovedHook(c, s)
+	event := newMemberRemovedHook(c, s)
 	triggerHook(event.Name, a, c, event)
 }
 

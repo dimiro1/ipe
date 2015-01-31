@@ -33,29 +33,29 @@ func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessio
 	protocol, err := strconv.Atoi(p)
 
 	if err != nil {
-		return NewInvalidVersionStringFormatError()
+		return newInvalidVersionStringFormatError()
 	}
 
 	switch {
 	case strings.TrimSpace(p) == "":
-		return NewNoProtocolVersionSuppliedError()
+		return newNoProtocolVersionSuppliedError()
 	case protocol != SUPPORTED_PROTOCOL_VERSION:
-		return NewUnsupportedProtocolVersionError()
+		return newUnsupportedProtocolVersionError()
 	case app.ApplicationDisabled:
-		return NewApplicationDisabledError()
+		return newApplicationDisabledError()
 	case r.TLS != nil:
 		if app.OnlySSL {
-			return NewApplicationOnlyAccepsSSLError()
+			return newApplicationOnlyAccepsSSLError()
 		}
 	}
 
 	// Create the new Subscriber
-	connection := NewConnection(sessionID, conn)
+	connection := newConnection(sessionID, conn)
 	app.Connect(connection)
 
 	// Everything went fine. Huhu.
-	if err := conn.WriteJSON(NewConnectionEstablishedEvent(connection.SocketID)); err != nil {
-		return NewGenericReconnectImmediatelyError()
+	if err := conn.WriteJSON(newConnectionEstablishedEvent(connection.SocketID)); err != nil {
+		return newGenericReconnectImmediatelyError()
 	}
 
 	return nil
@@ -84,13 +84,13 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 			case io.EOF:
 				onClose(sessionID, app)
 			default:
-				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				emitWSError(newGenericReconnectImmediatelyError(), conn)
 			}
 			break
 		}
 
 		if err := json.Unmarshal(message, &event); err != nil {
-			emitWSError(NewGenericReconnectImmediatelyError(), conn)
+			emitWSError(newGenericReconnectImmediatelyError(), conn)
 			break
 		}
 
@@ -98,21 +98,21 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 
 		switch event.Event {
 		case "pusher:ping":
-			if err := conn.WriteJSON(NewPongEvent()); err != nil {
-				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+			if err := conn.WriteJSON(newPongEvent()); err != nil {
+				emitWSError(newGenericReconnectImmediatelyError(), conn)
 			}
 		case "pusher:subscribe":
 			subscribeEvent := SubscribeEvent{}
 
 			if err := json.Unmarshal(message, &subscribeEvent); err != nil {
-				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				emitWSError(newGenericReconnectImmediatelyError(), conn)
 				break
 			}
 
 			connection, err := app.FindConnection(sessionID)
 
 			if err != nil {
-				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				emitWSError(newGenericReconnectImmediatelyError(), conn)
 				break
 			}
 
@@ -130,7 +130,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 
 				expectedAuthKey := fmt.Sprintf("%s:%s", app.Key, utils.HashMAC([]byte(strings.Join(toSign, ":")), []byte(app.Secret)))
 				if subscribeEvent.Data.Auth != expectedAuthKey {
-					emitWSError(NewGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName)), conn)
+					emitWSError(newGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName)), conn)
 					continue
 				}
 			}
@@ -139,60 +139,60 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 			log.Info(subscribeEvent.Data.ChannelData)
 
 			if err := app.Subscribe(channel, connection, subscribeEvent.Data.ChannelData); err != nil {
-				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				emitWSError(newGenericReconnectImmediatelyError(), conn)
 			}
 		case "pusher:unsubscribe":
 			unsubscribeEvent := UnsubscribeEvent{}
 
 			if err := json.Unmarshal(message, &unsubscribeEvent); err != nil {
-				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				emitWSError(newGenericReconnectImmediatelyError(), conn)
 			}
 
 			connection, err := app.FindConnection(sessionID)
 
 			if err != nil {
-				emitWSError(NewGenericError(fmt.Sprintf("Could not find a connection with the id %s", sessionID)), conn)
+				emitWSError(newGenericError(fmt.Sprintf("Could not find a connection with the id %s", sessionID)), conn)
 			}
 
 			channel, err := app.FindChannelByChannelID(unsubscribeEvent.Data.Channel)
 
 			if err != nil {
-				emitWSError(NewGenericError(fmt.Sprintf("Could not find a channel with the id %s", unsubscribeEvent.Data.Channel)), conn)
+				emitWSError(newGenericError(fmt.Sprintf("Could not find a channel with the id %s", unsubscribeEvent.Data.Channel)), conn)
 			}
 
 			if err := app.Unsubscribe(channel, connection); err != nil {
-				emitWSError(NewGenericReconnectImmediatelyError(), conn)
+				emitWSError(newGenericReconnectImmediatelyError(), conn)
 				break
 			}
 		default: // CLient Events ??
 			// see http://pusher.com/docs/client_api_guide/client_events#trigger-events
 			if strings.HasPrefix(event.Event, "client-") {
 				if !app.UserEvents {
-					emitWSError(NewGenericError("To send client events, you must enable this feature in the Settings."), conn)
+					emitWSError(newGenericError("To send client events, you must enable this feature in the Settings."), conn)
 				}
 
 				clientEvent := RawEvent{}
 
 				if err := json.Unmarshal(message, &clientEvent); err != nil {
 					log.Error(err)
-					emitWSError(NewGenericReconnectImmediatelyError(), conn)
+					emitWSError(newGenericReconnectImmediatelyError(), conn)
 					break
 				}
 
 				channel, err := app.FindChannelByChannelID(clientEvent.Channel)
 
 				if !channel.IsPresenceOrPrivate() {
-					emitWSError(NewGenericError("Client event rejected - only supported on private and presence channels"), conn)
+					emitWSError(newGenericError("Client event rejected - only supported on private and presence channels"), conn)
 					break
 				}
 
 				if err != nil {
-					emitWSError(NewGenericError(fmt.Sprintf("Could not find a channel with the id %s", clientEvent.Channel)), conn)
+					emitWSError(newGenericError(fmt.Sprintf("Could not find a channel with the id %s", clientEvent.Channel)), conn)
 				}
 
 				if err := app.Publish(channel, clientEvent, sessionID); err != nil {
 					log.Error(err)
-					emitWSError(NewGenericReconnectImmediatelyError(), conn)
+					emitWSError(newGenericReconnectImmediatelyError(), conn)
 					break
 				}
 			}
@@ -202,7 +202,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 }
 
 // Websocket GET /app/{key}
-func Websocket(w http.ResponseWriter, r *http.Request) {
+func wsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	defer func() {
 		if conn != nil {
@@ -222,7 +222,7 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Error(err)
-		emitWSError(NewApplicationDoesNotExistsError(), conn)
+		emitWSError(newApplicationDoesNotExistsError(), conn)
 		return
 	}
 
@@ -239,7 +239,7 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 // Emit an Websocket ErrorEvent
 func emitWSError(err WebsocketError, conn *websocket.Conn) {
 
-	event := NewErrorEvent(err.GetCode(), err.GetMsg())
+	event := newErrorEvent(err.GetCode(), err.GetMsg())
 
 	if err := conn.WriteJSON(event); err != nil {
 		log.Error(err)

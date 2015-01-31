@@ -29,7 +29,7 @@ import (
 // Response is an empty JSON hash.
 //
 // POST /apps/{app_id}/events
-func PostEvents(w http.ResponseWriter, r *http.Request) {
+func postEvents(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	appID := vars["app_id"]
 
@@ -95,7 +95,7 @@ func PostEvents(w http.ResponseWriter, r *http.Request) {
 // }
 //
 // GET /apps/{app_id}/channels
-func GetChannels(w http.ResponseWriter, r *http.Request) {
+func getChannels(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	vars := mux.Vars(r)
 
@@ -176,7 +176,7 @@ func GetChannels(w http.ResponseWriter, r *http.Request) {
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}
-func GetChannel(w http.ResponseWriter, r *http.Request) {
+func getChannel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
 	params := r.URL.Query()
@@ -266,7 +266,7 @@ func GetChannel(w http.ResponseWriter, r *http.Request) {
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}/users
-func GetChannelUsers(w http.ResponseWriter, r *http.Request) {
+func getChannelUsers(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	appID := vars["app_id"]
