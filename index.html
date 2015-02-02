@@ -28,30 +28,24 @@
 
     <div class="container">
       <section id="main_content">
-        
-    <h3>
-      <span class="octicon octicon-book"></span>
-      README.md
-    </h3>
-
-    <article class="markdown-body entry-content" itemprop="mainContentOfPage"><h1>
-<a id="user-content-ipÊ" class="anchor" href="#ip%C3%8A" aria-hidden="true"><span class="octicon octicon-link"></span></a>IPÊ</h1>
+        <h1>
+<a id="ipÊ" class="anchor" href="#ip%C3%8A" aria-hidden="true"><span class="octicon octicon-link"></span></a>IPÊ</h1>
 
 <p>This software is written in Go - the WYSIWYG lang</p>
 
 <h1>
-<a id="user-content-why-i-wrote-this-software" class="anchor" href="#why-i-wrote-this-software" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why I wrote this software?</h1>
+<a id="why-i-wrote-this-software" class="anchor" href="#why-i-wrote-this-software" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why I wrote this software?</h1>
 
-<ol class="task-list">
+<ol>
 <li>I wanted to learn Go and I needed a non trivial application;</li>
 <li>I use Pusher in some projects;</li>
 <li>I really like Pusher;</li>
 </ol>
 
 <h1>
-<a id="user-content-features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h1>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h1>
 
-<ul class="task-list">
+<ul>
 <li>Public Channels;</li>
 <li>Private Channels;</li>
 <li>Presence Channels;</li>
@@ -67,7 +61,7 @@
 </ul>
 
 <h1>
-<a id="user-content-building" class="anchor" href="#building" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building</h1>
+<a id="building" class="anchor" href="#building" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building</h1>
 
 <p>This software use the standard GOPATH structure and Godep as "dependency manager", so, install <a href="https://github.com/tools/godep">godep</a> first.</p>
 
@@ -75,10 +69,10 @@
 $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 
 <h1>
-<a id="user-content-how-to-configure" class="anchor" href="#how-to-configure" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to configure?</h1>
+<a id="how-to-configure" class="anchor" href="#how-to-configure" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to configure?</h1>
 
 <h2>
-<a id="user-content-the-server" class="anchor" href="#the-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>The server</h2>
+<a id="the-server" class="anchor" href="#the-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>The server</h2>
 
 <div class="highlight highlight-json"><pre>{
     <span class="pl-s1"><span class="pl-pds">"</span>Host<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>:8080<span class="pl-pds">"</span></span>,
@@ -101,10 +95,10 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 }</pre></div>
 
 <h2>
-<a id="user-content-libraries" class="anchor" href="#libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Libraries</h2>
+<a id="libraries" class="anchor" href="#libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Libraries</h2>
 
 <h3>
-<a id="user-content-client-javascript-library" class="anchor" href="#client-javascript-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client javascript library</h3>
+<a id="client-javascript-library" class="anchor" href="#client-javascript-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client javascript library</h3>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> pusher <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Pusher</span>(API_KEY, {
   wsHost<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>localhost<span class="pl-pds">'</span></span>,
@@ -114,7 +108,7 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 });</pre></div>
 
 <h3>
-<a id="user-content-client-server-libraries" class="anchor" href="#client-server-libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client server libraries</h3>
+<a id="client-server-libraries" class="anchor" href="#client-server-libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client server libraries</h3>
 
 <p>Ruby</p>
 
@@ -137,7 +131,7 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 </pre></div>
 
 <h1>
-<a id="user-content-logging" class="anchor" href="#logging" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logging</h1>
+<a id="logging" class="anchor" href="#logging" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logging</h1>
 
 <p>This software uses the <a href="https://github.com/golang/glog">glog</a> library</p>
 
@@ -146,9 +140,9 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 <div class="highlight highlight-console"><pre>$ <span class="pl-s2">ipe -h</span></pre></div>
 
 <h1>
-<a id="user-content-when-use-this-software" class="anchor" href="#when-use-this-software" aria-hidden="true"><span class="octicon octicon-link"></span></a>When use this software?</h1>
+<a id="when-use-this-software" class="anchor" href="#when-use-this-software" aria-hidden="true"><span class="octicon octicon-link"></span></a>When use this software?</h1>
 
-<ul class="task-list">
+<ul>
 <li>When you are offline;</li>
 <li>When you want to control your infrastructure;</li>
 <li>When you do not want to have external dependencies;</li>
@@ -156,35 +150,33 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 </ul>
 
 <h1>
-<a id="user-content-contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing.</h1>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing.</h1>
 
 <p>Feel free to fork this repo.</p>
 
 <h1>
-<a id="user-content-pusher" class="anchor" href="#pusher" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pusher</h1>
+<a id="pusher" class="anchor" href="#pusher" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pusher</h1>
 
 <p>Pusher is an excelent service, their service is very realible. I recomend for everyone.</p>
 
 <h1>
-<a id="user-content-where-this-name-came-from" class="anchor" href="#where-this-name-came-from" aria-hidden="true"><span class="octicon octicon-link"></span></a>Where this name came from?</h1>
+<a id="where-this-name-came-from" class="anchor" href="#where-this-name-came-from" aria-hidden="true"><span class="octicon octicon-link"></span></a>Where this name came from?</h1>
 
 <p>Here in Brazil we have this beatiful tree called <a href="http://en.wikipedia.org/wiki/Tabebuia_aurea">Ipê</a>, it comes in differente colors: yellow, pink, white, purple.</p>
 
 <p><a href="https://www.flickr.com/search/?q=ipe">I want to see pictures</a></p>
 
 <h1>
-<a id="user-content-author" class="anchor" href="#author" aria-hidden="true"><span class="octicon octicon-link"></span></a>Author</h1>
+<a id="author" class="anchor" href="#author" aria-hidden="true"><span class="octicon octicon-link"></span></a>Author</h1>
 
 <p>Claudemiro Alves Feitosa Neto</p>
 
 <h1>
-<a id="user-content-license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>LICENSE</h1>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>LICENSE</h1>
 
 <p>Copyright 2014 Claudemiro Alves Feitosa Neto. All rights reserved.
 Use of this source code is governed by a MIT-style
 license that can be found in the LICENSE file.</p>
-</article>
-  
       </section>
     </div>
 
