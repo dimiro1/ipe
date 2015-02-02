@@ -5,21 +5,24 @@
 package ipe
 
 import (
+	"time"
+
 	log "github.com/golang/glog"
 	"github.com/gorilla/websocket"
 )
 
 // An User Connection
 type connection struct {
-	SocketID string
-	Socket   *websocket.Conn
+	SocketID  string
+	Socket    *websocket.Conn
+	CreatedAt time.Time
 }
 
 // Create a new Subscriber
 func newConnection(socketID string, s *websocket.Conn) *connection {
 	log.Infof("Creating a new Subscriber %+v", socketID)
 
-	return &connection{SocketID: socketID, Socket: s}
+	return &connection{SocketID: socketID, Socket: s, CreatedAt: time.Now()}
 }
 
 // Publish the message to websocket atached to this client
