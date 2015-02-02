@@ -31,7 +31,7 @@ import (
 //
 // Since anyone could in principle send WebHooks to your application, it’s important to verify that these WebHooks originated from Pusher. Valid WebHooks will therefore contain these headers which contain a HMAC signature of the WebHook payload (body):
 //
-//     X-Pusher-Key: A Pusher app may have multiple tokens. The oldest active token will be used, identified by this key.
+//     X-Pusher-Key: The App Key.
 //     X-Pusher-Signature: A HMAC SHA256 hex digest formed by signing the POST payload (body) with the token’s secret.
 type webHook struct {
 	TimeMs int64       `json:"time_ms"`
