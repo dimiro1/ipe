@@ -8,7 +8,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/dimiro1/ipe/ipe"
+	"github.com/keithmattix/ipe/ipe"
 	log "github.com/golang/glog"
 )
 
