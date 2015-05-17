@@ -13,7 +13,6 @@ import (
 func TestGenerateSession(t *testing.T) {
 	sessionID := GenerateSessionID()
 
-	fmt.Println(sessionID)
 	if matched, _ := regexp.MatchString("^\\d+\\.\\d+$", sessionID); !matched {
 		t.Errorf("Must match ^\\d+\\.\\d+$, value: '%s'", sessionID)
 	}
