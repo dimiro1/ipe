@@ -6,10 +6,11 @@ package utils
 
 import (
 	"crypto/hmac"
-	"crypto/rand"
 	"crypto/sha256"
-	"encoding/base32"
 	"encoding/hex"
+	"fmt"
+	"math/rand"
+	"time"
 )
 
 // HashMAC Calculates the MAC signing with the given key and returns the hexadecimal encoded Result
@@ -22,12 +23,9 @@ func HashMAC(message, key []byte) string {
 }
 
 // Generate a new random Hash
-func RandomHash() string {
-	b := make([]byte, 25)
+func GenerateSessionID() string {
+	MAX := 999999999
+	rand.Seed(time.Now().Unix())
 
-	if _, err := rand.Read(b); err != nil {
-		panic("websockets: Could not generate a random session ID")
-	}
-
-	return base32.StdEncoding.EncodeToString(b)
+	return fmt.Sprintf("%d.%d", rand.Intn(MAX), rand.Intn(MAX))
 }

@@ -226,7 +226,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID := utils.RandomHash()
+	sessionID := utils.GenerateSessionID()
 
 	if err := onOpen(conn, w, r, sessionID, app); err != nil {
 		emitWSError(err, conn)
