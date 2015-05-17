@@ -18,3 +18,21 @@ func TestGenerateSession(t *testing.T) {
 		t.Errorf("Must match ^\\d+\\.\\d+$, value: '%s'", sessionID)
 	}
 }
+
+func TestIsValidChannelName(t *testing.T) {
+	if IsChannelNameValid("#@#hhh**sasas") {
+		t.Errorf("Invalid Channel Name")
+	}
+
+	if !IsChannelNameValid("private-hello") {
+		t.Errorf("Must be Valid Channel Name")
+	}
+
+	if !IsChannelNameValid("presence-hello") {
+		t.Errorf("Must be Valid Channel Name")
+	}
+
+	if !IsChannelNameValid("public") {
+		t.Errorf("Must be Valid Channel Name")
+	}
+}

@@ -118,6 +118,11 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 
 			channelName := strings.TrimSpace(subscribeEvent.Data.Channel)
 
+			if !utils.IsChannelNameValid(channelName) {
+				emitWSError(newGenericError(fmt.Sprintf("This channel name is not valid")), conn)
+				break
+			}
+
 			isPresence := strings.HasPrefix(channelName, "presence-")
 			isPrivate := strings.HasPrefix(channelName, "private-")
 

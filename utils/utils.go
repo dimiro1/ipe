@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
+	"regexp"
 	"time"
 )
 
@@ -28,4 +29,18 @@ func GenerateSessionID() string {
 	rand.Seed(time.Now().Unix())
 
 	return fmt.Sprintf("%d.%d", rand.Intn(MAX), rand.Intn(MAX))
+}
+
+func IsChannelNameValid(channelName string) bool {
+	matched, err := regexp.MatchString("^[A-Za-z0-9_\\-=@,.;]+$", channelName)
+
+	if err != nil {
+		return false
+	}
+
+	if matched {
+		return true
+	}
+
+	return false
 }
