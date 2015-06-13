@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/golang/glog"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
+	log "github.com/dimiro1/ipe/vendor/github.com/golang/glog"
+	"github.com/dimiro1/ipe/vendor/github.com/gorilla/mux"
+	"github.com/dimiro1/ipe/vendor/github.com/gorilla/websocket"
 
 	"github.com/dimiro1/ipe/utils"
 )

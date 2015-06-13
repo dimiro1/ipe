@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/dimiro1/ipe/vendor/github.com/golang/glog"
 )
 
 // A Channel

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/dimiro1/ipe/vendor/github.com/gorilla/mux"
 )
 
 // Check if the application is disabled

@@ -8,8 +8,8 @@ import (
 	_ "expvar"
 	"net/http"
 
-	"github.com/goji/httpauth"
-	"github.com/gorilla/mux"
+	"github.com/dimiro1/ipe/vendor/github.com/goji/httpauth"
+	"github.com/dimiro1/ipe/vendor/github.com/gorilla/mux"
 )
 
 // NewRouter is a function that returns a new configured Router

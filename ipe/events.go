@@ -7,7 +7,7 @@ package ipe
 import (
 	"encoding/json"
 
-	log "github.com/golang/glog"
+	log "github.com/dimiro1/ipe/vendor/github.com/golang/glog"
 )
 
 // {
