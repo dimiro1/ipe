@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/keithmattix/ipe",
+	"ImportPath": "github.com/dimiro1/ipe",
 	"GoVersion": "go1.4.1",
 	"Deps": [
 		{
