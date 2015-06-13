@@ -42,12 +42,9 @@ $ go install github.com/dimiro1/ipe
 ```json
 {
 	"Host": ":8080",
-	"User": "Username",
-	"Password": "123456",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,
-			"OnlySSL": false,
 			"Secret": "APP_SECRET",
 			"Key": "APP_KEY",
 			"Name": "APP_NAME",
