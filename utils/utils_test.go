@@ -5,7 +5,6 @@
 package utils
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 )
