@@ -20,3 +20,4 @@ windows:
 
 raspberry:
 	GOOS=linux GOARCH=arm go install github.com/dimiro1/ipe
+	
