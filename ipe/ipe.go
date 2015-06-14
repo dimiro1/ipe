@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"os"
+	"strings"
 )
 
 // Conf holds the global configuration state
@@ -29,8 +29,8 @@ func Start(configfile string) error {
 
 	conf.Init()
 	if strings.HasPrefix(conf.Host, ":$") {
-    conf.Host = ":" + os.Getenv(conf.Host[2:len(conf.Host)])
-  }
+		conf.Host = ":" + os.Getenv(conf.Host[2:len(conf.Host)])
+	}
 	router := newRouter()
 
 	if err := http.ListenAndServe(conf.Host, router); err != nil {
