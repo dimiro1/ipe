@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/golang/glog"
-	"github.com/gorilla/mux"
+	log "github.com/dimiro1/ipe/vendor/github.com/golang/glog"
+	"github.com/dimiro1/ipe/vendor/github.com/gorilla/mux"
 )
 
 // An event consists of a name and data (typically JSON) which may be sent to all subscribers to a particular channel or channels.

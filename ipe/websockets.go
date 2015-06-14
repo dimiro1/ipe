@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/golang/glog"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
+	log "github.com/dimiro1/ipe/vendor/github.com/golang/glog"
+	"github.com/dimiro1/ipe/vendor/github.com/gorilla/mux"
+	"github.com/dimiro1/ipe/vendor/github.com/gorilla/websocket"
 
 	"github.com/dimiro1/ipe/utils"
 )
@@ -117,6 +117,11 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 			}
 
 			channelName := strings.TrimSpace(subscribeEvent.Data.Channel)
+
+			if !utils.IsChannelNameValid(channelName) {
+				emitWSError(newGenericError(fmt.Sprintf("This channel name is not valid")), conn)
+				break
+			}
 
 			isPresence := strings.HasPrefix(channelName, "presence-")
 			isPrivate := strings.HasPrefix(channelName, "private-")
@@ -226,7 +231,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID := utils.RandomHash()
+	sessionID := utils.GenerateSessionID()
 
 	if err := onOpen(conn, w, r, sessionID, app); err != nil {
 		emitWSError(err, conn)

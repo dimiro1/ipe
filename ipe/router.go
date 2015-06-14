@@ -8,22 +8,13 @@ import (
 	_ "expvar"
 	"net/http"
 
-	"github.com/goji/httpauth"
-	"github.com/gorilla/mux"
+	"github.com/dimiro1/ipe/vendor/github.com/gorilla/mux"
 )
 
-// NewRouter is a function that returns a new configured Router
+// newRouter is a function that returns a new configured Router
 // It add the necessary middlewares
 func newRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-
-	if conf.Expvar {
-		if !conf.WasProvidedUserAndPassword() {
-			panic("Your are exporting debug variables and looks like you forget to define an User and a Password")
-		}
-
-		router.Handle("/debug/vars", httpauth.SimpleBasicAuth(conf.User, conf.Password)(http.DefaultServeMux))
-	}
 
 	for _, route := range routes {
 		var handler http.Handler

@@ -25,11 +25,14 @@ This software is written in Go - the WYSIWYG lang
 
 # Building
 
-This software use the standard GOPATH structure and Godep as "dependency manager", so, install [godep](https://github.com/tools/godep) first.
+```console
+$ go get github.com/dimiro1/ipe
+```
+
+or simply
 
 ```console
-$ go get github.com/tools/godep
-$ godep get github.com/dimiro1/ipe
+$ go install github.com/dimiro1/ipe
 ```
 
 # How to configure?
@@ -39,13 +42,9 @@ $ godep get github.com/dimiro1/ipe
 ```json
 {
 	"Host": ":8080",
-	"Expvar": true,
-	"User": "Username",
-	"Password": "123456",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,
-			"OnlySSL": false,
 			"Secret": "APP_SECRET",
 			"Key": "APP_KEY",
 			"Name": "APP_NAME",
@@ -136,7 +135,7 @@ Claudemiro Alves Feitosa Neto
 
 # LICENSE
 
-Copyright 2014 Claudemiro Alves Feitosa Neto. All rights reserved.
+Copyright 2014, 2015 Claudemiro Alves Feitosa Neto. All rights reserved.
 Use of this source code is governed by a MIT-style
 license that can be found in the LICENSE file.
 
