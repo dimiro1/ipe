@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/dimiro1/ipe/ipe"
-	log "github.com/dimiro1/ipe/vendor/github.com/golang/glog"
+	log "github.com/golang/glog"
 )
 
 // Main function, initialze the system

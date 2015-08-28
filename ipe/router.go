@@ -8,7 +8,7 @@ import (
 	_ "expvar"
 	"net/http"
 
-	"github.com/dimiro1/ipe/vendor/github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 // newRouter is a function that returns a new configured Router

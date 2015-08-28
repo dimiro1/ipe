@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/dimiro1/ipe/utils"
-	log "github.com/dimiro1/ipe/vendor/github.com/golang/glog"
+	log "github.com/golang/glog"
 )
 
 // A WebHook is sent as a HTTP POST request to the url which you specify.
