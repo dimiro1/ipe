@@ -125,7 +125,7 @@ Pusher is an excelent service, their service is very realible. I recomend for ev
 
 # Where this name came from?
 
-Here in Brazil we have this beatiful tree called [Ipê](http://en.wikipedia.org/wiki/Tabebuia_aurea), it comes in differente colors: yellow, pink, white, purple.
+Here in Brazil we have this beautiful tree called [Ipê](http://en.wikipedia.org/wiki/Tabebuia_aurea), it comes in differente colors: yellow, pink, white, purple.
 
 [I want to see pictures](https://www.flickr.com/search/?q=ipe)
 
