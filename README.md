@@ -121,7 +121,7 @@ Feel free to fork this repo.
 
 # Pusher
 
-Pusher is an excelent service, their service is very realible. I recomend for everyone.
+Pusher is an excelent service, their service is very reliable. I recomend for everyone.
 
 # Where this name came from?
 
