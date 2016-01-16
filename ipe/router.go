@@ -5,7 +5,6 @@
 package ipe
 
 import (
-	_ "expvar"
 	"net/http"
 
 	"github.com/gorilla/mux"

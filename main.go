@@ -24,7 +24,7 @@ func main() {
 	}
 }
 
-// Print a beatifull banner
+// Print a beautifull banner
 func printBanner() {
 	fmt.Print("\033[36m")
 	fmt.Print(`

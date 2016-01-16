@@ -58,7 +58,7 @@ func (c *channel) TotalUsers() int {
 	total := make(map[string]int)
 
 	for _, s := range c.Subscriptions {
-		total[s.Id]++
+		total[s.ID]++
 	}
 
 	return len(total)
@@ -96,7 +96,7 @@ func (c *channel) Subscribe(a *app, conn *connection, channelData string) error 
 		}
 
 		// Update the Subscription
-		subscription.Id = info.UserID
+		subscription.ID = info.UserID
 		subscription.Data = string(js)
 
 		// Publish pusher_internal:member_added

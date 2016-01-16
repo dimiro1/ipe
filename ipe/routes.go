@@ -18,35 +18,35 @@ type route struct {
 }
 
 var routes = []route{
-	route{
+	{
 		"PostEvents",
 		"POST",
 		"/apps/{app_id}/events",
 		postEvents,
 		true,
 	},
-	route{
+	{
 		"GetChannels",
 		"GET",
 		"/apps/{app_id}/channels",
 		getChannels,
 		true,
 	},
-	route{
+	{
 		"GetChannel",
 		"GET",
 		"/apps/{app_id}/channels/{channel_name}",
 		getChannel,
 		true,
 	},
-	route{
+	{
 		"GetChannelUsers",
 		"GET",
 		"/apps/{app_id}/channels/{channel_name}/users",
 		getChannelUsers,
 		true,
 	},
-	route{
+	{
 		"Websocket",
 		"GET",
 		"/app/{key}",

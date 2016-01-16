@@ -106,8 +106,8 @@ func newSubscriptionSucceedEventPresenceData(c *channel) subscriptionSucceeedEve
 		var js interface{}
 		json.Unmarshal([]byte(s.Data), &js)
 
-		hash[s.Id] = js
-		ids = append(ids, s.Id)
+		hash[s.ID] = js
+		ids = append(ids, s.ID)
 	}
 
 	event.Ids = ids
@@ -193,7 +193,7 @@ func newErrorEvent(code int, message string) errorEvent {
 //     }
 // }
 type connectionEstablishedEventData struct {
-	SocketId        string `json:"socket_id"`
+	SocketID        string `json:"socket_id"`
 	ActivityTimeout int    `json:"activity_timeout"`
 }
 
@@ -203,8 +203,8 @@ type connectionEstablishedEvent struct {
 }
 
 // Create a new connection established event using the specified socketId
-func newConnectionEstablishedEvent(socketId string) connectionEstablishedEvent {
-	data := connectionEstablishedEventData{SocketId: socketId, ActivityTimeout: 120}
+func newConnectionEstablishedEvent(socketID string) connectionEstablishedEvent {
+	data := connectionEstablishedEventData{SocketID: socketID, ActivityTimeout: 120}
 
 	b, err := json.Marshal(data)
 
@@ -245,7 +245,7 @@ func newMemberRemovedEvent(channel string, s *subscription) memberRemovedEvent {
 	data, err := json.Marshal(struct {
 		UserID string `json:"user_id"`
 	}{
-		UserID: s.Id,
+		UserID: s.ID,
 	})
 
 	if err != nil {

@@ -23,7 +23,7 @@ func HashMAC(message, key []byte) string {
 	return hex.EncodeToString(expected)
 }
 
-// Generate a new random Hash
+// GenerateSessionID Generate a new random Hash
 func GenerateSessionID() string {
 	MAX := 999999999
 	rand.Seed(time.Now().Unix())
@@ -31,6 +31,7 @@ func GenerateSessionID() string {
 	return fmt.Sprintf("%d.%d", rand.Intn(MAX), rand.Intn(MAX))
 }
 
+// IsChannelNameValid Verify if the channel name is valid
 func IsChannelNameValid(channelName string) bool {
 	matched, err := regexp.MatchString("^[A-Za-z0-9_\\-=@,.;]+$", channelName)
 

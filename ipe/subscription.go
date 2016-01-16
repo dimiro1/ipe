@@ -7,7 +7,7 @@ package ipe
 // A Channel Subscription
 type subscription struct {
 	Connection *connection
-	Id         string
+	ID         string
 	Data       string
 }
 

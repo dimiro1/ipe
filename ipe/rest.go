@@ -300,8 +300,8 @@ func getChannelUsers(w http.ResponseWriter, r *http.Request) {
 
 	for _, s := range channel.Subscriptions {
 		users = append(users, struct {
-			Id string `json:"id"`
-		}{s.Id})
+			ID string `json:"id"`
+		}{s.ID})
 	}
 
 	result["users"] = users
