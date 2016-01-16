@@ -64,7 +64,7 @@ $ go install github.com/dimiro1/ipe
 ### Client javascript library
 
 ```javascript
-var pusher = new Pusher(API_KEY, {
+var pusher = new Pusher(APP_KEY, {
   wsHost: 'localhost',
   wsPort: 8080,
   enabledTransports: ["ws", "flash"],
