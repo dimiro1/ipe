@@ -1,3 +1,5 @@
+![Quality code report](http://goreportcard.com/badge/dimiro1/ipe)
+
 # IPÊ
 
 This software is written in Go - the WYSIWYG lang
