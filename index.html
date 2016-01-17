@@ -1,34 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
     <title>Ipe by dimiro1</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
-
-    <header>
-      <div class="container">
+    <div class="wrapper">
+      <header>
         <h1>Ipe</h1>
-        <h2>A Pusher server implementation compatible with Pusher client libraries written in GO</h2>
+        <p>A Pusher server implementation compatible with Pusher client libraries written in GO</p>
 
-        <section id="downloads">
-          <a href="https://github.com/dimiro1/ipe/zipball/master" class="btn">Download as .zip</a>
-          <a href="https://github.com/dimiro1/ipe/tarball/master" class="btn">Download as .tar.gz</a>
-          <a href="https://github.com/dimiro1/ipe" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
-        </section>
-      </div>
-    </header>
+        <p class="view"><a href="https://github.com/dimiro1/ipe">View the Project on GitHub <small>dimiro1/ipe</small></a></p>
 
-    <div class="container">
-      <section id="main_content">
-        <h1>
+
+        <ul>
+          <li><a href="https://github.com/dimiro1/ipe/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/dimiro1/ipe/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/dimiro1/ipe">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><img src="http://goreportcard.com/badge/dimiro1/ipe" alt="Quality code report"></p>
+
+<h1>
 <a id="ipÊ" class="anchor" href="#ip%C3%8A" aria-hidden="true"><span class="octicon octicon-link"></span></a>IPÊ</h1>
 
 <p>This software is written in Go - the WYSIWYG lang</p>
@@ -63,10 +65,11 @@
 <h1>
 <a id="building" class="anchor" href="#building" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building</h1>
 
-<p>This software use the standard GOPATH structure and Godep as "dependency manager", so, install <a href="https://github.com/tools/godep">godep</a> first.</p>
+<div class="highlight highlight-text-shell-session"><pre>$ <span class="pl-s1">go get github.com/dimiro1/ipe</span></pre></div>
 
-<div class="highlight highlight-console"><pre>$ <span class="pl-s2">go get github.com/tools/godep</span>
-$ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
+<p>or simply</p>
+
+<div class="highlight highlight-text-shell-session"><pre>$ <span class="pl-s1">go install github.com/dimiro1/ipe</span></pre></div>
 
 <h1>
 <a id="how-to-configure" class="anchor" href="#how-to-configure" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to configure?</h1>
@@ -74,22 +77,18 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 <h2>
 <a id="the-server" class="anchor" href="#the-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>The server</h2>
 
-<div class="highlight highlight-json"><pre>{
-    <span class="pl-s1"><span class="pl-pds">"</span>Host<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>:8080<span class="pl-pds">"</span></span>,
-    <span class="pl-s1"><span class="pl-pds">"</span>Expvar<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
-    <span class="pl-s1"><span class="pl-pds">"</span>User<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>Username<span class="pl-pds">"</span></span>,
-    <span class="pl-s1"><span class="pl-pds">"</span>Password<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>123456<span class="pl-pds">"</span></span>,
-    <span class="pl-s1"><span class="pl-pds">"</span>Apps<span class="pl-pds">"</span></span>: [
+<div class="highlight highlight-source-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>Host<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>:8080<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>Apps<span class="pl-pds">"</span></span>: [
         {
-            <span class="pl-s1"><span class="pl-pds">"</span>ApplicationDisabled<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
-            <span class="pl-s1"><span class="pl-pds">"</span>OnlySSL<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
-            <span class="pl-s1"><span class="pl-pds">"</span>Secret<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>APP_SECRET<span class="pl-pds">"</span></span>,
-            <span class="pl-s1"><span class="pl-pds">"</span>Key<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>APP_KEY<span class="pl-pds">"</span></span>,
-            <span class="pl-s1"><span class="pl-pds">"</span>Name<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>APP_NAME<span class="pl-pds">"</span></span>,
-            <span class="pl-s1"><span class="pl-pds">"</span>AppID<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>APP_ID<span class="pl-pds">"</span></span>,
-            <span class="pl-s1"><span class="pl-pds">"</span>UserEvents<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
-            <span class="pl-s1"><span class="pl-pds">"</span>WebHooks<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
-            <span class="pl-s1"><span class="pl-pds">"</span>URLWebHook<span class="pl-pds">"</span></span>: <span class="pl-s1"><span class="pl-pds">"</span>http://localhost:4567/php/hook.php<span class="pl-pds">"</span></span>
+            <span class="pl-s"><span class="pl-pds">"</span>ApplicationDisabled<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>Secret<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>APP_SECRET<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>Key<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>APP_KEY<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>Name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>APP_NAME<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>AppID<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>APP_ID<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>UserEvents<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>WebHooks<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>URLWebHook<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>http://localhost:4567/php/hook.php<span class="pl-pds">"</span></span>
         }
     ]
 }</pre></div>
@@ -100,11 +99,11 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 <h3>
 <a id="client-javascript-library" class="anchor" href="#client-javascript-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client javascript library</h3>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> pusher <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Pusher</span>(API_KEY, {
-  wsHost<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>localhost<span class="pl-pds">'</span></span>,
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> pusher <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Pusher</span>(<span class="pl-c1">APP_KEY</span>, {
+  wsHost<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>localhost<span class="pl-pds">'</span></span>,
   wsPort<span class="pl-k">:</span> <span class="pl-c1">8080</span>,
-  enabledTransports<span class="pl-k">:</span> [<span class="pl-s1"><span class="pl-pds">"</span>ws<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>flash<span class="pl-pds">"</span></span>],
-  disabledTransports<span class="pl-k">:</span> [<span class="pl-s1"><span class="pl-pds">"</span>flash<span class="pl-pds">"</span></span>]
+  enabledTransports<span class="pl-k">:</span> [<span class="pl-s"><span class="pl-pds">"</span>ws<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>flash<span class="pl-pds">"</span></span>],
+  disabledTransports<span class="pl-k">:</span> [<span class="pl-s"><span class="pl-pds">"</span>flash<span class="pl-pds">"</span></span>]
 });</pre></div>
 
 <h3>
@@ -112,20 +111,20 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 
 <p>Ruby</p>
 
-<div class="highlight highlight-ruby"><pre><span class="pl-s3">Pusher</span>.host <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>localhost<span class="pl-pds">'</span></span>
-<span class="pl-s3">Pusher</span>.port <span class="pl-k">=</span> <span class="pl-c1">8080</span></pre></div>
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Pusher</span>.host <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>localhost<span class="pl-pds">'</span></span>
+<span class="pl-c1">Pusher</span>.port <span class="pl-k">=</span> <span class="pl-c1">8080</span></pre></div>
 
 <p>PHP</p>
 
-<div class="highlight highlight-php"><pre><span class="pl-s2"><span class="pl-vo">$pusher</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-s3">Pusher</span>(<span class="pl-c1">APP_KEY</span>, <span class="pl-c1">APP_SECRET</span>, <span class="pl-c1">APP_ID</span>, <span class="pl-c1">DEBUG</span>, <span class="pl-s1"><span class="pl-pds">"</span>http://localhost<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>8080<span class="pl-pds">"</span></span>);</span></pre></div>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$pusher</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Pusher</span>(<span class="pl-c1">APP_KEY</span>, <span class="pl-c1">APP_SECRET</span>, <span class="pl-c1">APP_ID</span>, <span class="pl-c1">DEBUG</span>, <span class="pl-s"><span class="pl-pds">"</span>http://localhost<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>8080<span class="pl-pds">"</span></span>);</span></pre></div>
 
 <p>NodeJS</p>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> pusher <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Pusher</span>({
-  appId<span class="pl-k">:</span> APP_ID,
-  key<span class="pl-k">:</span> APP_KEY,
-  secret<span class="pl-k">:</span> APP_SECRET
-  domain<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>localhost<span class="pl-pds">'</span></span>,
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> pusher <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Pusher</span>({
+  appId<span class="pl-k">:</span> <span class="pl-c1">APP_ID</span>,
+  key<span class="pl-k">:</span> <span class="pl-c1">APP_KEY</span>,
+  secret<span class="pl-k">:</span> <span class="pl-c1">APP_SECRET</span>
+  domain<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>localhost<span class="pl-pds">'</span></span>,
   port<span class="pl-k">:</span> <span class="pl-c1">80</span>
 });
 </pre></div>
@@ -137,7 +136,7 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 
 <p>for more information about logging type the following in console.</p>
 
-<div class="highlight highlight-console"><pre>$ <span class="pl-s2">ipe -h</span></pre></div>
+<div class="highlight highlight-text-shell-session"><pre>$ <span class="pl-s1">ipe -h</span></pre></div>
 
 <h1>
 <a id="when-use-this-software" class="anchor" href="#when-use-this-software" aria-hidden="true"><span class="octicon octicon-link"></span></a>When use this software?</h1>
@@ -157,12 +156,12 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 <h1>
 <a id="pusher" class="anchor" href="#pusher" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pusher</h1>
 
-<p>Pusher is an excelent service, their service is very realible. I recomend for everyone.</p>
+<p>Pusher is an excelent service, their service is very reliable. I recomend for everyone.</p>
 
 <h1>
 <a id="where-this-name-came-from" class="anchor" href="#where-this-name-came-from" aria-hidden="true"><span class="octicon octicon-link"></span></a>Where this name came from?</h1>
 
-<p>Here in Brazil we have this beatiful tree called <a href="http://en.wikipedia.org/wiki/Tabebuia_aurea">Ipê</a>, it comes in differente colors: yellow, pink, white, purple.</p>
+<p>Here in Brazil we have this beautiful tree called <a href="http://en.wikipedia.org/wiki/Tabebuia_aurea">Ipê</a>, it comes in differente colors: yellow, pink, white, purple.</p>
 
 <p><a href="https://www.flickr.com/search/?q=ipe">I want to see pictures</a></p>
 
@@ -174,12 +173,16 @@ $ <span class="pl-s2">godep get github.com/dimiro1/ipe</span></pre></div>
 <h1>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>LICENSE</h1>
 
-<p>Copyright 2014 Claudemiro Alves Feitosa Neto. All rights reserved.
+<p>Copyright 2014, 2015 Claudemiro Alves Feitosa Neto. All rights reserved.
 Use of this source code is governed by a MIT-style
 license that can be found in the LICENSE file.</p>
       </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/dimiro1">dimiro1</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
     </div>
-
+    <script src="javascripts/scale.fix.js"></script>
     
   </body>
 </html>
