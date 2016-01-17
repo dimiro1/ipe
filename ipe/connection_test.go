@@ -6,14 +6,14 @@ package ipe
 
 import (
 	"testing"
-	
+
 	"github.com/gorilla/websocket"
 )
 
 func TestNewConnection(t *testing.T) {
 	expectedSocketID := "socketID"
 	expectedSocket := &websocket.Conn{}
-	
+
 	c := newConnection(expectedSocketID, expectedSocket)
 
 	if c.SocketID != expectedSocketID {

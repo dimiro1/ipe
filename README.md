@@ -1,4 +1,4 @@
-![Quality code report](http://goreportcard.com/badge/dimiro1/ipe)
+[![Quality code report](http://goreportcard.com/badge/dimiro1/ipe)](http://goreportcard.com/report/dimiro1/ipe)
 
 # IPÊ
 
@@ -137,7 +137,7 @@ Claudemiro Alves Feitosa Neto
 
 # LICENSE
 
-Copyright 2014, 2015 Claudemiro Alves Feitosa Neto. All rights reserved.
+Copyright 2014, 2015, 2016 Claudemiro Alves Feitosa Neto. All rights reserved.
 Use of this source code is governed by a MIT-style
 license that can be found in the LICENSE file.
 
