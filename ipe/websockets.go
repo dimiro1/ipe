@@ -186,13 +186,13 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 
 				channel, err := app.FindChannelByChannelID(clientEvent.Channel)
 
+				if err != nil {
+					emitWSError(newGenericError(fmt.Sprintf("Could not find a channel with the id %s", clientEvent.Channel)), conn)
+				}
+
 				if !channel.IsPresenceOrPrivate() {
 					emitWSError(newGenericError("Client event rejected - only supported on private and presence channels"), conn)
 					break
-				}
-
-				if err != nil {
-					emitWSError(newGenericError(fmt.Sprintf("Could not find a channel with the id %s", clientEvent.Channel)), conn)
 				}
 
 				if err := app.Publish(channel, clientEvent, sessionID); err != nil {
