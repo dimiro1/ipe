@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
-	"time"
 )
 
 // HashMAC Calculates the MAC signing with the given key and returns the hexadecimal encoded Result
@@ -26,7 +25,6 @@ func HashMAC(message, key []byte) string {
 // GenerateSessionID Generate a new random Hash
 func GenerateSessionID() string {
 	MAX := 999999999
-	rand.Seed(time.Now().Unix())
 
 	return fmt.Sprintf("%d.%d", rand.Intn(MAX), rand.Intn(MAX))
 }
