@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"math"
 	"math/rand"
 	"regexp"
 )
@@ -24,7 +25,7 @@ func HashMAC(message, key []byte) string {
 
 // GenerateSessionID Generate a new random Hash
 func GenerateSessionID() string {
-	MAX := 999999999
+	MAX := math.MaxInt64
 
 	return fmt.Sprintf("%d.%d", rand.Intn(MAX), rand.Intn(MAX))
 }
