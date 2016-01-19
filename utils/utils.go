@@ -34,11 +34,7 @@ func GenerateSessionID() string {
 func IsChannelNameValid(channelName string) bool {
 	matched, err := regexp.MatchString("^[A-Za-z0-9_\\-=@,.;]+$", channelName)
 
-	if err != nil {
-		return false
-	}
-
-	if matched {
+	if err == nil && matched {
 		return true
 	}
 
