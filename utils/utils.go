@@ -14,6 +14,12 @@ import (
 	"regexp"
 )
 
+var validChannelName *regexp.Regexp
+
+func init() {
+	validChannelName = regexp.MustCompile("^[A-Za-z0-9_\\-=@,.;]+$")
+}
+
 // HashMAC Calculates the MAC signing with the given key and returns the hexadecimal encoded Result
 func HashMAC(message, key []byte) string {
 	mac := hmac.New(sha256.New, key)
@@ -25,18 +31,10 @@ func HashMAC(message, key []byte) string {
 
 // GenerateSessionID Generate a new random Hash
 func GenerateSessionID() string {
-	MAX := math.MaxInt64
-
-	return fmt.Sprintf("%d.%d", rand.Intn(MAX), rand.Intn(MAX))
+	return fmt.Sprintf("%d.%d", rand.Intn(math.MaxInt64), rand.Intn(math.MaxInt64))
 }
 
 // IsChannelNameValid Verify if the channel name is valid
 func IsChannelNameValid(channelName string) bool {
-	matched, err := regexp.MatchString("^[A-Za-z0-9_\\-=@,.;]+$", channelName)
-
-	if err == nil && matched {
-		return true
-	}
-
-	return false
+	return validChannelName.Match([]byte(channelName))
 }

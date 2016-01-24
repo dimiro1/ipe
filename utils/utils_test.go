@@ -9,6 +9,18 @@ import (
 	"testing"
 )
 
+func BenchmarkGenerateSession(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		GenerateSessionID()
+	}
+}
+
+func BenchmarkIsChannelNameValid(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		IsChannelNameValid("hello-world")
+	}
+}
+
 func TestGenerateSession(t *testing.T) {
 	sessionID := GenerateSessionID()
 
