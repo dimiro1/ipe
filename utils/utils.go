@@ -12,6 +12,7 @@ import (
 	"math"
 	"math/rand"
 	"regexp"
+	"strings"
 )
 
 var validChannelName *regexp.Regexp
@@ -37,4 +38,12 @@ func GenerateSessionID() string {
 // IsChannelNameValid Verify if the channel name is valid
 func IsChannelNameValid(channelName string) bool {
 	return validChannelName.Match([]byte(channelName))
+}
+
+func IsPrivateChannel(channelName string) bool {
+	return strings.HasPrefix(channelName, "private-")
+}
+
+func IsPresenceChannel(channelName string) bool {
+	return strings.HasPrefix(channelName, "presence-")
 }

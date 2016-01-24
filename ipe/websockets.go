@@ -123,8 +123,8 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 				break
 			}
 
-			isPresence := strings.HasPrefix(channelName, "presence-")
-			isPrivate := strings.HasPrefix(channelName, "private-")
+			isPresence := utils.IsPresenceChannel(channelName)
+			isPrivate := utils.IsPrivateChannel(channelName)
 
 			if isPresence || isPrivate {
 				toSign := []string{connection.SocketID, channelName}

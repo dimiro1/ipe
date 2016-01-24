@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dimiro1/ipe/utils"
 	log "github.com/golang/glog"
 )
 
@@ -40,12 +41,12 @@ func (c *channel) IsPublic() bool {
 
 // Check if the type of the channel is presence
 func (c *channel) IsPresence() bool {
-	return strings.HasPrefix(c.ChannelID, "presence-")
+	return utils.IsPresenceChannel(c.ChannelID)
 }
 
 // Check if the type of the channel is private
 func (c *channel) IsPrivate() bool {
-	return strings.HasPrefix(c.ChannelID, "private-")
+	return utils.IsPrivateChannel(c.ChannelID)
 }
 
 // Get the total of subscribers
