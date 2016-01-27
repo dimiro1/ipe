@@ -1,0 +1,14 @@
+[Unit]
+Description=Ipe
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=ipe
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=ipe
+ExecStart=/path/to/ipe -logtostderr -config="path_to_config.json"
+
+[Install]
+WantedBy=multi-user.target
