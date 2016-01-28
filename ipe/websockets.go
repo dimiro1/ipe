@@ -129,7 +129,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 			if isPresence || isPrivate {
 				toSign := []string{connection.SocketID, channelName}
 
-				if isPresence {
+				if isPresence || len(subscribeEvent.Data.ChannelData) > 0 {
 					toSign = append(toSign, subscribeEvent.Data.ChannelData)
 				}
 
