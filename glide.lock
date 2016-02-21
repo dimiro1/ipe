@@ -1,0 +1,14 @@
+hash: bfb508bdf4f85c71c7eef4bb9431148ee373dfaf31d001d050d933f80ac4288e
+updated: 2016-02-21T20:13:57.03748112-03:00
+imports:
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+- name: github.com/gorilla/context
+  version: 1c83b3eabd45b6d76072b66b746c20815fb2872d
+- name: github.com/gorilla/mux
+  version: 26a6070f849969ba72b72256e9f14cf519751690
+- name: github.com/gorilla/websocket
+  version: 5c91b59efa232fa9a87b705d54101832c498a172
+- name: github.com/pusher/pusher-http-go
+  version: 8d4ffe157699620440932e4d03253a22533f2e43
+devImports: []
