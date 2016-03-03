@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/dimiro1/ipe/ipe"
-	log "github.com/golang/glog"
 )
 
 // Main function, initialze the system
@@ -19,9 +18,7 @@ func main() {
 
 	printBanner()
 
-	if err := ipe.Start(*filename); err != nil {
-		log.Fatal(err)
-	}
+	ipe.Start(*filename)
 }
 
 // Print a beautifull banner

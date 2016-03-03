@@ -1,10 +1,15 @@
 {
 	"Host": ":8080",
+	"Encrypted": true,
+	"SSLHost": ":8090",
+	"SSLPrivateKey": "/home/ssl.key",
+	"SSLPublicKey": "/home/ssl.crt",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,
 			"Secret": "7ad3753142a6693b25b9",
 			"Key": "278d525bdf162c739803",
+			"OnlySSL": false,
 			"Name": "App 1",
 			"AppID": "321",
 			"UserEvents": true,
@@ -15,6 +20,7 @@
 			"ApplicationDisabled": false,
 			"Secret": "d6824d2fa32888931504",
 			"Key": "c8b30f611ffb13202976",
+			"OnlySSL": false,
 			"Name": "App 2",
 			"AppID": "123",
 			"UserEvents": true,
