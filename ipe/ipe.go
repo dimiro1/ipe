@@ -32,7 +32,12 @@ func Start(configfile string) error {
 	router := newRouter()
 
 	if conf.Encrypted {
-		if err := http.ListenAndServeTLS(conf.Host, conf.SSLPublicKey, conf.SSLPrivateKey, router); err != nil {
+		go func () {
+			if err := http.ListenAndServe(conf.Host, router); err != nil {
+				return err
+			}
+		}
+		if err := http.ListenAndServeTLS(conf.SSLHost, conf.SSLPublicKey, conf.SSLPrivateKey, router); err != nil {
 			return err
 		}
 	}else{

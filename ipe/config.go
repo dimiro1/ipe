@@ -17,6 +17,7 @@ type configFile struct {
 
 	// SSL Configurations
 	Encrypted     bool
+	SSLHost       string
 	SSLPrivateKey string
 	SSLPublicKey  string
 
