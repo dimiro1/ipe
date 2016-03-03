@@ -31,8 +31,14 @@ func Start(configfile string) error {
 	conf.Init()
 	router := newRouter()
 
-	if err := http.ListenAndServe(conf.Host, router); err != nil {
-		return err
+	if conf.Encrypted {
+		if err := http.ListenAndServeTLS(conf.Host, conf.SSLPublicKey, conf.SSLPrivateKey, router); err != nil {
+			return err
+		}
+	}else{
+		if err := http.ListenAndServe(conf.Host, router); err != nil {
+			return err
+		}
 	}
 
 	return nil

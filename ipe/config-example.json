@@ -1,5 +1,8 @@
 {
 	"Host": ":8080",
+	"Encrypted": true,
+	"SSLPrivateKey": "/home/ssl.key",
+	"SSLPublicKey": "/home/ssl.crt",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,

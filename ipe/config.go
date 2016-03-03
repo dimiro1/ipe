@@ -14,6 +14,12 @@ type configFile struct {
 	Host     string // The host, eg: :8080 will start on 0.0.0.0:8080
 	User     string
 	Password string
+
+	// SSL Configurations
+	Encrypted     bool
+	SSLPrivateKey string
+	SSLPublicKey  string
+
 	Apps     []*app
 }
 
