@@ -43,8 +43,8 @@ func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessio
 		return newUnsupportedProtocolVersionError()
 	case app.ApplicationDisabled:
 		return newApplicationDisabledError()
-	case r.TLS != nil:
-		if app.OnlySSL {
+	case app.OnlySSL:
+		if r.TLS == nil {
 			return newApplicationOnlyAccepsSSLError()
 		}
 	}
