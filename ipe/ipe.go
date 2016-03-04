@@ -6,9 +6,9 @@ package ipe
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	log "github.com/golang/glog"
@@ -21,13 +21,13 @@ var conf configFile
 // It Panic if could not start the HTTP or HTTPS server
 func Start(configfile string) {
 	rand.Seed(time.Now().Unix())
-	file, err := ioutil.ReadFile(configfile)
+	file, err := os.Open(configfile)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := json.Unmarshal(file, &conf); err != nil {
+	if err := json.NewDecoder(file).Decode(&conf); err != nil {
 		log.Fatal(err)
 	}
 
