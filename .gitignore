@@ -154,5 +154,6 @@ flymake*
 # Project Specific
 
 ignore_http/*
-/config.json
+config.json
+*.pem
 

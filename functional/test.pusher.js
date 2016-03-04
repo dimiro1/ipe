@@ -4,14 +4,14 @@ var assert = chai.assert;
 // Non SSL Configuration
 var APP_KEY = "278d525bdf162c739803";
 var HOST = "localhost";
-var PORT = 4567;
+var PORT = 8080;
 var AUTH = "http://localhost:5000/pusher/private/auth"
 var AUTH_PRESENCE = "http://localhost:5000/pusher/presence/auth"
 
 // SSL Configuration
 var SSL_APP_KEY = "c8b30f611ffb13202976";
 var SSL_HOST = "localhost";
-var SSL_PORT = 5566;
+var SSL_PORT = 8090;
 
 
 Pusher.log = function(msg) {

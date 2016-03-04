@@ -1,28 +1,28 @@
 {
 	"Host": ":8080",
-	"SSL": false,
+	"SSL": true,
 	"SSLHost": ":8090",
 	"SSLKeyFile": "key.pem",
 	"SSLCertFile": "cert.pem",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,
+			"OnlySSL": false,
 			"Secret": "7ad3753142a6693b25b9",
 			"Key": "278d525bdf162c739803",
-			"OnlySSL": false,
-			"Name": "App 1",
-			"AppID": "321",
+			"Name": "App for Functional Test Non SSL",
+			"AppID": "1",
 			"UserEvents": true,
-			"WebHooks": true,
+			"WebHooks": false,
 			"URLWebHook": "http://127.0.0.1:4567/php/hook.php"
 		},
 		{
 			"ApplicationDisabled": false,
+			"OnlySSL": true,
 			"Secret": "d6824d2fa32888931504",
 			"Key": "c8b30f611ffb13202976",
-			"OnlySSL": false,
-			"Name": "App 2",
-			"AppID": "123",
+			"Name": "App for Functional Test SSL",
+			"AppID": "2",
 			"UserEvents": true,
 			"WebHooks": false,
 			"URLWebHook": "http://127.0.0.1:4567/php/hook.php"
