@@ -44,16 +44,32 @@ $ go install github.com/dimiro1/ipe
 ```json
 {
 	"Host": ":8080",
+	"SSL": false,
+	"SSLHost": ":8090",
+	"SSLKeyFile": "key.pem",
+	"SSLCertFile": "cert.pem",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,
-			"Secret": "APP_SECRET",
-			"Key": "APP_KEY",
-			"Name": "APP_NAME",
-			"AppID": "APP_ID",
+			"Secret": "7ad3753142a6693b25b9",
+			"Key": "278d525bdf162c739803",
+			"OnlySSL": false,
+			"Name": "App 1",
+			"AppID": "321",
 			"UserEvents": true,
 			"WebHooks": true,
-			"URLWebHook": "http://localhost:4567/php/hook.php"
+			"URLWebHook": "http://127.0.0.1:4567/php/hook.php"
+		},
+		{
+			"ApplicationDisabled": false,
+			"Secret": "d6824d2fa32888931504",
+			"Key": "c8b30f611ffb13202976",
+			"OnlySSL": false,
+			"Name": "App 2",
+			"AppID": "123",
+			"UserEvents": true,
+			"WebHooks": false,
+			"URLWebHook": "http://127.0.0.1:4567/php/hook.php"
 		}
 	]
 }

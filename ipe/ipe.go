@@ -7,45 +7,18 @@ package ipe
 import (
 	"encoding/json"
 	"io/ioutil"
-	"net/http"
 	"math/rand"
+	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	log "github.com/golang/glog"
 )
 
 // Conf holds the global configuration state
 var conf configFile
 
-func Run(conf configFile, router *mux.Router) chan error {
-
-    errs := make(chan error)
-
-    // Starting HTTP server
-    go func() {
-        log.Infof("Staring HTTP service on %s ...", conf.Host)
-
-        if err := http.ListenAndServe(conf.Host, router); err != nil {
-            errs <- err
-        }
-
-    }()
-
-	if conf.Encrypted {
-	    // Starting HTTPS server
-	    go func() {
-	        log.Infof("Staring HTTPS service on %s ...", conf.SSLHost)
-	        if err := http.ListenAndServeTLS(conf.SSLHost, conf.SSLPublicKey, conf.SSLPrivateKey, router); err != nil {
-	            errs <- err
-	        }
-	    }()
-	}
-
-    return errs
-}
-
 // Start Parse the configuration file and starts the ipe server
+// It Panic if could not start the HTTP or HTTPS server
 func Start(configfile string) {
 	rand.Seed(time.Now().Unix())
 	file, err := ioutil.ReadFile(configfile)
@@ -61,10 +34,13 @@ func Start(configfile string) {
 	conf.Init()
 	router := newRouter()
 
-	errs := Run(conf, router)
+	if conf.SSL {
+		go func() {
+			log.Infof("Starting HTTPS service on %s ...", conf.SSLHost)
+			log.Fatal(http.ListenAndServeTLS(conf.SSLHost, conf.SSLCertFile, conf.SSLKeyFile, router))
+		}()
+	}
 
-	select {
-    case err := <-errs:
-        log.Errorf("Could not start serving service due to (error: %s)", err)
-    }
+	log.Infof("Starting HTTP service on %s ...", conf.Host)
+	log.Fatal(http.ListenAndServe(conf.Host, router))
 }

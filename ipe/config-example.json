@@ -1,9 +1,9 @@
 {
 	"Host": ":8080",
-	"Encrypted": true,
+	"SSL": false,
 	"SSLHost": ":8090",
-	"SSLPrivateKey": "/home/ssl.key",
-	"SSLPublicKey": "/home/ssl.crt",
+	"SSLKeyFile": "key.pem",
+	"SSLCertFile": "cert.pem",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,

@@ -155,4 +155,5 @@ flymake*
 
 ignore_http/*
 config.json
+*.pem
 
