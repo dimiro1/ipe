@@ -1,12 +1,12 @@
 IPÊ
 ---
 
-  * TODO [11/14]
+  * TODO [12/14]
 	* [X] Autenticação API Rest
     * [X] Autenticação Websockets
     * [X] Ping e Pong
     * [ ] Escrever testes automatizados
-    * [ ] SSL
+    * [X] SSL
 	* [X] Expvar - Canais, inscritos
     * [X] Otimizações [3/3]
 	  * [X] Refatorar partes do código, remover repetições
