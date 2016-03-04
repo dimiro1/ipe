@@ -150,6 +150,7 @@ func triggerHook(name string, a *app, c *channel, event hookEvent) {
 			return
 		}
 
+		req.Header.Set("User-Agent", "Ipe UA; (+https://github.com/dimiro1/ipe)")
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Pusher-Key", a.Key)
 		req.Header.Set("X-Pusher-Signature", utils.HashMAC(js, []byte(a.Secret)))
