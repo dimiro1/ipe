@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dimiro1/ipe/utils"
 	log "github.com/golang/glog"
 	"github.com/gorilla/mux"
 )
@@ -55,7 +56,7 @@ func postEvents(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The event data should not be larger than 10KB.
-	if len(input.Data) > MAX_DATA_EVENT_SIZE {
+	if len(input.Data) > maxDataEventSize {
 		http.Error(w, "Request too large.", http.StatusRequestEntityTooLarge)
 		return
 	}
@@ -272,7 +273,7 @@ func getChannelUsers(w http.ResponseWriter, r *http.Request) {
 	appID := vars["app_id"]
 	channelName := vars["channel_name"]
 
-	isPresence := strings.HasPrefix(channelName, "presence-")
+	isPresence := utils.IsPresenceChannel(channelName)
 
 	if !isPresence {
 		http.Error(w, "This api endpoint is restricted to presence channels.", http.StatusBadRequest)

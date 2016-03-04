@@ -39,7 +39,7 @@ func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessio
 	switch {
 	case strings.TrimSpace(p) == "":
 		return newNoProtocolVersionSuppliedError()
-	case protocol != SUPPORTED_PROTOCOL_VERSION:
+	case protocol != supportedProtocolVersion:
 		return newUnsupportedProtocolVersionError()
 	case app.ApplicationDisabled:
 		return newApplicationDisabledError()

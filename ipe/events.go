@@ -164,7 +164,7 @@ type errorEvent struct {
 func newErrorEvent(code int, message string) errorEvent {
 	var data interface{}
 
-	if code == GENERIC_ERROR {
+	if code == otherError {
 		data = struct {
 			Code    *int   `json:"code"`
 			Message string `json:"message"`
