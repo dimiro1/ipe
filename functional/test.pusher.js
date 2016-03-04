@@ -103,7 +103,6 @@ describe("Pusher", function() {
         if (msg.match(/Application only accepts SSL connections, reconnect using wss:\/\//)) {
           assert.ok(true, "Disconnected");
           done();
-          debugger;
         }
 
         Pusher.log = l
