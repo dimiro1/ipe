@@ -1,7 +1,7 @@
 {
 	"Host": ":8080",
 	"SSL": false,
-	"SSLHost": ":8090",
+	"SSLHost": ":4433",
 	"SSLKeyFile": "key.pem",
 	"SSLCertFile": "cert.pem",
 	"Apps": [
