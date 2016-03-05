@@ -2,30 +2,19 @@
 	"Host": ":8080",
 	"SSL": false,
 	"SSLHost": ":4433",
-	"SSLKeyFile": "key.pem",
-	"SSLCertFile": "cert.pem",
+	"SSLKeyFile": "A key.pem file",
+	"SSLCertFile": "A cert.pem file",
 	"Apps": [
 		{
 			"ApplicationDisabled": false,
-			"Secret": "7ad3753142a6693b25b9",
-			"Key": "278d525bdf162c739803",
+			"Secret": "A really secret random string",
+			"Key": "A random Key string",
 			"OnlySSL": false,
-			"Name": "App 1",
-			"AppID": "321",
+			"Name": "The app name",
+			"AppID": "The app ID",
 			"UserEvents": true,
 			"WebHooks": true,
-			"URLWebHook": "http://127.0.0.1:4567/php/hook.php"
-		},
-		{
-			"ApplicationDisabled": false,
-			"Secret": "d6824d2fa32888931504",
-			"Key": "c8b30f611ffb13202976",
-			"OnlySSL": false,
-			"Name": "App 2",
-			"AppID": "123",
-			"UserEvents": true,
-			"WebHooks": false,
-			"URLWebHook": "http://127.0.0.1:4567/php/hook.php"
+			"URLWebHook": "Some URL to send webhooks"
 		}
 	]
 }
