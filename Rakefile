@@ -52,5 +52,7 @@ task :build, [:os] do |t, args|
 	sh "mkdir -p build/#{os}"
 	sh "GO15VENDOREXPERIMENT=1 GOOS=#{os} GOARCH=amd64 go build -ldflags '-X main.version=#{VERSION} -X main.buildstamp=#{DATE} -X main.githash=#{GITHASH}' -o build/#{os}/ipe github.com/dimiro1/ipe"
 	sh "cp ipe/config-example.json build/#{os}/config.json"
+	sh "cp LICENSE build/#{os}/"
+	sh "cp README.md build/#{os}/"
 	sh "tar -C build/#{os} -czf build/ipe_#{VERSION}_#{os}_amd64.tar.gz ."
 end
