@@ -25,6 +25,12 @@ This software is written in Go - the WYSIWYG lang
 * Multiple apps in the same instance;
 * Drop in replacement for pusher server;
 
+# Download pre built binaries
+
+You can download pre built binaries from the [releases tab](https://github.com/dimiro1/ipe/releases).
+
+I do not have a Windows machine, so I can only distribute binaries for amd64 linux and amd64 darwin.
+
 # Building
 
 ```console
