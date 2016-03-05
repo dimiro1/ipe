@@ -1,42 +1,33 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Ipe by dimiro1</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-light.css">
-    <meta name="viewport" content="width=device-width">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Ipe</h1>
-        <p>A Pusher server implementation compatible with Pusher client libraries written in GO</p>
+    <section class="page-header">
+      <h1 class="project-name">Ipe</h1>
+      <h2 class="project-tagline">A Pusher server implementation compatible with Pusher client libraries written in GO</h2>
+      <a href="https://github.com/dimiro1/ipe" class="btn">View on GitHub</a>
+      <a href="https://github.com/dimiro1/ipe/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/dimiro1/ipe/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <p class="view"><a href="https://github.com/dimiro1/ipe">View the Project on GitHub <small>dimiro1/ipe</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/dimiro1/ipe/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/dimiro1/ipe/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/dimiro1/ipe">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <p><img src="http://goreportcard.com/badge/dimiro1/ipe" alt="Quality code report"></p>
+    <section class="main-content">
+      <p><a href="http://goreportcard.com/report/dimiro1/ipe"><img src="http://goreportcard.com/badge/dimiro1/ipe" alt="Quality code report"></a></p>
 
 <h1>
-<a id="ipÊ" class="anchor" href="#ip%C3%8A" aria-hidden="true"><span class="octicon octicon-link"></span></a>IPÊ</h1>
+<a id="ipÊ" class="anchor" href="#ip%C3%8A" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>IPÊ</h1>
 
 <p>This software is written in Go - the WYSIWYG lang</p>
 
 <h1>
-<a id="why-i-wrote-this-software" class="anchor" href="#why-i-wrote-this-software" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why I wrote this software?</h1>
+<a id="why-i-wrote-this-software" class="anchor" href="#why-i-wrote-this-software" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why I wrote this software?</h1>
 
 <ol>
 <li>I wanted to learn Go and I needed a non trivial application;</li>
@@ -45,7 +36,7 @@
 </ol>
 
 <h1>
-<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h1>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h1>
 
 <ul>
 <li>Public Channels;</li>
@@ -63,7 +54,14 @@
 </ul>
 
 <h1>
-<a id="building" class="anchor" href="#building" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building</h1>
+<a id="download-pre-built-binaries" class="anchor" href="#download-pre-built-binaries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Download pre built binaries</h1>
+
+<p>You can download pre built binaries from the <a href="https://github.com/dimiro1/ipe/releases">releases tab</a>.</p>
+
+<p>I do not have a Windows machine, so I can only distribute binaries for amd64 linux and amd64 darwin.</p>
+
+<h1>
+<a id="building" class="anchor" href="#building" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building</h1>
 
 <div class="highlight highlight-text-shell-session"><pre>$ <span class="pl-s1">go get github.com/dimiro1/ipe</span></pre></div>
 
@@ -72,32 +70,38 @@
 <div class="highlight highlight-text-shell-session"><pre>$ <span class="pl-s1">go install github.com/dimiro1/ipe</span></pre></div>
 
 <h1>
-<a id="how-to-configure" class="anchor" href="#how-to-configure" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to configure?</h1>
+<a id="how-to-configure" class="anchor" href="#how-to-configure" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to configure?</h1>
 
 <h2>
-<a id="the-server" class="anchor" href="#the-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>The server</h2>
+<a id="the-server" class="anchor" href="#the-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The server</h2>
 
 <div class="highlight highlight-source-json"><pre>{
     <span class="pl-s"><span class="pl-pds">"</span>Host<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>:8080<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>SSL<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>SSLHost<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>:4433<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>SSLKeyFile<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>A key.pem file<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>SSLCertFile<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>A cert.pem file<span class="pl-pds">"</span></span>,
     <span class="pl-s"><span class="pl-pds">"</span>Apps<span class="pl-pds">"</span></span>: [
         {
             <span class="pl-s"><span class="pl-pds">"</span>ApplicationDisabled<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
-            <span class="pl-s"><span class="pl-pds">"</span>Secret<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>APP_SECRET<span class="pl-pds">"</span></span>,
-            <span class="pl-s"><span class="pl-pds">"</span>Key<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>APP_KEY<span class="pl-pds">"</span></span>,
-            <span class="pl-s"><span class="pl-pds">"</span>Name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>APP_NAME<span class="pl-pds">"</span></span>,
-            <span class="pl-s"><span class="pl-pds">"</span>AppID<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>APP_ID<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>Secret<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>A really secret random string<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>Key<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>A random Key string<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>OnlySSL<span class="pl-pds">"</span></span>: <span class="pl-c1">false</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>Name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>The app name<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>AppID<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>The app ID<span class="pl-pds">"</span></span>,
             <span class="pl-s"><span class="pl-pds">"</span>UserEvents<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
             <span class="pl-s"><span class="pl-pds">"</span>WebHooks<span class="pl-pds">"</span></span>: <span class="pl-c1">true</span>,
-            <span class="pl-s"><span class="pl-pds">"</span>URLWebHook<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>http://localhost:4567/php/hook.php<span class="pl-pds">"</span></span>
+            <span class="pl-s"><span class="pl-pds">"</span>URLWebHook<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>Some URL to send webhooks<span class="pl-pds">"</span></span>
         }
     ]
-}</pre></div>
+}
+</pre></div>
 
 <h2>
-<a id="libraries" class="anchor" href="#libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Libraries</h2>
+<a id="libraries" class="anchor" href="#libraries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Libraries</h2>
 
 <h3>
-<a id="client-javascript-library" class="anchor" href="#client-javascript-library" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client javascript library</h3>
+<a id="client-javascript-library" class="anchor" href="#client-javascript-library" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Client javascript library</h3>
 
 <div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> pusher <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Pusher</span>(<span class="pl-c1">APP_KEY</span>, {
   wsHost<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>localhost<span class="pl-pds">'</span></span>,
@@ -107,7 +111,7 @@
 });</pre></div>
 
 <h3>
-<a id="client-server-libraries" class="anchor" href="#client-server-libraries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client server libraries</h3>
+<a id="client-server-libraries" class="anchor" href="#client-server-libraries" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Client server libraries</h3>
 
 <p>Ruby</p>
 
@@ -130,7 +134,7 @@
 </pre></div>
 
 <h1>
-<a id="logging" class="anchor" href="#logging" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logging</h1>
+<a id="logging" class="anchor" href="#logging" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Logging</h1>
 
 <p>This software uses the <a href="https://github.com/golang/glog">glog</a> library</p>
 
@@ -139,7 +143,7 @@
 <div class="highlight highlight-text-shell-session"><pre>$ <span class="pl-s1">ipe -h</span></pre></div>
 
 <h1>
-<a id="when-use-this-software" class="anchor" href="#when-use-this-software" aria-hidden="true"><span class="octicon octicon-link"></span></a>When use this software?</h1>
+<a id="when-use-this-software" class="anchor" href="#when-use-this-software" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>When use this software?</h1>
 
 <ul>
 <li>When you are offline;</li>
@@ -149,40 +153,42 @@
 </ul>
 
 <h1>
-<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing.</h1>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contributing.</h1>
 
 <p>Feel free to fork this repo.</p>
 
 <h1>
-<a id="pusher" class="anchor" href="#pusher" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pusher</h1>
+<a id="pusher" class="anchor" href="#pusher" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Pusher</h1>
 
 <p>Pusher is an excelent service, their service is very reliable. I recomend for everyone.</p>
 
 <h1>
-<a id="where-this-name-came-from" class="anchor" href="#where-this-name-came-from" aria-hidden="true"><span class="octicon octicon-link"></span></a>Where this name came from?</h1>
+<a id="where-this-name-came-from" class="anchor" href="#where-this-name-came-from" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Where this name came from?</h1>
 
 <p>Here in Brazil we have this beautiful tree called <a href="http://en.wikipedia.org/wiki/Tabebuia_aurea">Ipê</a>, it comes in differente colors: yellow, pink, white, purple.</p>
 
 <p><a href="https://www.flickr.com/search/?q=ipe">I want to see pictures</a></p>
 
 <h1>
-<a id="author" class="anchor" href="#author" aria-hidden="true"><span class="octicon octicon-link"></span></a>Author</h1>
+<a id="author" class="anchor" href="#author" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Author</h1>
 
 <p>Claudemiro Alves Feitosa Neto</p>
 
 <h1>
-<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>LICENSE</h1>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>LICENSE</h1>
 
-<p>Copyright 2014, 2015 Claudemiro Alves Feitosa Neto. All rights reserved.
+<p>Copyright 2014, 2015, 2016 Claudemiro Alves Feitosa Neto. All rights reserved.
 Use of this source code is governed by a MIT-style
 license that can be found in the LICENSE file.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/dimiro1">dimiro1</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/dimiro1/ipe">Ipe</a> is maintained by <a href="https://github.com/dimiro1">dimiro1</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+    </section>
+
+  
   </body>
 </html>
