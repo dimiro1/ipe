@@ -47,7 +47,7 @@ $ go install github.com/dimiro1/ipe
 
 ## The server
 
-```json
+```javascript
 {
 	"Host": ":8080",                    // Required
 	"SSL": false,                       // Required but can be false
