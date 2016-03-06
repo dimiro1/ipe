@@ -21,10 +21,10 @@ func init() {
 	testApp.AddChannel(newChannel("c2"))
 	testApp.AddChannel(newChannel("private-c3"))
 
-	conn := newConnection("123.456", nil)
+	conn := newConnection("123.456", mockSocket{})
 	testApp.Subscribe(channel, conn, "{}")
 
-	conn = newConnection("321.654", nil)
+	conn = newConnection("321.654", mockSocket{})
 	testApp.Subscribe(channel, conn, "{}")
 
 	db := newMemdb()

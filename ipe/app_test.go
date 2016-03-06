@@ -22,7 +22,7 @@ func newTestApp() *app {
 func TestConnect(t *testing.T) {
 	app := newTestApp()
 
-	app.Connect(newConnection("socketID", nil))
+	app.Connect(newConnection("socketID", mockSocket{}))
 
 	if len(app.Connections) != 1 {
 		t.Errorf("len(app.Connections) == %d, wants %d", len(app.Connections), 1)
@@ -33,7 +33,7 @@ func TestConnect(t *testing.T) {
 func TestDisconnect(t *testing.T) {
 	app := newTestApp()
 
-	app.Connect(newConnection("socketID", nil))
+	app.Connect(newConnection("socketID", mockSocket{}))
 	app.Disconnect("socketID")
 
 	if len(app.Connections) != 0 {
@@ -45,7 +45,7 @@ func TestDisconnect(t *testing.T) {
 func TestFindConnection(t *testing.T) {
 	app := newTestApp()
 
-	app.Connect(newConnection("socketID", nil))
+	app.Connect(newConnection("socketID", mockSocket{}))
 
 	if _, err := app.FindConnection("socketID"); err != nil {
 		t.Errorf("app.FindConnection('socketID') == _, %q, wants %v", err, nil)
@@ -165,7 +165,7 @@ func Test_New_Subscriber(t *testing.T) {
 		t.Errorf("len(app.Connections) == %d, wants %d", len(app.Connections), 0)
 	}
 
-	conn := newConnection("1", nil)
+	conn := newConnection("1", mockSocket{})
 	app.Connect(conn)
 
 	if len(app.Connections) != 1 {
@@ -175,7 +175,7 @@ func Test_New_Subscriber(t *testing.T) {
 
 func Test_find_subscriber(t *testing.T) {
 	app := newTestApp()
-	conn := newConnection("1", nil)
+	conn := newConnection("1", mockSocket{})
 	app.Connect(conn)
 
 	conn, err := app.FindConnection("1")

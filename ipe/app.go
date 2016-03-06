@@ -27,10 +27,10 @@ type app struct {
 	WebHooks            bool
 	URLWebHook          string
 
-	Channels    map[string]*channel    `json:"-"`
-	Connections map[string]*connection `json:"-"`
+	Channels    map[string]*channel
+	Connections map[string]*connection
 
-	Stats *expvar.Map `json:"-"`
+	Stats *expvar.Map
 }
 
 func newApp(name, appID, key, secret string, onlySSL, disabled, userEvents, webHooks bool, webHookURL string) *app {

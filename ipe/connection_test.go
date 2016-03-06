@@ -4,15 +4,11 @@
 
 package ipe
 
-import (
-	"testing"
-
-	"github.com/gorilla/websocket"
-)
+import "testing"
 
 func TestNewConnection(t *testing.T) {
 	expectedSocketID := "socketID"
-	expectedSocket := &websocket.Conn{}
+	expectedSocket := mockSocket{}
 
 	c := newConnection(expectedSocketID, expectedSocket)
 

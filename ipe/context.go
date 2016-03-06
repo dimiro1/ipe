@@ -17,13 +17,13 @@ func (p params) Get(key string) string {
 	return p[key]
 }
 
-// A handlerHTTPC responds to an HTTP request with custom application context.
-type handlerHTTPC interface {
-	ServeHTTPC(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request)
+// A contextHandler responds to an HTTP request with custom application context.
+type contextHandler interface {
+	ServeWithContext(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request)
 }
 
-type handlerHTTPCFunc func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request)
+type contextHandlerFunc func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request)
 
-func (c handlerHTTPCFunc) ServeHTTPC(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+func (c contextHandlerFunc) ServeWithContext(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
 	c(ctx, p, w, r)
 }

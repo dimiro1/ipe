@@ -13,7 +13,7 @@ func TestIsOccupied(t *testing.T) {
 		t.Errorf("c.IsOccupied() == %t, wants %t", c.IsOccupied(), false)
 	}
 
-	c.Subscriptions["ID"] = newSubscription(newConnection("ID", nil), "")
+	c.Subscriptions["ID"] = newSubscription(newConnection("ID", mockSocket{}), "")
 
 	if !c.IsOccupied() {
 		t.Errorf("c.IsOccupied() == %t, wants %t", c.IsOccupied(), true)
@@ -69,8 +69,8 @@ func TestTotalSubscriptions(t *testing.T) {
 func TestTotalUsers(t *testing.T) {
 	c := newChannel("ID")
 
-	c.Subscriptions["1"] = newSubscription(newConnection("ID", nil), "")
-	c.Subscriptions["2"] = newSubscription(newConnection("ID", nil), "")
+	c.Subscriptions["1"] = newSubscription(newConnection("ID", mockSocket{}), "")
+	c.Subscriptions["2"] = newSubscription(newConnection("ID", mockSocket{}), "")
 
 	if c.TotalSubscriptions() != len(c.Subscriptions) {
 		t.Errorf("c.TotalSubscriptions() == %d, wants %d", c.TotalSubscriptions(), len(c.Subscriptions))
@@ -84,7 +84,7 @@ func TestTotalUsers(t *testing.T) {
 
 func TestIsSubscribed(t *testing.T) {
 	c := newChannel("ID")
-	conn := newConnection("ID", nil)
+	conn := newConnection("ID", mockSocket{})
 
 	if c.IsSubscribed(conn) {
 		t.Errorf("c.IsSubscribed(%q) == %t, wants %t", conn, c.IsSubscribed(conn), false)

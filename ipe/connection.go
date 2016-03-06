@@ -8,18 +8,30 @@ import (
 	"time"
 
 	log "github.com/golang/glog"
-	"github.com/gorilla/websocket"
 )
+
+// socket interface to write to the client
+type socket interface {
+	WriteJSON(interface{}) error
+}
+
+// mockSocket is a mock implementation of socket
+// used in the test suite
+type mockSocket struct{}
+
+func (s mockSocket) WriteJSON(i interface{}) error {
+	return nil
+}
 
 // An User Connection
 type connection struct {
 	SocketID  string
-	Socket    *websocket.Conn
+	Socket    socket
 	CreatedAt time.Time
 }
 
 // Create a new Subscriber
-func newConnection(socketID string, s *websocket.Conn) *connection {
+func newConnection(socketID string, s socket) *connection {
 	log.Infof("Creating a new Subscriber %+v", socketID)
 
 	return &connection{SocketID: socketID, Socket: s, CreatedAt: time.Now()}
@@ -28,11 +40,6 @@ func newConnection(socketID string, s *websocket.Conn) *connection {
 // Publish the message to websocket atached to this client
 func (conn *connection) Publish(m interface{}) {
 	go func() {
-		if conn.Socket == nil {
-			log.Info("Socket is nil. Maybe you are testing this app?")
-			return
-		}
-
 		if err := conn.Socket.WriteJSON(m); err != nil {
 			log.Errorf("Error publishing message to connection %+v, %s", conn, err)
 		}

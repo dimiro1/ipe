@@ -53,7 +53,7 @@ func Start(filename string) {
 
 	router.GET("/apps/{app_id}/channels/{channel_name}/users", commonHandlers(ctx, getChannelUsers))
 
-	router.GET("/app/{key}", handlerHTTPCFunc(wsHandler))
+	router.GET("/app/{key}", contextHandlerFunc(wsHandler))
 
 	if conf.SSL {
 		go func() {

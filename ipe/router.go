@@ -13,7 +13,7 @@ import (
 type router struct {
 	ctx    *applicationContext
 	mux    *mux.Router
-	routes map[string]handlerHTTPC
+	routes map[string]contextHandler
 }
 
 func newRouter(ctx *applicationContext) *router {
@@ -23,19 +23,17 @@ func newRouter(ctx *applicationContext) *router {
 	}
 }
 
-func (a *router) GET(path string, handler handlerHTTPC) {
+func (a *router) GET(path string, handler contextHandler) {
 	a.Handle("GET", path, handler)
 }
 
-func (a *router) POST(path string, handler handlerHTTPC) {
+func (a *router) POST(path string, handler contextHandler) {
 	a.Handle("POST", path, handler)
 }
 
-func (a *router) Handle(method, path string, handler handlerHTTPC) {
+func (a *router) Handle(method, path string, handler contextHandler) {
 	a.mux.Methods(method).Path(path).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := params(mux.Vars(r))
-
-		handler.ServeHTTPC(a.ctx, p, w, r)
+		handler.ServeWithContext(a.ctx, params(mux.Vars(r)), w, r)
 	})
 }
 

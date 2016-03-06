@@ -46,8 +46,8 @@ func prepareQueryString(params url.Values) string {
 //  * The request path (e.g. /some/resource)
 //  * The query parameters sorted by key, with keys converted to lowercase, then joined as in the query string.
 //    Note that the string must not be url escaped (e.g. given the keys auth_key: foo, Name: Something else, you get auth_key=foo&name=Something else)
-func restAuthenticationHandler(ctx *applicationContext, h handlerHTTPC) handlerHTTPC {
-	return handlerHTTPCFunc(func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+func restAuthenticationHandler(ctx *applicationContext, h contextHandler) contextHandler {
+	return contextHandlerFunc(func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
 		appID := p.Get("app_id")
 
 		app, err := ctx.DB.GetAppByAppID(appID)
@@ -68,7 +68,7 @@ func restAuthenticationHandler(ctx *applicationContext, h handlerHTTPC) handlerH
 		toSign := strings.ToUpper(r.Method) + "\n" + r.URL.Path + "\n" + queryString
 
 		if utils.HashMAC([]byte(toSign), []byte(app.Secret)) == signature {
-			h.ServeHTTPC(ctx, p, w, r)
+			h.ServeWithContext(ctx, p, w, r)
 		} else {
 			log.Error("Not authorized")
 			http.Error(w, "Not authorized", http.StatusUnauthorized)
@@ -77,8 +77,8 @@ func restAuthenticationHandler(ctx *applicationContext, h handlerHTTPC) handlerH
 }
 
 // Check if the application is disabled
-func restCheckAppDisabledHandler(ctx *applicationContext, h handlerHTTPC) handlerHTTPC {
-	return handlerHTTPCFunc(func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+func restCheckAppDisabledHandler(ctx *applicationContext, h contextHandler) contextHandler {
+	return contextHandlerFunc(func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
 		appID := p.Get("app_id")
 
 		currentApp, err := ctx.DB.GetAppByAppID(appID)
@@ -93,12 +93,12 @@ func restCheckAppDisabledHandler(ctx *applicationContext, h handlerHTTPC) handle
 			return
 		}
 
-		h.ServeHTTPC(ctx, p, w, r)
+		h.ServeWithContext(ctx, p, w, r)
 	})
 }
 
 // commonHandlers combine restCheckAppDisabledHandler and restAuthenticationHandler handlers
-func commonHandlers(ctx *applicationContext, h handlerHTTPCFunc) handlerHTTPC {
+func commonHandlers(ctx *applicationContext, h contextHandlerFunc) contextHandler {
 	return restCheckAppDisabledHandler(ctx, restAuthenticationHandler(ctx, h))
 }
 
