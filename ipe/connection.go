@@ -28,6 +28,11 @@ func newConnection(socketID string, s *websocket.Conn) *connection {
 // Publish the message to websocket atached to this client
 func (conn *connection) Publish(m interface{}) {
 	go func() {
+		if conn.Socket == nil {
+			log.Info("Socket is nil. Maybe you are testing this app?")
+			return
+		}
+
 		if err := conn.Socket.WriteJSON(m); err != nil {
 			log.Errorf("Error publishing message to connection %+v, %s", conn, err)
 		}
