@@ -25,7 +25,7 @@ func TestConnect(t *testing.T) {
 	app.Connect(newConnection("socketID", nil))
 
 	if len(app.Connections) != 1 {
-		t.Errorf("Connections must be 1, but was %d", len(app.Connections))
+		t.Errorf("len(app.Connections) == %d, wants %d", len(app.Connections), 1)
 	}
 
 }
@@ -37,7 +37,7 @@ func TestDisconnect(t *testing.T) {
 	app.Disconnect("socketID")
 
 	if len(app.Connections) != 0 {
-		t.Errorf("Connections must be 0, but was %d", len(app.Connections))
+		t.Errorf("len(app.Connections) == %d, wants %d", len(app.Connections), 0)
 	}
 
 }
@@ -48,11 +48,11 @@ func TestFindConnection(t *testing.T) {
 	app.Connect(newConnection("socketID", nil))
 
 	if _, err := app.FindConnection("socketID"); err != nil {
-		t.Error("Must find Connection")
+		t.Errorf("app.FindConnection('socketID') == _, %q, wants %v", err, nil)
 	}
 
 	if _, err := app.FindConnection("NotFound"); err == nil {
-		t.Error("Must not found Connection")
+		t.Errorf("app.FindConnection('socketID') == _, %q, wants !nil", err)
 	}
 
 }
@@ -64,7 +64,7 @@ func TestFindChannelByChannelID(t *testing.T) {
 	app.AddChannel(channel)
 
 	if _, err := app.FindChannelByChannelID("ID"); err != nil {
-		t.Error("Channel not found")
+		t.Errorf("app.FindChannelByChannelID('ID') == _, %q, wants %v", err, nil)
 	}
 }
 
@@ -72,13 +72,13 @@ func TestFindOrCreateChannelByChannelID(t *testing.T) {
 	app := newTestApp()
 
 	if len(app.Channels) != 0 {
-		t.Error("Length of channels must be 0 before test")
+		t.Errorf("len(app.Channels) == %d, wants %d", len(app.Channels), 0)
 	}
 
 	app.FindOrCreateChannelByChannelID("ID")
 
 	if len(app.Channels) != 1 {
-		t.Error("Length of channels must be 1 after test")
+		t.Errorf("len(app.Channels) == %d, wants %d", len(app.Channels), 1)
 	}
 
 }
@@ -87,20 +87,20 @@ func TestRemoveChannel(t *testing.T) {
 	app := newTestApp()
 
 	if len(app.Channels) != 0 {
-		t.Error("Length of channels must be 0 before test")
+		t.Errorf("len(app.Channels) == %d, wants %d", len(app.Channels), 0)
 	}
 
 	channel := newChannel("ID")
 	app.AddChannel(channel)
 
 	if len(app.Channels) != 1 {
-		t.Error("Length of channels after insert must be 1")
+		t.Errorf("len(app.Channels) == %d, wants %d", len(app.Channels), 1)
 	}
 
 	app.RemoveChannel(channel)
 
 	if len(app.Channels) != 0 {
-		t.Error("Length of channels must be 0 after remove")
+		t.Errorf("len(app.Channels) == %d, wants %d", len(app.Channels), 0)
 	}
 
 }
@@ -112,37 +112,37 @@ func Test_add_channels(t *testing.T) {
 	// Public
 
 	if len(app.PublicChannels()) != 0 {
-		t.Error("Length of public channels must be 0 before test")
+		t.Errorf("len(app.PublicChannels()) == %d, wants %d", len(app.PublicChannels()), 0)
 	}
 
 	app.AddChannel(newChannel("ID"))
 
 	if len(app.PublicChannels()) != 1 {
-		t.Error("Length os public channels after insert must be 1")
+		t.Errorf("len(app.PublicChannels()) == %d, wants %d", len(app.PublicChannels()), 1)
 	}
 
 	// Presence
 
 	if len(app.PresenceChannels()) != 0 {
-		t.Error("Length of presence channels must be 0 before test")
+		t.Errorf("len(app.PresenceChannels()) == %d, wants %d", len(app.PresenceChannels()), 0)
 	}
 
 	app.AddChannel(newChannel("presence-test"))
 
 	if len(app.PresenceChannels()) != 1 {
-		t.Error("Length os presence channels after insert must be 1")
+		t.Errorf("len(app.PresenceChannels()) == %d, wants %d", len(app.PresenceChannels()), 1)
 	}
 
 	// Private
 
 	if len(app.PrivateChannels()) != 0 {
-		t.Error("Length of private channels must be 0 before test")
+		t.Errorf("len(app.PrivateChannels()) == %d, wants %d", len(app.PrivateChannels()), 0)
 	}
 
 	app.AddChannel(newChannel("private-test"))
 
 	if len(app.PrivateChannels()) != 1 {
-		t.Error("Length os private channels after insert must be 1")
+		t.Errorf("len(app.PrivateChannels()) == %d, wants %d", len(app.PrivateChannels()), 1)
 	}
 
 }
@@ -154,7 +154,7 @@ func Test_AllChannels(t *testing.T) {
 	app.AddChannel(newChannel("test"))
 
 	if len(app.Channels) != 3 {
-		t.Error("Must have 3 channels")
+		t.Errorf("len(app.Channels) == %d, wants %d", len(app.Channels), 3)
 	}
 }
 
@@ -162,14 +162,14 @@ func Test_New_Subscriber(t *testing.T) {
 	app := newTestApp()
 
 	if len(app.Connections) != 0 {
-		t.Error("Length of subscribers before test must be 0")
+		t.Errorf("len(app.Connections) == %d, wants %d", len(app.Connections), 0)
 	}
 
 	conn := newConnection("1", nil)
 	app.Connect(conn)
 
 	if len(app.Connections) != 1 {
-		t.Error("Length os subscribers after test must be 1")
+		t.Errorf("len(app.Connections) == %d, wants %d", len(app.Connections), 1)
 	}
 }
 
@@ -185,7 +185,7 @@ func Test_find_subscriber(t *testing.T) {
 	}
 
 	if conn.SocketID != "1" {
-		t.Error("Wrong subscriber.")
+		t.Errorf("conn.SocketID == %s, wants %s", conn.SocketID, "1")
 	}
 
 	// Find a wrong subscriber
@@ -193,11 +193,11 @@ func Test_find_subscriber(t *testing.T) {
 	conn, err = app.FindConnection("DoesNotExists")
 
 	if err == nil {
-		t.Error("Opps, Must be nil")
+		t.Errorf("err == %q, wants !nil", err)
 	}
 
 	if conn != nil {
-		t.Error("Opps, Must be nil")
+		t.Errorf("conn == %q, wants nil", conn)
 	}
 }
 
@@ -206,47 +206,47 @@ func Test_find_or_create_channels(t *testing.T) {
 
 	// Public
 	if len(app.PublicChannels()) != 0 {
-		t.Error("Length of public channels must be 0 before test")
+		t.Errorf("len(app.PublicChannels()) == %d, wants %d", len(app.PublicChannels()), 0)
 	}
 
 	c := app.FindOrCreateChannelByChannelID("id")
 
 	if len(app.PublicChannels()) != 1 {
-		t.Error("Length os public channels after insert must be 1")
+		t.Errorf("len(app.PublicChannels()) == %d, wants %d", len(app.PublicChannels()), 1)
 	}
 
 	if c.ChannelID != "id" {
-		t.Error("Opps wrong channel")
+		t.Errorf("c.ChannelID == %s, wants %s", c.ChannelID, "id")
 	}
 
 	// Presence
 	if len(app.PresenceChannels()) != 0 {
-		t.Error("Length of presence channels must be 0 before test")
+		t.Errorf("len(app.PresenceChannels()) == %d, wants %d", len(app.PresenceChannels()), 0)
 	}
 
 	c = app.FindOrCreateChannelByChannelID("presence-test")
 
 	if len(app.PresenceChannels()) != 1 {
-		t.Error("Length os presence channels after insert must be 1")
+		t.Errorf("len(app.PresenceChannels()) == %d, wants %d", len(app.PresenceChannels()), 1)
 	}
 
 	if c.ChannelID != "presence-test" {
-		t.Error("Opps wrong channel")
+		t.Errorf("c.ChannelID == %s, wants %s", c.ChannelID, "presence-test")
 	}
 
 	// Private
 	if len(app.PrivateChannels()) != 0 {
-		t.Error("Length of private channels must be 0 before test")
+		t.Errorf("len(app.PrivateChannels()) == %d, wants %d", len(app.PrivateChannels()), 0)
 	}
 
 	c = app.FindOrCreateChannelByChannelID("private-test")
 
 	if len(app.PrivateChannels()) != 1 {
-		t.Error("Length os private channels after insert must be 1")
+		t.Errorf("len(app.PrivateChannels()) == %d, wants %d", len(app.PrivateChannels()), 1)
 	}
 
 	if c.ChannelID != "private-test" {
-		t.Error("Opps wrong channel")
+		t.Errorf("c.ChannelID == %s, wants %s", c.ChannelID, "private-test")
 	}
 
 }
