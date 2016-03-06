@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
-	"github.com/gorilla/mux"
 
 	"github.com/dimiro1/ipe/utils"
 )
@@ -48,9 +47,8 @@ func prepareQueryString(params url.Values) string {
 //  * The query parameters sorted by key, with keys converted to lowercase, then joined as in the query string.
 //    Note that the string must not be url escaped (e.g. given the keys auth_key: foo, Name: Something else, you get auth_key=foo&name=Something else)
 func restAuthenticationHandler(ctx *applicationContext, h handlerHTTPC) handlerHTTPC {
-	return handlerHTTPCFunc(func(ctx *applicationContext, w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		appID := vars["app_id"]
+	return handlerHTTPCFunc(func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+		appID := p.Get("app_id")
 
 		app, err := ctx.DB.GetAppByAppID(appID)
 
@@ -60,17 +58,17 @@ func restAuthenticationHandler(ctx *applicationContext, h handlerHTTPC) handlerH
 			return
 		}
 
-		params := r.URL.Query()
+		query := r.URL.Query()
 
-		signature := params.Get("auth_signature")
-		params.Del("auth_signature")
+		signature := query.Get("auth_signature")
+		query.Del("auth_signature")
 
-		queryString := prepareQueryString(params)
+		queryString := prepareQueryString(query)
 
 		toSign := strings.ToUpper(r.Method) + "\n" + r.URL.Path + "\n" + queryString
 
 		if utils.HashMAC([]byte(toSign), []byte(app.Secret)) == signature {
-			h.ServeHTTPC(ctx, w, r)
+			h.ServeHTTPC(ctx, p, w, r)
 		} else {
 			log.Error("Not authorized")
 			http.Error(w, "Not authorized", http.StatusUnauthorized)
@@ -80,9 +78,8 @@ func restAuthenticationHandler(ctx *applicationContext, h handlerHTTPC) handlerH
 
 // Check if the application is disabled
 func restCheckAppDisabledHandler(ctx *applicationContext, h handlerHTTPC) handlerHTTPC {
-	return handlerHTTPCFunc(func(ctx *applicationContext, w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		appID := vars["app_id"]
+	return handlerHTTPCFunc(func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+		appID := p.Get("app_id")
 
 		currentApp, err := ctx.DB.GetAppByAppID(appID)
 
@@ -96,7 +93,7 @@ func restCheckAppDisabledHandler(ctx *applicationContext, h handlerHTTPC) handle
 			return
 		}
 
-		h.ServeHTTPC(ctx, w, r)
+		h.ServeHTTPC(ctx, p, w, r)
 	})
 }
 
@@ -120,9 +117,8 @@ func commonHandlers(ctx *applicationContext, h handlerHTTPCFunc) handlerHTTPC {
 // Response is an empty JSON hash.
 //
 // POST /apps/{app_id}/events
-func postEvents(ctx *applicationContext, w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	appID := vars["app_id"]
+func postEvents(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+	appID := p.Get("app_id")
 
 	app, err := ctx.DB.GetAppByAppID(appID)
 
@@ -186,13 +182,12 @@ func postEvents(ctx *applicationContext, w http.ResponseWriter, r *http.Request)
 // }
 //
 // GET /apps/{app_id}/channels
-func getChannels(ctx *applicationContext, w http.ResponseWriter, r *http.Request) {
-	params := r.URL.Query()
-	vars := mux.Vars(r)
+func getChannels(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
 
-	appID := vars["app_id"]
-	filter := params.Get("filter_by_prefix")
-	info := params.Get("info")
+	appID := p.Get("app_id")
+	filter := query.Get("filter_by_prefix")
+	info := query.Get("info")
 
 	attributes := strings.Split(info, ",")
 
@@ -267,20 +262,19 @@ func getChannels(ctx *applicationContext, w http.ResponseWriter, r *http.Request
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}
-func getChannel(ctx *applicationContext, w http.ResponseWriter, r *http.Request) {
+func getChannel(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
-	params := r.URL.Query()
-	vars := mux.Vars(r)
+	query := r.URL.Query()
 
-	appID := vars["app_id"]
+	appID := p.Get("app_id")
 	app, err := ctx.DB.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
 	}
 
-	channelName := vars["channel_name"]
+	channelName := p.Get("channel_name")
 
 	// Channel name could not be empty
 	if strings.TrimSpace(channelName) == "" {
@@ -288,7 +282,7 @@ func getChannel(ctx *applicationContext, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	info := params.Get("info")
+	info := query.Get("info")
 	attributes := strings.Split(info, ",")
 
 	// Attributes requested
@@ -357,11 +351,9 @@ func getChannel(ctx *applicationContext, w http.ResponseWriter, r *http.Request)
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}/users
-func getChannelUsers(ctx *applicationContext, w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	appID := vars["app_id"]
-	channelName := vars["channel_name"]
+func getChannelUsers(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+	appID := p.Get("app_id")
+	channelName := p.Get("channel_name")
 
 	isPresence := utils.IsPresenceChannel(channelName)
 

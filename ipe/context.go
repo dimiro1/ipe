@@ -10,13 +10,20 @@ type applicationContext struct {
 	DB db
 }
 
-// A handlerHTTPC responds to an HTTP request with custom application context.
-type handlerHTTPC interface {
-	ServeHTTPC(ctx *applicationContext, w http.ResponseWriter, r *http.Request)
+// url params
+type params map[string]string
+
+func (p params) Get(key string) string {
+	return p[key]
 }
 
-type handlerHTTPCFunc func(ctx *applicationContext, w http.ResponseWriter, r *http.Request)
+// A handlerHTTPC responds to an HTTP request with custom application context.
+type handlerHTTPC interface {
+	ServeHTTPC(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request)
+}
 
-func (c handlerHTTPCFunc) ServeHTTPC(ctx *applicationContext, w http.ResponseWriter, r *http.Request) {
-	c(ctx, w, r)
+type handlerHTTPCFunc func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request)
+
+func (c handlerHTTPCFunc) ServeHTTPC(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+	c(ctx, p, w, r)
 }

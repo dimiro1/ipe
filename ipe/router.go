@@ -24,14 +24,18 @@ func newRouter(ctx *applicationContext) *router {
 }
 
 func (a *router) GET(path string, handler handlerHTTPC) {
-	a.mux.Methods("GET").Path(path).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handler.ServeHTTPC(a.ctx, w, r)
-	})
+	a.Handle("GET", path, handler)
 }
 
 func (a *router) POST(path string, handler handlerHTTPC) {
-	a.mux.Methods("POST").Path(path).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handler.ServeHTTPC(a.ctx, w, r)
+	a.Handle("POST", path, handler)
+}
+
+func (a *router) Handle(method, path string, handler handlerHTTPC) {
+	a.mux.Methods(method).Path(path).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := params(mux.Vars(r))
+
+		handler.ServeHTTPC(a.ctx, p, w, r)
 	})
 }
 
