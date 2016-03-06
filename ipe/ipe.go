@@ -14,25 +14,46 @@ import (
 	log "github.com/golang/glog"
 )
 
-// Conf holds the global configuration state
-var conf configFile
-
 // Start Parse the configuration file and starts the ipe server
 // It Panic if could not start the HTTP or HTTPS server
-func Start(configfile string) {
+func Start(filename string) {
+	var conf configFile
+
 	rand.Seed(time.Now().Unix())
-	file, err := os.Open(configfile)
+	file, err := os.Open(filename)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Reading config
 	if err := json.NewDecoder(file).Decode(&conf); err != nil {
 		log.Fatal(err)
 	}
 
-	conf.Init()
-	router := newRouter()
+	// Using a in memory database
+	db := newMemdb()
+
+	// Adding applications
+	for _, a := range conf.Apps {
+		db.AddApp(newAppFromConfig(a))
+	}
+
+	// Creating the global application context
+	ctx := &applicationContext{DB: db}
+
+	// The router
+	router := newRouter(ctx)
+
+	router.POST("/apps/{app_id}/events", commonHandlers(ctx, postEvents))
+
+	router.GET("/apps/{app_id}/channels", commonHandlers(ctx, getChannels))
+
+	router.GET("/apps/{app_id}/channels/{channel_name}", commonHandlers(ctx, getChannel))
+
+	router.GET("/apps/{app_id}/channels/{channel_name}/users", commonHandlers(ctx, getChannelUsers))
+
+	router.GET("/app/{key}", contextHandlerFunc(wsHandler))
 
 	if conf.SSL {
 		go func() {

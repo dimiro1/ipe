@@ -4,27 +4,23 @@
 
 package ipe
 
-import (
-	"testing"
-
-	"github.com/gorilla/websocket"
-)
+import "testing"
 
 func TestNewConnection(t *testing.T) {
 	expectedSocketID := "socketID"
-	expectedSocket := &websocket.Conn{}
+	expectedSocket := mockSocket{}
 
 	c := newConnection(expectedSocketID, expectedSocket)
 
 	if c.SocketID != expectedSocketID {
-		t.Errorf("Expected: %s but got %s", expectedSocketID, c.SocketID)
+		t.Errorf("c.SocketID == %s, wants %s", c.SocketID, expectedSocketID)
 	}
 
 	if c.Socket != expectedSocket {
-		t.Errorf("Expected: %+v but got %+v", expectedSocket, c.Socket)
+		t.Errorf("c.Socket == %v, wants %v", c.Socket, expectedSocket)
 	}
 
 	if c.CreatedAt.IsZero() {
-		t.Errorf("Expected %s to not be zero", c.CreatedAt)
+		t.Errorf("c.CreatedAt.IsZero() == %t, wants %t", c.CreatedAt.IsZero(), false)
 	}
 }

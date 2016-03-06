@@ -1,4 +1,4 @@
-// Copyright 2014 Claudemiro Alves Feitosa Neto. All rights reserved.
+// Copyright 2014, 2016 Claudemiro Alves Feitosa Neto. All rights reserved.
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
@@ -10,23 +10,33 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// newRouter is a function that returns a new configured Router
-// It add the necessary middlewares
-func newRouter() *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
+type router struct {
+	ctx    *applicationContext
+	mux    *mux.Router
+	routes map[string]contextHandler
+}
 
-	for _, route := range routes {
-		var handler http.Handler
-
-		handler = route.HandlerFunc
-
-		if route.RequiresRestAuth {
-			handler = restAuthenticationHandler(handler)
-			handler = restCheckAppDisabledHandler(handler)
-		}
-
-		router.Methods(route.Method).Path(route.Pattern).Name(route.Name).Handler(handler)
+func newRouter(ctx *applicationContext) *router {
+	return &router{
+		ctx: ctx,
+		mux: mux.NewRouter().StrictSlash(true),
 	}
+}
 
-	return router
+func (a *router) GET(path string, handler contextHandler) {
+	a.Handle("GET", path, handler)
+}
+
+func (a *router) POST(path string, handler contextHandler) {
+	a.Handle("POST", path, handler)
+}
+
+func (a *router) Handle(method, path string, handler contextHandler) {
+	a.mux.Methods(method).Path(path).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler.ServeWithContext(a.ctx, params(mux.Vars(r)), w, r)
+	})
+}
+
+func (a router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.mux.ServeHTTP(w, r)
 }

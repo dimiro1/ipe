@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 
 	"github.com/dimiro1/ipe/utils"
@@ -207,7 +206,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 }
 
 // Websocket GET /app/{key}
-func wsHandler(w http.ResponseWriter, r *http.Request) {
+func wsHandler(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	defer func() {
 		if conn != nil {
@@ -220,10 +219,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	appKey := vars["key"]
+	appKey := p.Get("key")
 
-	app, err := conf.GetAppByKey(appKey)
+	app, err := ctx.DB.GetAppByKey(appKey)
 
 	if err != nil {
 		log.Error(err)
