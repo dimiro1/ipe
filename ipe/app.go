@@ -33,11 +33,25 @@ type app struct {
 	Stats *expvar.Map `json:"-"`
 }
 
-// Alloc memory for Connections and Channels
-func (a *app) Init() {
+func newApp(name, appID, key, secret string, onlySSL, disabled, userEvents, webHooks bool, webHookURL string) *app {
+
+	a := &app{
+		Name:                name,
+		AppID:               appID,
+		Key:                 key,
+		Secret:              secret,
+		OnlySSL:             onlySSL,
+		ApplicationDisabled: disabled,
+		UserEvents:          userEvents,
+		WebHooks:            webHooks,
+		URLWebHook:          webHookURL,
+	}
+
 	a.Connections = make(map[string]*connection)
 	a.Channels = make(map[string]*channel)
 	a.Stats = expvar.NewMap(fmt.Sprintf("%s (%s)", a.Name, a.AppID))
+
+	return a
 }
 
 // Only Presence channels

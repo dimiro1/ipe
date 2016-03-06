@@ -11,17 +11,16 @@ import (
 
 var id = 0
 
-func newApp() *app {
+func newTestApp() *app {
 
-	a := app{Name: "Test", AppID: strconv.Itoa(id), Key: "123", Secret: "123", OnlySSL: false, ApplicationDisabled: false, UserEvents: true}
-	a.Init()
-
+	a := newApp("Test", strconv.Itoa(id), "123", "123", false, false, true, false, "")
 	id++
-	return &a
+
+	return a
 }
 
 func TestConnect(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 
 	app.Connect(newConnection("socketID", nil))
 
@@ -32,7 +31,7 @@ func TestConnect(t *testing.T) {
 }
 
 func TestDisconnect(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 
 	app.Connect(newConnection("socketID", nil))
 	app.Disconnect("socketID")
@@ -44,7 +43,7 @@ func TestDisconnect(t *testing.T) {
 }
 
 func TestFindConnection(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 
 	app.Connect(newConnection("socketID", nil))
 
@@ -59,7 +58,7 @@ func TestFindConnection(t *testing.T) {
 }
 
 func TestFindChannelByChannelID(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 
 	channel := newChannel("ID")
 	app.AddChannel(channel)
@@ -70,7 +69,7 @@ func TestFindChannelByChannelID(t *testing.T) {
 }
 
 func TestFindOrCreateChannelByChannelID(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 
 	if len(app.Channels) != 0 {
 		t.Error("Length of channels must be 0 before test")
@@ -85,7 +84,7 @@ func TestFindOrCreateChannelByChannelID(t *testing.T) {
 }
 
 func TestRemoveChannel(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 
 	if len(app.Channels) != 0 {
 		t.Error("Length of channels must be 0 before test")
@@ -108,7 +107,7 @@ func TestRemoveChannel(t *testing.T) {
 
 func Test_add_channels(t *testing.T) {
 
-	app := newApp()
+	app := newTestApp()
 
 	// Public
 
@@ -149,7 +148,7 @@ func Test_add_channels(t *testing.T) {
 }
 
 func Test_AllChannels(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 	app.AddChannel(newChannel("private-test"))
 	app.AddChannel(newChannel("presence-test"))
 	app.AddChannel(newChannel("test"))
@@ -160,7 +159,7 @@ func Test_AllChannels(t *testing.T) {
 }
 
 func Test_New_Subscriber(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 
 	if len(app.Connections) != 0 {
 		t.Error("Length of subscribers before test must be 0")
@@ -175,7 +174,7 @@ func Test_New_Subscriber(t *testing.T) {
 }
 
 func Test_find_subscriber(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 	conn := newConnection("1", nil)
 	app.Connect(conn)
 
@@ -203,7 +202,7 @@ func Test_find_subscriber(t *testing.T) {
 }
 
 func Test_find_or_create_channels(t *testing.T) {
-	app := newApp()
+	app := newTestApp()
 
 	// Public
 	if len(app.PublicChannels()) != 0 {

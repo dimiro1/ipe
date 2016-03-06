@@ -207,7 +207,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 }
 
 // Websocket GET /app/{key}
-func wsHandler(w http.ResponseWriter, r *http.Request) {
+func wsHandler(ctx *applicationContext, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	defer func() {
 		if conn != nil {
@@ -223,7 +223,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	appKey := vars["key"]
 
-	app, err := conf.GetAppByKey(appKey)
+	app, err := ctx.DB.GetAppByKey(appKey)
 
 	if err != nil {
 		log.Error(err)
