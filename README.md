@@ -49,22 +49,22 @@ $ go install github.com/dimiro1/ipe
 
 ```json
 {
-	"Host": ":8080",
-	"SSL": false,
-	"SSLHost": ":4433",
-	"SSLKeyFile": "A key.pem file",
-	"SSLCertFile": "A cert.pem file",
-	"Apps": [
+	"Host": ":8080",                    // Required
+	"SSL": false,                       // Required but can be false
+	"SSLHost": ":4433",                 // Required if SSL is true
+	"SSLKeyFile": "A key.pem file",     // Required if SSL is true
+	"SSLCertFile": "A cert.pem file",   // Required if SSL is true
+	"Apps": [                           // Required, A Json arrays with multiple apps
 		{
-			"ApplicationDisabled": false,
-			"Secret": "A really secret random string",
-			"Key": "A random Key string",
-			"OnlySSL": false,
-			"Name": "The app name",
-			"AppID": "The app ID",
-			"UserEvents": true,
-			"WebHooks": true,
-			"URLWebHook": "Some URL to send webhooks"
+			"ApplicationDisabled": false,               // Required but can be false
+			"Secret": "A really secret random string",  // Required
+			"Key": "A random Key string",               // Required
+			"OnlySSL": false,                           // Required but can be false
+			"Name": "The app name",                     // Required
+			"AppID": "The app ID",                      // Required
+			"UserEvents": true,                         // Required but can be false
+			"WebHooks": true,                           // Required but can be false
+			"URLWebHook": "Some URL to send webhooks"   // Required if WebHooks is true
 		}
 	]
 }
@@ -79,6 +79,8 @@ $ go install github.com/dimiro1/ipe
 var pusher = new Pusher(APP_KEY, {
   wsHost: 'localhost',
   wsPort: 8080,
+  wssPort: 4433,    // Required if encrypted is true
+  encrypted: false, // Optional. the application must use only SSL connections
   enabledTransports: ["ws", "flash"],
   disabledTransports: ["flash"]
 });
