@@ -30,19 +30,80 @@ func TestGenerateSession(t *testing.T) {
 }
 
 func TestIsValidChannelName(t *testing.T) {
-	if IsChannelNameValid("#@#hhh**sasas") {
-		t.Errorf("Invalid Channel Name")
+	name := "#@#hhh**sasas"
+	ok := IsChannelNameValid(name)
+
+	if ok {
+		t.Errorf("IsChannelNameValid(%s) == %t, wants %t", name, ok, false)
 	}
 
-	if !IsChannelNameValid("private-hello") {
-		t.Errorf("Must be Valid Channel Name")
+	name = "private-hello"
+	ok = IsChannelNameValid(name)
+
+	if !ok {
+		t.Errorf("IsChannelNameValid(%s) == %t, wants %t", name, ok, true)
 	}
 
-	if !IsChannelNameValid("presence-hello") {
-		t.Errorf("Must be Valid Channel Name")
+	name = "presence-hello"
+	ok = IsChannelNameValid(name)
+
+	if !ok {
+		t.Errorf("IsChannelNameValid(%s) == %t, wants %t", name, ok, true)
 	}
 
-	if !IsChannelNameValid("public") {
-		t.Errorf("Must be Valid Channel Name")
+	name = "public"
+	ok = IsChannelNameValid(name)
+
+	if !ok {
+		t.Errorf("IsChannelNameValid(%s) == %t, wants %t", name, ok, true)
+	}
+}
+
+func TestIsPrivateChannel_valid(t *testing.T) {
+	name := "private-hello"
+	ok := IsPrivateChannel(name)
+
+	if !ok {
+		t.Errorf("IsPrivateChannel(%s) == %t, wants %t", name, ok, true)
+	}
+}
+
+func TestIsPrivateChannel_invalid(t *testing.T) {
+	name := "hello"
+	ok := IsPrivateChannel(name)
+
+	if ok {
+		t.Errorf("IsPrivateChannel(%s) == %t, wants %t", name, ok, false)
+	}
+}
+
+func TestIsIsPresenceChannel_valid(t *testing.T) {
+	name := "presence-hello"
+	ok := IsPresenceChannel(name)
+
+	if !ok {
+		t.Errorf("IsPresenceChannel(%s) == %t, wants %t", name, ok, true)
+	}
+}
+
+func TestIsPresenceChannel_invalid(t *testing.T) {
+	name := "hello"
+	ok := IsPresenceChannel(name)
+
+	if ok {
+		t.Errorf("IsPresenceChannel(%s) == %t, wants %t", name, ok, false)
+	}
+}
+
+func TestHashMAC(t *testing.T) {
+	message := []byte("hello world")
+	key := []byte("my super secret key")
+	digest := HashMAC(message, key)
+
+	// See: http://www.freeformatter.com/hmac-generator.html
+	expected := "0811b8affc185a01e1a65b80089ebb1f7f68d287fc3b64581da9ec99136ad1db"
+
+	if digest != expected {
+		t.Errorf("HashMAC(%s, %q) == %s, wants %s", message, key, digest, expected)
 	}
 }

@@ -15,7 +15,11 @@ import (
 	"strings"
 )
 
-var validChannelName *regexp.Regexp = regexp.MustCompile("^[A-Za-z0-9_\\-=@,.;]+$")
+var validChannelName *regexp.Regexp
+
+func init() {
+	validChannelName = regexp.MustCompile("^[A-Za-z0-9_\\-=@,.;]+$")
+}
 
 // HashMAC Calculates the MAC signing with the given key and returns the hexadecimal encoded Result
 func HashMAC(message, key []byte) string {
