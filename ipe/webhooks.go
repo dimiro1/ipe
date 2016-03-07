@@ -158,8 +158,17 @@ func triggerHook(name string, a *app, c *channel, event hookEvent) {
 		log.V(1).Infof("%+v", req.Header)
 		log.V(1).Infof("%+v", string(js))
 
-		if _, err := http.DefaultClient.Do(req); err != nil {
+		resp, err := http.DefaultClient.Do(req)
+
+		// See: http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.html#close_http_resp_body
+		if resp != nil {
+			defer resp.Body.Close()
+		}
+
+		if err != nil {
 			log.Errorf("Error posting %s event: %+v", name, err)
 		}
+
+		defer resp.Body.Close()
 	}()
 }
