@@ -168,7 +168,5 @@ func triggerHook(name string, a *app, c *channel, event hookEvent) {
 		if err != nil {
 			log.Errorf("Error posting %s event: %+v", name, err)
 		}
-
-		defer resp.Body.Close()
 	}()
 }
