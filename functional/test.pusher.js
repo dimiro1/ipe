@@ -17,7 +17,8 @@ function getPusher(auth) {
     wsPort: PORT,
     authEndpoint: auth,
     enabledTransports: ["ws"],
-    disabledTransports: ["flash"]
+    disabledTransports: ["flash"],
+    cluster: "hello", // Should be ignored
   });
 }
 
