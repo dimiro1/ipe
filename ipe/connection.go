@@ -39,9 +39,5 @@ func newConnection(socketID string, s socket) *connection {
 
 // Publish the message to websocket atached to this client
 func (conn *connection) Publish(m interface{}) {
-	go func() {
-		if err := conn.Socket.WriteJSON(m); err != nil {
-			log.Errorf("Error publishing message to connection %+v, %s", conn, err)
-		}
-	}()
+	conn.Socket.WriteJSON(m)
 }
