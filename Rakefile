@@ -4,7 +4,7 @@
 
 require 'rake/clean'
 
-VERSION = 'v1.0.0'
+VERSION = 'v1.1.0'
 GITHASH = `git rev-parse --short HEAD`
 DATE = Time.now.strftime '%Y%m%d%H%M%S'
 
