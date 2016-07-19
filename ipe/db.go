@@ -30,10 +30,8 @@ func newMemdb() *memdb {
 
 func (db *memdb) AddApp(a *app) error {
 	db.Lock()
-	defer db.Unlock()
-
 	db.Apps = append(db.Apps, a)
-
+	db.Unlock()
 	return nil
 }
 
