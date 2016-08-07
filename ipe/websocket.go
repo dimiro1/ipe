@@ -79,10 +79,11 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 
 		if err != nil {
 			log.Errorf("%+v", err)
-			switch err {
-			case io.EOF:
+			if err == io.EOF {
 				onClose(sessionID, app)
-			default:
+			} else if _, ok := err.(*websocket.CloseError); ok {
+				onClose(sessionID, app)
+			} else {
 				emitWSError(newGenericReconnectImmediatelyError(), conn)
 			}
 			break
