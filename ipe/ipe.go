@@ -26,6 +26,8 @@ func Start(filename string) {
 		log.Fatal(err)
 	}
 
+	defer file.Close()
+
 	// Reading config
 	if err := json.NewDecoder(file).Decode(&conf); err != nil {
 		log.Fatal(err)
