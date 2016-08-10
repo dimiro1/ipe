@@ -15,11 +15,7 @@ import (
 	"strings"
 )
 
-var validChannelName *regexp.Regexp
-
-func init() {
-	validChannelName = regexp.MustCompile("^[A-Za-z0-9_\\-=@,.;]+$")
-}
+var channelValidationRegex = regexp.MustCompile("^[A-Za-z0-9_\\-=@,.;]+$")
 
 // HashMAC Calculates the MAC signing with the given key and returns the hexadecimal encoded Result
 func HashMAC(message, key []byte) string {
@@ -37,7 +33,7 @@ func GenerateSessionID() string {
 
 // IsChannelNameValid Verify if the channel name is valid
 func IsChannelNameValid(channelName string) bool {
-	return validChannelName.Match([]byte(channelName))
+	return channelValidationRegex.Match([]byte(channelName))
 }
 
 // IsPrivateChannel Verify if the channel name represents a private channel
