@@ -1,3 +1,0 @@
-[submodule "vendor/github.com/pusher/pusher-http-go"]
-	path = vendor/github.com/pusher/pusher-http-go
-	url = git://github.com/pusher/pusher-http-go.git

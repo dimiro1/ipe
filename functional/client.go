@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/pusher/pusher-http-go"
@@ -20,6 +21,7 @@ func init() {
 }
 
 func pusherPresenceAuth(res http.ResponseWriter, req *http.Request) {
+	log.Println("Presence Request")
 	presenceData := pusher.MemberData{
 		UserId:   "1",
 		UserInfo: map[string]string{},
@@ -38,6 +40,9 @@ func pusherPresenceAuth(res http.ResponseWriter, req *http.Request) {
 func pusherPrivateAuth(res http.ResponseWriter, req *http.Request) {
 	params, _ := ioutil.ReadAll(req.Body)
 	response, err := client.AuthenticatePrivateChannel(params)
+
+	log.Printf("Private Request %s", params)
+	log.Printf("Auth %s", response)
 
 	if err != nil {
 		panic(err)
