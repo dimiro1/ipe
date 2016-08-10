@@ -95,6 +95,24 @@ func TestIsPresenceChannel_invalid(t *testing.T) {
 	}
 }
 
+func TestIsClientEvent_valid(t *testing.T) {
+	name := "client-hello"
+	ok := IsClientEvent(name)
+
+	if !ok {
+		t.Errorf("IsClientEvent(%s) == %t, wants %t", name, ok, true)
+	}
+}
+
+func TestIsClientEvent_invalid(t *testing.T) {
+	name := "hello"
+	ok := IsClientEvent(name)
+
+	if ok {
+		t.Errorf("IsClientEvent(%s) == %t, wants %t", name, ok, false)
+	}
+}
+
 func TestHashMAC(t *testing.T) {
 	message := []byte("hello world")
 	key := []byte("my super secret key")

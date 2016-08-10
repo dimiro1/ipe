@@ -171,7 +171,7 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 			}
 		default: // CLient Events ??
 			// see http://pusher.com/docs/client_api_guide/client_events#trigger-events
-			if strings.HasPrefix(event.Event, "client-") {
+			if utils.IsClientEvent(event.Event) {
 				if !app.UserEvents {
 					emitWSError(newGenericError("To send client events, you must enable this feature in the Settings."), conn)
 				}

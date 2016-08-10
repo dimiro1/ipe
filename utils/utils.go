@@ -40,10 +40,17 @@ func IsChannelNameValid(channelName string) bool {
 	return validChannelName.Match([]byte(channelName))
 }
 
+// IsPrivateChannel Verify if the channel name represents a private channel
 func IsPrivateChannel(channelName string) bool {
 	return strings.HasPrefix(channelName, "private-")
 }
 
+// IsPresenceChannel Verify if the channel name represents a presence channel
 func IsPresenceChannel(channelName string) bool {
 	return strings.HasPrefix(channelName, "presence-")
+}
+
+// IsClientEvent Verify if the event name represents a client event type
+func IsClientEvent(event string) bool {
+	return strings.HasPrefix(event, "client-")
 }

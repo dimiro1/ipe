@@ -7,7 +7,6 @@ package ipe
 import (
 	"encoding/json"
 	"errors"
-	"strings"
 	"sync"
 	"time"
 
@@ -215,7 +214,7 @@ func (c *channel) Publish(a *app, event rawEvent, ignore string) error {
 			subs.Connection.Publish(newResponseEvent(event.Event, event.Channel, v))
 		} else {
 			// Webhook
-			if strings.HasPrefix(event.Event, "client-") {
+			if utils.IsClientEvent(event.Event) {
 				a.TriggerClientEventHook(c, subs, event.Event, v)
 			}
 		}
