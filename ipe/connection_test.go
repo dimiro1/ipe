@@ -6,6 +6,14 @@ package ipe
 
 import "testing"
 
+// mockSocket is a mock implementation of socket
+// used in the test suite
+type mockSocket struct{}
+
+func (s mockSocket) WriteJSON(i interface{}) error {
+	return nil
+}
+
 func TestNewConnection(t *testing.T) {
 	expectedSocketID := "socketID"
 	expectedSocket := mockSocket{}

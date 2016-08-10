@@ -15,14 +15,6 @@ type socket interface {
 	WriteJSON(interface{}) error
 }
 
-// mockSocket is a mock implementation of socket
-// used in the test suite
-type mockSocket struct{}
-
-func (s mockSocket) WriteJSON(i interface{}) error {
-	return nil
-}
-
 // An User Connection
 type connection struct {
 	SocketID  string
