@@ -33,7 +33,7 @@ func GenerateSessionID() string {
 
 // IsChannelNameValid Verify if the channel name is valid
 func IsChannelNameValid(channelName string) bool {
-	return channelValidationRegex.Match([]byte(channelName))
+	return channelValidationRegex.MatchString(channelName)
 }
 
 // IsPrivateChannel Verify if the channel name represents a private channel
