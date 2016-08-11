@@ -47,7 +47,7 @@ func Test_getChannels_all(t *testing.T) {
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels", appID), nil)
 	w := httptest.NewRecorder()
 
-	handler := &getChannels{DB: database}
+	handler := &getChannelsHandler{database}
 	handler.ServeHTTPC(ctx, w, r)
 
 	if w.Code != http.StatusOK {
@@ -73,7 +73,7 @@ func Test_getChannels_filter_by_presence_prefix(t *testing.T) {
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=presence-", appID), nil)
 	w := httptest.NewRecorder()
 
-	handler := &getChannels{DB: database}
+	handler := &getChannelsHandler{database}
 	handler.ServeHTTPC(ctx, w, r)
 
 	if w.Code != http.StatusOK {
@@ -100,7 +100,7 @@ func Test_getChannels_filter_by_presence_prefix_and_user_count(t *testing.T) {
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=presence-&info=user_count", appID), nil)
 	w := httptest.NewRecorder()
 
-	handler := &getChannels{DB: database}
+	handler := &getChannelsHandler{database}
 	handler.ServeHTTPC(ctx, w, r)
 
 	if w.Code != http.StatusOK {
@@ -139,7 +139,7 @@ func Test_getChannels_filter_by_private_prefix_and_info_user_count(t *testing.T)
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=private-&info=user_count", appID), nil)
 	w := httptest.NewRecorder()
 
-	handler := &getChannels{DB: database}
+	handler := &getChannelsHandler{database}
 	handler.ServeHTTPC(ctx, w, r)
 
 	if w.Code != http.StatusBadRequest {
@@ -156,7 +156,7 @@ func Test_getChannels_filter_by_public_prefix(t *testing.T) {
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=public-", appID), nil)
 	w := httptest.NewRecorder()
 
-	handler := &getChannels{DB: database}
+	handler := &getChannelsHandler{database}
 	handler.ServeHTTPC(ctx, w, r)
 
 	if w.Code != http.StatusOK {
@@ -189,7 +189,7 @@ func Test_getChannels_filter_by_private_prefix(t *testing.T) {
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=private-", appID), nil)
 	w := httptest.NewRecorder()
 
-	handler := &getChannels{DB: database}
+	handler := &getChannelsHandler{database}
 	handler.ServeHTTPC(ctx, w, r)
 
 	if w.Code != http.StatusOK {

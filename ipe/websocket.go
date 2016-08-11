@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 
+	goji "goji.io"
+
 	"goji.io/pat"
 
 	log "github.com/golang/glog"
@@ -209,10 +211,14 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 	} // For
 }
 
-type wsHandler struct{ DB db }
+func newWebsocketHandler(DB db) goji.HandlerFunc {
+	return commonHandlers(DB, &websocketHandler{DB})
+}
+
+type websocketHandler struct{ DB db }
 
 // Websocket GET /app/{key}
-func (h *wsHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (h *websocketHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	defer func() {
 		if conn != nil {
