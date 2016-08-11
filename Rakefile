@@ -27,9 +27,9 @@ task :test do
 	sh 'GO15VENDOREXPERIMENT=1 go test . `glide nv`'
 end
 
-desc 'Download the development dependencies'
-task :'dev-deps' do
-	sh 'go get github.com/pusher/pusher-http-go'
+desc 'Download the dependencies'
+task :'deps' do
+	sh 'glide install -v -s'
 end
 
 desc 'Generate distributions'
