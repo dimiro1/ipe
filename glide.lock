@@ -1,14 +1,20 @@
-hash: bfb508bdf4f85c71c7eef4bb9431148ee373dfaf31d001d050d933f80ac4288e
-updated: 2016-08-09T22:49:29.988191345-03:00
+hash: 78960e966a1b6d8bc39ea931f98953699c7ee382acad3108c936b7da93fa1f65
+updated: 2016-08-10T21:41:28.666548239-03:00
 imports:
 - name: github.com/golang/glog
-  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
-- name: github.com/gorilla/context
-  version: aed02d124ae4a0e94fea4541c8effd05bf0c8296
-- name: github.com/gorilla/mux
-  version: 780415097119f6f61c55475fe59b66f3c3e9ea53
+  version: 6e46bcb2aaf67fbcc54da4a3ba9dbf419507d2ef
 - name: github.com/gorilla/websocket
-  version: a69d25be2fe2923a97c2af6849b2f52426f68fc0
+  version: 6e46bcb2aaf67fbcc54da4a3ba9dbf419507d2ef
 - name: github.com/pusher/pusher-http-go
-  version: 2bba5f217f6f0f4f0c0a9bb11b945b206b32bec5
+  version: 6e46bcb2aaf67fbcc54da4a3ba9dbf419507d2ef
+- name: goji.io
+  version: e355964ac565b94cf0fc7f218346626529125086
+  subpackages:
+  - pat
+  - pattern
+  - internal
+- name: golang.org/x/net
+  version: 075e191f18186a8ff2becaf64478e30f4545cdad
+  subpackages:
+  - context
 testImports: []

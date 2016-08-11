@@ -12,7 +12,12 @@ import (
 	"sort"
 	"strings"
 
+	goji "goji.io"
+
+	"goji.io/pat"
+
 	log "github.com/golang/glog"
+	"golang.org/x/net/context"
 
 	"github.com/dimiro1/ipe/utils"
 )
@@ -46,11 +51,11 @@ func prepareQueryString(params url.Values) string {
 //  * The request path (e.g. /some/resource)
 //  * The query parameters sorted by key, with keys converted to lowercase, then joined as in the query string.
 //    Note that the string must not be url escaped (e.g. given the keys auth_key: foo, Name: Something else, you get auth_key=foo&name=Something else)
-func restAuthenticationHandler(ctx *applicationContext, h contextHandler) contextHandler {
-	return contextHandlerFunc(func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
-		appID := p.Get("app_id")
+func restAuthenticationHandler(DB db, h goji.Handler) goji.HandlerFunc {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		appID := pat.Param(ctx, "app_id")
 
-		app, err := ctx.DB.GetAppByAppID(appID)
+		app, err := DB.GetAppByAppID(appID)
 
 		if err != nil {
 			log.Error(err)
@@ -68,20 +73,20 @@ func restAuthenticationHandler(ctx *applicationContext, h contextHandler) contex
 		toSign := strings.ToUpper(r.Method) + "\n" + r.URL.Path + "\n" + queryString
 
 		if utils.HashMAC([]byte(toSign), []byte(app.Secret)) == signature {
-			h.ServeWithContext(ctx, p, w, r)
+			h.ServeHTTPC(ctx, w, r)
 		} else {
 			log.Error("Not authorized")
 			http.Error(w, "Not authorized", http.StatusUnauthorized)
 		}
-	})
+	}
 }
 
 // Check if the application is disabled
-func restCheckAppDisabledHandler(ctx *applicationContext, h contextHandler) contextHandler {
-	return contextHandlerFunc(func(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
-		appID := p.Get("app_id")
+func restCheckAppDisabledHandler(DB db, h goji.Handler) goji.HandlerFunc {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		appID := pat.Param(ctx, "app_id")
 
-		currentApp, err := ctx.DB.GetAppByAppID(appID)
+		currentApp, err := DB.GetAppByAppID(appID)
 
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusForbidden)
@@ -93,16 +98,31 @@ func restCheckAppDisabledHandler(ctx *applicationContext, h contextHandler) cont
 			return
 		}
 
-		h.ServeWithContext(ctx, p, w, r)
-	})
+		h.ServeHTTPC(ctx, w, r)
+	}
+}
+
+func recoverHandle(h goji.Handler) goji.HandlerFunc {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Errorf("Please verify the url parameters error was: %s", r)
+				http.Error(w, "Not authorized", http.StatusUnauthorized)
+				return
+			}
+		}()
+		h.ServeHTTPC(ctx, w, r)
+	}
 }
 
 // commonHandlers combine restCheckAppDisabledHandler and restAuthenticationHandler handlers
-func commonHandlers(ctx *applicationContext, h contextHandlerFunc) contextHandler {
-	return restCheckAppDisabledHandler(ctx, restAuthenticationHandler(ctx, h))
+func commonHandlers(DB db, h goji.Handler) goji.HandlerFunc {
+	return recoverHandle(restCheckAppDisabledHandler(DB, restAuthenticationHandler(DB, h)))
 }
 
-// An event consists of a name and data (typically JSON) which may be sent to all subscribers to a particular channel or channels.
+type postEvents struct{ DB db }
+
+// ServeHTTPC An event consists of a name and data (typically JSON) which may be sent to all subscribers to a particular channel or channels.
 // This is conventionally known as triggering an event.
 //
 // The body should contain a Hash of parameters encoded as JSON where data parameter itself is JSON encoded.
@@ -117,10 +137,10 @@ func commonHandlers(ctx *applicationContext, h contextHandlerFunc) contextHandle
 // Response is an empty JSON hash.
 //
 // POST /apps/{app_id}/events
-func postEvents(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
-	appID := p.Get("app_id")
+func (h *postEvents) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	appID := pat.Param(ctx, "app_id")
 
-	app, err := ctx.DB.GetAppByAppID(appID)
+	app, err := h.DB.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
@@ -163,6 +183,8 @@ func postEvents(ctx *applicationContext, p params, w http.ResponseWriter, r *htt
 	w.Write([]byte("{}"))
 }
 
+type getChannels struct{ DB db }
+
 // Allows fetching a hash of occupied channels (optionally filtered by prefix),
 // and optionally one or more attributes for each channel.
 //
@@ -182,10 +204,10 @@ func postEvents(ctx *applicationContext, p params, w http.ResponseWriter, r *htt
 // }
 //
 // GET /apps/{app_id}/channels
-func getChannels(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+func (h *getChannels) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
-	appID := p.Get("app_id")
+	appID := pat.Param(ctx, "app_id")
 	filter := query.Get("filter_by_prefix")
 	info := query.Get("info")
 
@@ -206,7 +228,7 @@ func getChannels(ctx *applicationContext, p params, w http.ResponseWriter, r *ht
 		return
 	}
 
-	app, err := ctx.DB.GetAppByAppID(appID)
+	app, err := h.DB.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
@@ -252,6 +274,8 @@ func getChannels(ctx *applicationContext, p params, w http.ResponseWriter, r *ht
 	}
 }
 
+type getChannel struct{ DB db }
+
 // Fetch info for one channel
 //
 // Example:
@@ -262,19 +286,19 @@ func getChannels(ctx *applicationContext, p params, w http.ResponseWriter, r *ht
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}
-func getChannel(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+func (h *getChannel) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
 	query := r.URL.Query()
 
-	appID := p.Get("app_id")
-	app, err := ctx.DB.GetAppByAppID(appID)
+	appID := pat.Param(ctx, "app_id")
+	app, err := h.DB.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
 	}
 
-	channelName := p.Get("channel_name")
+	channelName := pat.Param(ctx, "channel_name")
 
 	// Channel name could not be empty
 	if strings.TrimSpace(channelName) == "" {
@@ -340,6 +364,8 @@ func getChannel(ctx *applicationContext, p params, w http.ResponseWriter, r *htt
 	}
 }
 
+type getChannelUsers struct{ DB db }
+
 // Allowed only for presence-channels
 //
 // Example:
@@ -351,9 +377,9 @@ func getChannel(ctx *applicationContext, p params, w http.ResponseWriter, r *htt
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}/users
-func getChannelUsers(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
-	appID := p.Get("app_id")
-	channelName := p.Get("channel_name")
+func (h *getChannelUsers) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	appID := pat.Param(ctx, "app_id")
+	channelName := pat.Param(ctx, "channel_name")
 
 	isPresence := utils.IsPresenceChannel(channelName)
 
@@ -362,7 +388,7 @@ func getChannelUsers(ctx *applicationContext, p params, w http.ResponseWriter, r
 		return
 	}
 
-	app, err := ctx.DB.GetAppByAppID(appID)
+	app, err := h.DB.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
