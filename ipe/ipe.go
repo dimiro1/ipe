@@ -46,11 +46,11 @@ func Start(filename string) {
 	}
 
 	router := goji.NewMux()
-	router.HandleFuncC(pat.Post("/apps/:app_id/events"), commonHandlers(db, &postEvents{DB: db}))
-	router.HandleFuncC(pat.Get("/apps/:app_id/channels"), commonHandlers(db, &getChannels{DB: db}))
-	router.HandleFuncC(pat.Get("/apps/:app_id/channels/:channel_name"), commonHandlers(db, &getChannel{DB: db}))
-	router.HandleFuncC(pat.Get("/apps/:app_id/channels/:channel_name/users"), commonHandlers(db, &getChannelUsers{DB: db}))
-	router.HandleC(pat.Get("/app/:key"), &wsHandler{DB: db})
+	router.HandleFuncC(pat.Post("/apps/:app_id/events"), newPostEventsHandler(db))
+	router.HandleFuncC(pat.Get("/apps/:app_id/channels"), newGetChannelsHandler(db))
+	router.HandleFuncC(pat.Get("/apps/:app_id/channels/:channel_name"), newGetChannelHandler(db))
+	router.HandleFuncC(pat.Get("/apps/:app_id/channels/:channel_name/users"), newGetChannelUsersHandler(db))
+	router.HandleC(pat.Get("/app/:key"), newWebsocketHandler(db))
 
 	if conf.SSL {
 		go func() {

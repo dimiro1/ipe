@@ -51,7 +51,7 @@ func prepareQueryString(params url.Values) string {
 //  * The request path (e.g. /some/resource)
 //  * The query parameters sorted by key, with keys converted to lowercase, then joined as in the query string.
 //    Note that the string must not be url escaped (e.g. given the keys auth_key: foo, Name: Something else, you get auth_key=foo&name=Something else)
-func restAuthenticationHandler(DB db, h goji.Handler) goji.HandlerFunc {
+func restAuthenticationHandler(DB db, next goji.Handler) goji.HandlerFunc {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		appID := pat.Param(ctx, "app_id")
 
@@ -73,7 +73,7 @@ func restAuthenticationHandler(DB db, h goji.Handler) goji.HandlerFunc {
 		toSign := strings.ToUpper(r.Method) + "\n" + r.URL.Path + "\n" + queryString
 
 		if utils.HashMAC([]byte(toSign), []byte(app.Secret)) == signature {
-			h.ServeHTTPC(ctx, w, r)
+			next.ServeHTTPC(ctx, w, r)
 		} else {
 			log.Error("Not authorized")
 			http.Error(w, "Not authorized", http.StatusUnauthorized)
@@ -82,7 +82,7 @@ func restAuthenticationHandler(DB db, h goji.Handler) goji.HandlerFunc {
 }
 
 // Check if the application is disabled
-func restCheckAppDisabledHandler(DB db, h goji.Handler) goji.HandlerFunc {
+func restCheckAppDisabledHandler(DB db, next goji.Handler) goji.HandlerFunc {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		appID := pat.Param(ctx, "app_id")
 
@@ -98,11 +98,11 @@ func restCheckAppDisabledHandler(DB db, h goji.Handler) goji.HandlerFunc {
 			return
 		}
 
-		h.ServeHTTPC(ctx, w, r)
+		next.ServeHTTPC(ctx, w, r)
 	}
 }
 
-func recoverHandler(h goji.Handler) goji.HandlerFunc {
+func recoverHandler(next goji.Handler) goji.HandlerFunc {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -111,16 +111,20 @@ func recoverHandler(h goji.Handler) goji.HandlerFunc {
 				return
 			}
 		}()
-		h.ServeHTTPC(ctx, w, r)
+		next.ServeHTTPC(ctx, w, r)
 	}
 }
 
 // commonHandlers combine restCheckAppDisabledHandler and restAuthenticationHandler handlers
-func commonHandlers(DB db, h goji.Handler) goji.HandlerFunc {
-	return recoverHandler(restCheckAppDisabledHandler(DB, restAuthenticationHandler(DB, h)))
+func commonHandlers(DB db, next goji.Handler) goji.HandlerFunc {
+	return recoverHandler(restCheckAppDisabledHandler(DB, restAuthenticationHandler(DB, next)))
 }
 
-type postEvents struct{ DB db }
+func newPostEventsHandler(DB db) goji.HandlerFunc {
+	return commonHandlers(DB, &postEventsHandler{DB})
+}
+
+type postEventsHandler struct{ DB db }
 
 // ServeHTTPC An event consists of a name and data (typically JSON) which may be sent to all subscribers to a particular channel or channels.
 // This is conventionally known as triggering an event.
@@ -137,7 +141,7 @@ type postEvents struct{ DB db }
 // Response is an empty JSON hash.
 //
 // POST /apps/{app_id}/events
-func (h *postEvents) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (h *postEventsHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	appID := pat.Param(ctx, "app_id")
 
 	app, err := h.DB.GetAppByAppID(appID)
@@ -183,7 +187,11 @@ func (h *postEvents) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *h
 	w.Write([]byte("{}"))
 }
 
-type getChannels struct{ DB db }
+func newGetChannelsHandler(DB db) goji.HandlerFunc {
+	return commonHandlers(DB, &getChannelsHandler{DB})
+}
+
+type getChannelsHandler struct{ DB db }
 
 // Allows fetching a hash of occupied channels (optionally filtered by prefix),
 // and optionally one or more attributes for each channel.
@@ -204,7 +212,7 @@ type getChannels struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels
-func (h *getChannels) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (h *getChannelsHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
 	appID := pat.Param(ctx, "app_id")
@@ -274,7 +282,11 @@ func (h *getChannels) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *
 	}
 }
 
-type getChannel struct{ DB db }
+func newGetChannelHandler(DB db) goji.HandlerFunc {
+	return commonHandlers(DB, &getChannelHandler{DB})
+}
+
+type getChannelHandler struct{ DB db }
 
 // Fetch info for one channel
 //
@@ -286,7 +298,7 @@ type getChannel struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}
-func (h *getChannel) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (h *getChannelHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
 	query := r.URL.Query()
@@ -364,7 +376,11 @@ func (h *getChannel) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *h
 	}
 }
 
-type getChannelUsers struct{ DB db }
+func newGetChannelUsersHandler(DB db) goji.HandlerFunc {
+	return commonHandlers(DB, &getChannelUsersHandler{DB})
+}
+
+type getChannelUsersHandler struct{ DB db }
 
 // Allowed only for presence-channels
 //
@@ -377,7 +393,7 @@ type getChannelUsers struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}/users
-func (h *getChannelUsers) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (h *getChannelUsersHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	appID := pat.Param(ctx, "app_id")
 	channelName := pat.Param(ctx, "channel_name")
 
