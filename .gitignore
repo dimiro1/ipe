@@ -159,3 +159,5 @@ config.json
 build
 .vscode/*
 debug
+
+vendor/*

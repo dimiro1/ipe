@@ -4,3 +4,8 @@ import:
 - package: github.com/gorilla/websocket
 - package: github.com/pusher/pusher-http-go
 - package: goji.io
+  subpackages:
+  - pat
+- package: golang.org/x/net
+  subpackages:
+  - context
