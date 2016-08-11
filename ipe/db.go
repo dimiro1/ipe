@@ -27,7 +27,10 @@ type memdb struct {
 }
 
 func newMemdb() *memdb {
-	return &memdb{}
+	return &memdb{
+		AppsByAppID: make(map[string]*app),
+		AppsByKey:   make(map[string]*app),
+	}
 }
 
 func (db *memdb) AddApp(a *app) error {
