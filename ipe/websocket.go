@@ -211,8 +211,8 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 	} // For
 }
 
-func newWebsocketHandler(DB db) goji.HandlerFunc {
-	return commonHandlers(DB, &websocketHandler{DB})
+func newWebsocketHandler(DB db) goji.Handler {
+	return &websocketHandler{DB}
 }
 
 type websocketHandler struct{ DB db }
