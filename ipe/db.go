@@ -18,7 +18,7 @@ type db interface {
 	AddApp(*app) error
 }
 
-// memdb is a in memory implementation of db interface
+// memdb is an in memory implementation of db interface
 type memdb struct {
 	IdMutex     sync.Mutex
 	KeyMutex    sync.Mutex
@@ -41,16 +41,15 @@ func (db *memdb) AddApp(a *app) error {
 	db.KeyMutex.Lock()
 	db.AppsByKey[a.Key] = a
 	db.KeyMutex.Unlock()
-
 	return nil
 }
 
 // GetAppByAppID returns an App with by appID
 func (db *memdb) GetAppByAppID(appID string) (*app, error) {
 	db.IdMutex.Lock()
-	a, exists := db.AppsByAppID[appID]
+	a, ok := db.AppsByAppID[appID]
 	db.IdMutex.Unlock()
-	if exists {
+	if ok {
 		return a, nil
 	}
 	return nil, errors.New("App not found")
@@ -59,9 +58,9 @@ func (db *memdb) GetAppByAppID(appID string) (*app, error) {
 // GetAppByKey returns an App with by key
 func (db *memdb) GetAppByKey(key string) (*app, error) {
 	db.KeyMutex.Lock()
-	a, exists := db.AppsByKey[key]
+	a, ok := db.AppsByKey[key]
 	db.KeyMutex.Unlock()
-	if exists {
+	if ok {
 		return a, nil
 	}
 	return nil, errors.New("App not found")
