@@ -102,7 +102,7 @@ func restCheckAppDisabledHandler(DB db, h goji.Handler) goji.HandlerFunc {
 	}
 }
 
-func recoverHandle(h goji.Handler) goji.HandlerFunc {
+func recoverHandler(h goji.Handler) goji.HandlerFunc {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -117,7 +117,7 @@ func recoverHandle(h goji.Handler) goji.HandlerFunc {
 
 // commonHandlers combine restCheckAppDisabledHandler and restAuthenticationHandler handlers
 func commonHandlers(DB db, h goji.Handler) goji.HandlerFunc {
-	return recoverHandle(restCheckAppDisabledHandler(DB, restAuthenticationHandler(DB, h)))
+	return recoverHandler(restCheckAppDisabledHandler(DB, restAuthenticationHandler(DB, h)))
 }
 
 type postEvents struct{ DB db }
