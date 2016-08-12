@@ -29,8 +29,59 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-// Handle open Subscriber.
-func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessionID string, app *app) websocketError {
+func handleMessages(
+	conn *websocket.Conn, w http.ResponseWriter,
+	r *http.Request, sessionID string, app *app) {
+
+	var event struct {
+		Event string `json:"event"`
+	}
+
+	for {
+		_, message, err := conn.ReadMessage()
+
+		if err != nil {
+			handleError(conn, sessionID, app, err)
+			return
+		}
+
+		if err := json.Unmarshal(message, &event); err != nil {
+			emitWSError(newGenericReconnectImmediatelyError(), conn)
+			return
+		}
+
+		log.Infof("websockets: Handling %s event", event.Event)
+
+		switch event.Event {
+		case "pusher:ping":
+			onPing(conn)
+		case "pusher:subscribe":
+			onSubscribe(conn, sessionID, app, message)
+		case "pusher:unsubscribe":
+			onUnsubscribe(conn, sessionID, app, message)
+		default:
+			if utils.IsClientEvent(event.Event) {
+				onClientEvent(conn, sessionID, app, message)
+			}
+		}
+	} // For
+}
+
+func handleError(conn *websocket.Conn, sessionID string, app *app, err error) {
+	log.Errorf("%+v", err)
+	if err == io.EOF {
+		onClose(sessionID, app)
+	} else if _, ok := err.(*websocket.CloseError); ok {
+		onClose(sessionID, app)
+	} else {
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+	}
+}
+
+func onOpen(
+	conn *websocket.Conn, w http.ResponseWriter,
+	r *http.Request, sessionID string, app *app) websocketError {
+
 	params := r.URL.Query()
 	p := params.Get("protocol")
 
@@ -65,150 +116,132 @@ func onOpen(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessio
 	return nil
 }
 
-// Handle the close event
 func onClose(sessionID string, app *app) {
 	app.Disconnect(sessionID)
 }
 
-// Handle messages
-//
-// If there is an unrecoverable error then break the loop,
-// otherwise just keep going.
-func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, sessionID string, app *app) {
-	var event struct {
-		Event string `json:"event"`
+func onPing(conn *websocket.Conn) {
+	if err := conn.WriteJSON(newPongEvent()); err != nil {
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+	}
+}
+
+func onClientEvent(
+	conn *websocket.Conn, sessionID string, app *app, message []byte) {
+
+	if !app.UserEvents {
+		emitWSError(newGenericError("To send client events, you must enable this feature in the Settings."), conn)
 	}
 
-	for {
-		_, message, err := conn.ReadMessage()
+	clientEvent := rawEvent{}
 
-		if err != nil {
-			log.Errorf("%+v", err)
-			if err == io.EOF {
-				onClose(sessionID, app)
-			} else if _, ok := err.(*websocket.CloseError); ok {
-				onClose(sessionID, app)
-			} else {
-				emitWSError(newGenericReconnectImmediatelyError(), conn)
-			}
-			break
+	if err := json.Unmarshal(message, &clientEvent); err != nil {
+		log.Error(err)
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+		return
+	}
+
+	channel, err := app.FindChannelByChannelID(clientEvent.Channel)
+
+	if err != nil {
+		emitWSError(newGenericError(fmt.Sprintf("Could not find a channel with the id %s", clientEvent.Channel)), conn)
+	}
+
+	if !channel.IsPresenceOrPrivate() {
+		emitWSError(newGenericError("Client event rejected - only supported on private and presence channels"), conn)
+		return
+	}
+
+	if err := app.Publish(channel, clientEvent, sessionID); err != nil {
+		log.Error(err)
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+		return
+	}
+}
+
+func onUnsubscribe(
+	conn *websocket.Conn, sessionID string, app *app, message []byte) {
+
+	unsubscribeEvent := unsubscribeEvent{}
+
+	if err := json.Unmarshal(message, &unsubscribeEvent); err != nil {
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+	}
+
+	connection, err := app.FindConnection(sessionID)
+
+	if err != nil {
+		emitWSError(newGenericError(fmt.Sprintf("Could not find a connection with the id %s", sessionID)), conn)
+	}
+
+	channel, err := app.FindChannelByChannelID(unsubscribeEvent.Data.Channel)
+
+	if err != nil {
+		emitWSError(newGenericError(fmt.Sprintf("Could not find a channel with the id %s", unsubscribeEvent.Data.Channel)), conn)
+	}
+
+	if err := app.Unsubscribe(channel, connection); err != nil {
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+		return
+	}
+}
+
+func onSubscribe(
+	conn *websocket.Conn, sessionID string, app *app, message []byte) {
+
+	subscribeEvent := subscribeEvent{}
+
+	if err := json.Unmarshal(message, &subscribeEvent); err != nil {
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+		return
+	}
+
+	connection, err := app.FindConnection(sessionID)
+
+	if err != nil {
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+		return
+	}
+
+	channelName := strings.TrimSpace(subscribeEvent.Data.Channel)
+
+	if !utils.IsChannelNameValid(channelName) {
+		emitWSError(newGenericError(fmt.Sprintf("This channel name is not valid")), conn)
+		return
+	}
+
+	isPresence := utils.IsPresenceChannel(channelName)
+	isPrivate := utils.IsPrivateChannel(channelName)
+
+	if isPresence || isPrivate {
+		toSign := []string{connection.SocketID, channelName}
+
+		if isPresence || len(subscribeEvent.Data.ChannelData) > 0 {
+			toSign = append(toSign, subscribeEvent.Data.ChannelData)
 		}
 
-		if err := json.Unmarshal(message, &event); err != nil {
-			emitWSError(newGenericReconnectImmediatelyError(), conn)
-			break
+		expectedAuthKey := fmt.Sprintf("%s:%s", app.Key, utils.HashMAC([]byte(strings.Join(toSign, ":")), []byte(app.Secret)))
+		if subscribeEvent.Data.Auth != expectedAuthKey {
+			emitWSError(newGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName)), conn)
+			return
 		}
+	}
 
-		log.Infof("websockets: Handling %s event", event.Event)
+	channel := app.FindOrCreateChannelByChannelID(channelName)
+	log.Info(subscribeEvent.Data.ChannelData)
 
-		switch event.Event {
-		case "pusher:ping":
-			if err := conn.WriteJSON(newPongEvent()); err != nil {
-				emitWSError(newGenericReconnectImmediatelyError(), conn)
-			}
-		case "pusher:subscribe":
-			subscribeEvent := subscribeEvent{}
+	if err := app.Subscribe(channel, connection, subscribeEvent.Data.ChannelData); err != nil {
+		emitWSError(newGenericReconnectImmediatelyError(), conn)
+	}
+}
 
-			if err := json.Unmarshal(message, &subscribeEvent); err != nil {
-				emitWSError(newGenericReconnectImmediatelyError(), conn)
-				break
-			}
+// Emit an Websocket ErrorEvent
+func emitWSError(err websocketError, conn *websocket.Conn) {
+	event := newErrorEvent(err.GetCode(), err.GetMsg())
 
-			connection, err := app.FindConnection(sessionID)
-
-			if err != nil {
-				emitWSError(newGenericReconnectImmediatelyError(), conn)
-				break
-			}
-
-			channelName := strings.TrimSpace(subscribeEvent.Data.Channel)
-
-			if !utils.IsChannelNameValid(channelName) {
-				emitWSError(newGenericError(fmt.Sprintf("This channel name is not valid")), conn)
-				break
-			}
-
-			isPresence := utils.IsPresenceChannel(channelName)
-			isPrivate := utils.IsPrivateChannel(channelName)
-
-			if isPresence || isPrivate {
-				toSign := []string{connection.SocketID, channelName}
-
-				if isPresence || len(subscribeEvent.Data.ChannelData) > 0 {
-					toSign = append(toSign, subscribeEvent.Data.ChannelData)
-				}
-
-				expectedAuthKey := fmt.Sprintf("%s:%s", app.Key, utils.HashMAC([]byte(strings.Join(toSign, ":")), []byte(app.Secret)))
-				if subscribeEvent.Data.Auth != expectedAuthKey {
-					emitWSError(newGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName)), conn)
-					continue
-				}
-			}
-
-			channel := app.FindOrCreateChannelByChannelID(channelName)
-			log.Info(subscribeEvent.Data.ChannelData)
-
-			if err := app.Subscribe(channel, connection, subscribeEvent.Data.ChannelData); err != nil {
-				emitWSError(newGenericReconnectImmediatelyError(), conn)
-			}
-		case "pusher:unsubscribe":
-			unsubscribeEvent := unsubscribeEvent{}
-
-			if err := json.Unmarshal(message, &unsubscribeEvent); err != nil {
-				emitWSError(newGenericReconnectImmediatelyError(), conn)
-			}
-
-			connection, err := app.FindConnection(sessionID)
-
-			if err != nil {
-				emitWSError(newGenericError(fmt.Sprintf("Could not find a connection with the id %s", sessionID)), conn)
-			}
-
-			channel, err := app.FindChannelByChannelID(unsubscribeEvent.Data.Channel)
-
-			if err != nil {
-				emitWSError(newGenericError(fmt.Sprintf("Could not find a channel with the id %s", unsubscribeEvent.Data.Channel)), conn)
-			}
-
-			if err := app.Unsubscribe(channel, connection); err != nil {
-				emitWSError(newGenericReconnectImmediatelyError(), conn)
-				break
-			}
-		default: // CLient Events ??
-			// see http://pusher.com/docs/client_api_guide/client_events#trigger-events
-			if utils.IsClientEvent(event.Event) {
-				if !app.UserEvents {
-					emitWSError(newGenericError("To send client events, you must enable this feature in the Settings."), conn)
-				}
-
-				clientEvent := rawEvent{}
-
-				if err := json.Unmarshal(message, &clientEvent); err != nil {
-					log.Error(err)
-					emitWSError(newGenericReconnectImmediatelyError(), conn)
-					break
-				}
-
-				channel, err := app.FindChannelByChannelID(clientEvent.Channel)
-
-				if err != nil {
-					emitWSError(newGenericError(fmt.Sprintf("Could not find a channel with the id %s", clientEvent.Channel)), conn)
-				}
-
-				if !channel.IsPresenceOrPrivate() {
-					emitWSError(newGenericError("Client event rejected - only supported on private and presence channels"), conn)
-					break
-				}
-
-				if err := app.Publish(channel, clientEvent, sessionID); err != nil {
-					log.Error(err)
-					emitWSError(newGenericReconnectImmediatelyError(), conn)
-					break
-				}
-			}
-
-		} // switch
-	} // For
+	if err := conn.WriteJSON(event); err != nil {
+		log.Error(err)
+	}
 }
 
 func newWebsocketHandler(DB db) goji.Handler {
@@ -248,15 +281,5 @@ func (h *websocketHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter
 		return
 	}
 
-	onMessage(conn, w, r, sessionID, app)
-}
-
-// Emit an Websocket ErrorEvent
-func emitWSError(err websocketError, conn *websocket.Conn) {
-
-	event := newErrorEvent(err.GetCode(), err.GetMsg())
-
-	if err := conn.WriteJSON(event); err != nil {
-		log.Error(err)
-	}
+	handleMessages(conn, w, r, sessionID, app)
 }
