@@ -1,4 +1,4 @@
-[![Quality code report](http://goreportcard.com/badge/dimiro1/ipe)](http://goreportcard.com/report/dimiro1/ipe)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dimiro1/ipe)](https://goreportcard.com/report/github.com/dimiro1/ipe)
 
 # IPÊ
 
