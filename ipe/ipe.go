@@ -11,6 +11,10 @@ import (
 	"os"
 	"time"
 
+	"goji.io/pat"
+
+	goji "goji.io"
+
 	log "github.com/golang/glog"
 )
 
@@ -41,21 +45,12 @@ func Start(filename string) {
 		db.AddApp(newAppFromConfig(a))
 	}
 
-	// Creating the global application context
-	ctx := &applicationContext{DB: db}
-
-	// The router
-	router := newRouter(ctx)
-
-	router.POST("/apps/{app_id}/events", commonHandlers(ctx, postEvents))
-
-	router.GET("/apps/{app_id}/channels", commonHandlers(ctx, getChannels))
-
-	router.GET("/apps/{app_id}/channels/{channel_name}", commonHandlers(ctx, getChannel))
-
-	router.GET("/apps/{app_id}/channels/{channel_name}/users", commonHandlers(ctx, getChannelUsers))
-
-	router.GET("/app/{key}", contextHandlerFunc(wsHandler))
+	router := goji.NewMux()
+	router.HandleFuncC(pat.Post("/apps/:app_id/events"), newPostEventsHandler(db))
+	router.HandleFuncC(pat.Get("/apps/:app_id/channels"), newGetChannelsHandler(db))
+	router.HandleFuncC(pat.Get("/apps/:app_id/channels/:channel_name"), newGetChannelHandler(db))
+	router.HandleFuncC(pat.Get("/apps/:app_id/channels/:channel_name/users"), newGetChannelUsersHandler(db))
+	router.HandleC(pat.Get("/app/:key"), newWebsocketHandler(db))
 
 	if conf.SSL {
 		go func() {

@@ -12,8 +12,13 @@ import (
 	"strconv"
 	"strings"
 
+	goji "goji.io"
+
+	"goji.io/pat"
+
 	log "github.com/golang/glog"
 	"github.com/gorilla/websocket"
+	"golang.org/x/net/context"
 
 	"github.com/dimiro1/ipe/utils"
 )
@@ -206,8 +211,14 @@ func onMessage(conn *websocket.Conn, w http.ResponseWriter, r *http.Request, ses
 	} // For
 }
 
+func newWebsocketHandler(DB db) goji.Handler {
+	return &websocketHandler{DB}
+}
+
+type websocketHandler struct{ DB db }
+
 // Websocket GET /app/{key}
-func wsHandler(ctx *applicationContext, p params, w http.ResponseWriter, r *http.Request) {
+func (h *websocketHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	defer func() {
 		if conn != nil {
@@ -220,9 +231,9 @@ func wsHandler(ctx *applicationContext, p params, w http.ResponseWriter, r *http
 		return
 	}
 
-	appKey := p.Get("key")
+	appKey := pat.Param(ctx, "key")
 
-	app, err := ctx.DB.GetAppByKey(appKey)
+	app, err := h.DB.GetAppByKey(appKey)
 
 	if err != nil {
 		log.Error(err)
