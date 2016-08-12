@@ -220,8 +220,7 @@ func onSubscribe(
 			toSign = append(toSign, subscribeEvent.Data.ChannelData)
 		}
 
-		expectedAuthKey := fmt.Sprintf("%s:%s", app.Key, utils.HashMAC([]byte(strings.Join(toSign, ":")), []byte(app.Secret)))
-		if subscribeEvent.Data.Auth != expectedAuthKey {
+		if !validateAuthKey(subscribeEvent.Data.Auth, toSign, app) {
 			emitWSError(newGenericError(fmt.Sprintf("Auth value for subscription to %s is invalid", channelName)), conn)
 			return
 		}
@@ -233,6 +232,11 @@ func onSubscribe(
 	if err := app.Subscribe(channel, connection, subscribeEvent.Data.ChannelData); err != nil {
 		emitWSError(newGenericReconnectImmediatelyError(), conn)
 	}
+}
+
+func validateAuthKey(givenAuthKey string, toSign []string, app *app) bool {
+	expectedAuthKey := fmt.Sprintf("%s:%s", app.Key, utils.HashMAC([]byte(strings.Join(toSign, ":")), []byte(app.Secret)))
+	return givenAuthKey == expectedAuthKey
 }
 
 // Emit an Websocket ErrorEvent
