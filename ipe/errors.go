@@ -4,6 +4,8 @@
 
 package ipe
 
+import "fmt"
+
 // Base interface
 type websocketError interface {
 	GetCode() int
@@ -24,6 +26,10 @@ func (e baseWebsocketError) GetMsg() string {
 	return e.Msg
 }
 
+func (e baseWebsocketError) Error() string {
+	return fmt.Sprintf("%d: %s", e.Code, e.Msg)
+}
+
 // Unsupprted protocol version
 type unsupportedProtocolVersionError struct {
 	baseWebsocketError
@@ -31,7 +37,7 @@ type unsupportedProtocolVersionError struct {
 
 func newUnsupportedProtocolVersionError() unsupportedProtocolVersionError {
 	return unsupportedProtocolVersionError{
-		baseWebsocketError{Code: unsupportedProtocolVersion, Msg: "Unsupported protocol version"},
+		baseWebsocketError{Code: 4007, Msg: "Unsupported protocol version"},
 	}
 }
 
@@ -43,7 +49,7 @@ type applicationDoesNotExistsError struct {
 
 func newApplicationDoesNotExistsError() applicationDoesNotExistsError {
 	return applicationDoesNotExistsError{
-		baseWebsocketError{Code: applicationDoesNotExists, Msg: "Could not found an app with the given key"},
+		baseWebsocketError{Code: 4001, Msg: "Could not found an app with the given key"},
 	}
 }
 
@@ -54,7 +60,7 @@ type noProtocolVersionSuppliedError struct {
 
 func newNoProtocolVersionSuppliedError() noProtocolVersionSuppliedError {
 	return noProtocolVersionSuppliedError{
-		baseWebsocketError{Code: noProtocolVersionSupplied, Msg: "No protocol version supplied"},
+		baseWebsocketError{Code: 4008, Msg: "No protocol version supplied"},
 	}
 }
 
@@ -66,7 +72,7 @@ type applicationDisabledError struct {
 
 func newApplicationDisabledError() noProtocolVersionSuppliedError {
 	return noProtocolVersionSuppliedError{
-		baseWebsocketError{Code: applicationDisabled, Msg: "Application disabled"},
+		baseWebsocketError{Code: 4003, Msg: "Application disabled"},
 	}
 }
 
@@ -77,7 +83,7 @@ type applicationOnlyAccepsSSLError struct {
 
 func newApplicationOnlyAccepsSSLError() applicationOnlyAccepsSSLError {
 	return applicationOnlyAccepsSSLError{
-		baseWebsocketError{Code: applicationOnlyAcceptsSSL, Msg: "Application only accepts SSL connections, reconnect using wss://"},
+		baseWebsocketError{Code: 4000, Msg: "Application only accepts SSL connections, reconnect using wss://"},
 	}
 }
 
@@ -88,7 +94,7 @@ type invalidVersionStringFormatError struct {
 
 func newInvalidVersionStringFormatError() invalidVersionStringFormatError {
 	return invalidVersionStringFormatError{
-		baseWebsocketError{Code: invalidVersionStringFormat, Msg: "Invalid version string format"},
+		baseWebsocketError{Code: 4006, Msg: "Invalid version string format"},
 	}
 }
 
@@ -101,7 +107,7 @@ type genericReconnectImmediatelyError struct {
 
 func newGenericReconnectImmediatelyError() genericReconnectImmediatelyError {
 	return genericReconnectImmediatelyError{
-		baseWebsocketError{Code: genericReconnectImmediately, Msg: "Generic reconnect immediately"},
+		baseWebsocketError{Code: 4200, Msg: "Generic reconnect immediately"},
 	}
 }
 
@@ -113,6 +119,6 @@ type genericError struct {
 
 func newGenericError(msg string) genericError {
 	return genericError{
-		baseWebsocketError{Code: otherError, Msg: msg},
+		baseWebsocketError{Code: 0, Msg: msg},
 	}
 }
