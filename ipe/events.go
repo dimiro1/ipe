@@ -160,26 +160,21 @@ type errorEvent struct {
 // Create a new error event
 // Pusher protocol is very strange in some parts
 // It send null in some errors.
-// So I created this GENERIC_ERROR thing, just to verify if the json must have null on the error code
 func newErrorEvent(code int, message string) errorEvent {
-	var data interface{}
 
-	if code == otherError {
-		data = struct {
-			Code    *int   `json:"code"`
-			Message string `json:"message"`
-		}{
-			nil,
-			message,
-		}
+	type dataErrorEvent struct {
+		Code    *int   `json:"code"`
+		Message string `json:"message"`
+	}
+
+	var data = dataErrorEvent{
+		Message: message,
+	}
+
+	if code == 0 {
+		data.Code = nil
 	} else {
-		data = struct {
-			Code    int    `json:"code"`
-			Message string `json:"message"`
-		}{
-			code,
-			message,
-		}
+		data.Code = &code
 	}
 
 	return errorEvent{Event: "pusher:error", Data: data}

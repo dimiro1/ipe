@@ -80,7 +80,7 @@ func handleError(conn *websocket.Conn, sessionID string, app *app, err error) {
 
 func onOpen(
 	conn *websocket.Conn, w http.ResponseWriter,
-	r *http.Request, sessionID string, app *app) websocketError {
+	r *http.Request, sessionID string, app *app) error {
 
 	params := r.URL.Query()
 	p := params.Get("protocol")
@@ -240,8 +240,15 @@ func validateAuthKey(givenAuthKey string, toSign []string, app *app) bool {
 }
 
 // Emit an Websocket ErrorEvent
-func emitWSError(err websocketError, conn *websocket.Conn) {
-	event := newErrorEvent(err.GetCode(), err.GetMsg())
+func emitWSError(err error, conn *websocket.Conn) {
+	e, ok := err.(websocketError)
+
+	if !ok {
+		log.Error(err)
+		return
+	}
+
+	event := newErrorEvent(e.GetCode(), e.GetMsg())
 
 	if err := conn.WriteJSON(event); err != nil {
 		log.Error(err)
