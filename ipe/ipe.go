@@ -27,14 +27,16 @@ func Start(filename string) {
 	file, err := os.Open(filename)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		return
 	}
 
 	defer file.Close()
 
 	// Reading config
 	if err := json.NewDecoder(file).Decode(&conf); err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		return
 	}
 
 	// Using a in memory database
