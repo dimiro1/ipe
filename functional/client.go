@@ -34,7 +34,7 @@ func pusherPresenceAuth(res http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	fmt.Fprintf(res, string(response))
+	fmt.Fprint(res, string(response))
 }
 
 func pusherPrivateAuth(res http.ResponseWriter, req *http.Request) {
@@ -48,13 +48,13 @@ func pusherPrivateAuth(res http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	fmt.Fprintf(res, string(response))
+	fmt.Fprint(res, string(response))
 }
 
-func triggerMessage(res http.ResponseWriter, req *http.Request) {
+func triggerMessage(res http.ResponseWriter, _ *http.Request) {
 	client.Trigger("private-messages", "messages", "The message from server")
 
-	fmt.Fprintf(res, "OK")
+	fmt.Fprint(res, "OK")
 }
 
 func main() {

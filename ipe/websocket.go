@@ -26,13 +26,12 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin:     func(r *http.Request) bool { return true },
+	CheckOrigin: func(_ *http.Request) bool {
+		return true
+	},
 }
 
-func handleMessages(
-	conn *websocket.Conn, w http.ResponseWriter,
-	r *http.Request, sessionID string, app *app) {
-
+func handleMessages(conn *websocket.Conn, sessionID string, app *app) {
 	var event struct {
 		Event string `json:"event"`
 	}
@@ -64,7 +63,7 @@ func handleMessages(
 				onClientEvent(conn, sessionID, app, message)
 			}
 		}
-	} // For
+	}
 }
 
 func handleError(conn *websocket.Conn, sessionID string, app *app, err error) {
@@ -78,10 +77,7 @@ func handleError(conn *websocket.Conn, sessionID string, app *app, err error) {
 	}
 }
 
-func onOpen(
-	conn *websocket.Conn, w http.ResponseWriter,
-	r *http.Request, sessionID string, app *app) error {
-
+func onOpen(conn *websocket.Conn, r *http.Request, sessionID string, app *app) error {
 	params := r.URL.Query()
 	p := params.Get("protocol")
 
@@ -126,9 +122,7 @@ func onPing(conn *websocket.Conn) {
 	}
 }
 
-func onClientEvent(
-	conn *websocket.Conn, sessionID string, app *app, message []byte) {
-
+func onClientEvent(conn *websocket.Conn, sessionID string, app *app, message []byte) {
 	if !app.UserEvents {
 		emitWSError(newGenericError("To send client events, you must enable this feature in the Settings."), conn)
 	}
@@ -159,9 +153,7 @@ func onClientEvent(
 	}
 }
 
-func onUnsubscribe(
-	conn *websocket.Conn, sessionID string, app *app, message []byte) {
-
+func onUnsubscribe(conn *websocket.Conn, sessionID string, app *app, message []byte) {
 	unsubscribeEvent := unsubscribeEvent{}
 
 	if err := json.Unmarshal(message, &unsubscribeEvent); err != nil {
@@ -186,9 +178,7 @@ func onUnsubscribe(
 	}
 }
 
-func onSubscribe(
-	conn *websocket.Conn, sessionID string, app *app, message []byte) {
-
+func onSubscribe(conn *websocket.Conn, sessionID string, app *app, message []byte) {
 	subscribeEvent := subscribeEvent{}
 
 	if err := json.Unmarshal(message, &subscribeEvent); err != nil {
@@ -206,7 +196,7 @@ func onSubscribe(
 	channelName := strings.TrimSpace(subscribeEvent.Data.Channel)
 
 	if !utils.IsChannelNameValid(channelName) {
-		emitWSError(newGenericError(fmt.Sprintf("This channel name is not valid")), conn)
+		emitWSError(newGenericError("This channel name is not valid"), conn)
 		return
 	}
 
@@ -259,7 +249,9 @@ func newWebsocketHandler(DB db) goji.Handler {
 	return &websocketHandler{DB}
 }
 
-type websocketHandler struct{ DB db }
+type websocketHandler struct {
+	DB db
+}
 
 // Websocket GET /app/{key}
 func (h *websocketHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -287,10 +279,10 @@ func (h *websocketHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter
 
 	sessionID := utils.GenerateSessionID()
 
-	if err := onOpen(conn, w, r, sessionID, app); err != nil {
+	if err := onOpen(conn, r, sessionID, app); err != nil {
 		emitWSError(err, conn)
 		return
 	}
 
-	handleMessages(conn, w, r, sessionID, app)
+	handleMessages(conn, sessionID, app)
 }

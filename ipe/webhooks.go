@@ -10,9 +10,13 @@ import (
 	"net/http"
 	"time"
 
+	"context"
+	"fmt"
 	"github.com/dimiro1/ipe/utils"
 	log "github.com/golang/glog"
 )
+
+const maxTimeout = 3 * time.Second
 
 // A WebHook is sent as a HTTP POST request to the url which you specify.
 // The POST request payload (body) contains a JSON document, and follows the following format:
@@ -71,14 +75,19 @@ func newClientHook(channel *channel, s *subscription, event string, data interfa
 // { "name": "channel_occupied", "channel": "test_channel" }
 func (a *app) TriggerChannelOccupiedHook(c *channel) {
 	event := newChannelOcuppiedHook(c)
-	triggerHook(event.Name, a, c, event)
+	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
+	defer cancel()
+
+	triggerHook(ctx, event.Name, a, c, event)
 }
 
 // channel_vacated
 // { "name": "channel_vacated", "channel": "test_channel" }
 func (a *app) TriggerChannelVacatedHook(c *channel) {
 	event := newChannelVacatedHook(c)
-	triggerHook(event.Name, a, c, event)
+	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
+	defer cancel()
+	triggerHook(ctx, event.Name, a, c, event)
 }
 
 // {
@@ -96,7 +105,9 @@ func (a *app) TriggerClientEventHook(c *channel, s *subscription, clientEvent st
 		event.UserID = s.ID
 	}
 
-	triggerHook(event.Name, a, c, event)
+	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
+	defer cancel()
+	triggerHook(ctx, event.Name, a, c, event)
 }
 
 // {
@@ -106,7 +117,9 @@ func (a *app) TriggerClientEventHook(c *channel, s *subscription, clientEvent st
 // }
 func (a *app) TriggerMemberAddedHook(c *channel, s *subscription) {
 	event := newMemberAddedHook(c, s)
-	triggerHook(event.Name, a, c, event)
+	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
+	defer cancel()
+	triggerHook(ctx, event.Name, a, c, event)
 }
 
 // {
@@ -116,14 +129,19 @@ func (a *app) TriggerMemberAddedHook(c *channel, s *subscription) {
 // }
 func (a *app) TriggerMemberRemovedHook(c *channel, s *subscription) {
 	event := newMemberRemovedHook(c, s)
-	triggerHook(event.Name, a, c, event)
+	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
+	defer cancel()
+	triggerHook(ctx, event.Name, a, c, event)
 }
 
-func triggerHook(name string, a *app, c *channel, event hookEvent) {
+func triggerHook(ctx context.Context, name string, a *app, _ *channel, event hookEvent) error {
 	if !a.WebHooks {
 		log.Infof("Webhooks are not enabled for app: %s", a.Name)
-		return
+		return fmt.Errorf("Webhooks are not enabled for app: %s", a.Name)
 	}
+
+	var done chan (bool)
+	defer close(done)
 
 	go func() {
 		log.Infof("Triggering %s event", name)
@@ -145,10 +163,13 @@ func triggerHook(name string, a *app, c *channel, event hookEvent) {
 		var req *http.Request
 
 		req, err = http.NewRequest("POST", a.URLWebHook, bytes.NewReader(js))
+
 		if err != nil {
 			log.Errorf("Error creating request: %+v", err)
 			return
 		}
+
+		req.WithContext(ctx)
 
 		req.Header.Set("User-Agent", "Ipe UA; (+https://github.com/dimiro1/ipe)")
 		req.Header.Set("Content-Type", "application/json")
@@ -168,5 +189,15 @@ func triggerHook(name string, a *app, c *channel, event hookEvent) {
 		if err != nil {
 			log.Errorf("Error posting %s event: %+v", name, err)
 		}
+
+		// Successfully terminated
+		done <- true
 	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-done:
+		return nil
+	}
 }
