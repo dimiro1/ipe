@@ -11,11 +11,9 @@ import (
 	"os"
 	"time"
 
-	"goji.io/pat"
-
-	goji "goji.io"
-
 	log "github.com/golang/glog"
+	"github.com/pressly/chi"
+	"github.com/pressly/chi/middleware"
 )
 
 // Start Parse the configuration file and starts the ipe server
@@ -47,20 +45,27 @@ func Start(filename string) {
 		db.AddApp(newAppFromConfig(a))
 	}
 
-	router := goji.NewMux()
-	router.HandleFuncC(pat.Post("/apps/:app_id/events"), newPostEventsHandler(db))
-	router.HandleFuncC(pat.Get("/apps/:app_id/channels"), newGetChannelsHandler(db))
-	router.HandleFuncC(pat.Get("/apps/:app_id/channels/:channel_name"), newGetChannelHandler(db))
-	router.HandleFuncC(pat.Get("/apps/:app_id/channels/:channel_name/users"), newGetChannelUsersHandler(db))
-	router.HandleC(pat.Get("/app/:key"), newWebsocketHandler(db))
+	r := chi.NewRouter()
+	r.Use(middleware.Recoverer)
+
+	r.Handle("/app/:key", &websocketHandler{db})
+	r.Group(func(r chi.Router) {
+		r.Use(checkAppDisabled(db))
+		r.Use(authenticationHandler(db))
+
+		r.Handle("/apps/:app_id/events", &postEventsHandler{db})
+		r.Handle("/apps/:app_id/channels", &getChannelsHandler{db})
+		r.Handle("/apps/:app_id/channels/:channel_name", &getChannelHandler{db})
+		r.Handle("/apps/:app_id/channels/:channel_name/users", &getChannelUsersHandler{db})
+	})
 
 	if conf.SSL {
 		go func() {
 			log.Infof("Starting HTTPS service on %s ...", conf.SSLHost)
-			log.Fatal(http.ListenAndServeTLS(conf.SSLHost, conf.SSLCertFile, conf.SSLKeyFile, router))
+			log.Fatal(http.ListenAndServeTLS(conf.SSLHost, conf.SSLCertFile, conf.SSLKeyFile, r))
 		}()
 	}
 
 	log.Infof("Starting HTTP service on %s ...", conf.Host)
-	log.Fatal(http.ListenAndServe(conf.Host, router))
+	log.Fatal(http.ListenAndServe(conf.Host, r))
 }

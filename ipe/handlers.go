@@ -12,12 +12,8 @@ import (
 	"sort"
 	"strings"
 
-	goji "goji.io"
-
-	"goji.io/pat"
-
 	log "github.com/golang/glog"
-	"golang.org/x/net/context"
+	"github.com/pressly/chi"
 
 	"github.com/dimiro1/ipe/utils"
 )
@@ -51,77 +47,62 @@ func prepareQueryString(params url.Values) string {
 //  * The request path (e.g. /some/resource)
 //  * The query parameters sorted by key, with keys converted to lowercase, then joined as in the query string.
 //    Note that the string must not be url escaped (e.g. given the keys auth_key: foo, Name: Something else, you get auth_key=foo&name=Something else)
-func restAuthenticationHandler(DB db, next goji.Handler) goji.HandlerFunc {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-		appID := pat.Param(ctx, "app_id")
+func authenticationHandler(DB db) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			appID := chi.URLParam(r, "app_id")
 
-		app, err := DB.GetAppByAppID(appID)
+			app, err := DB.GetAppByAppID(appID)
 
-		if err != nil {
-			log.Error(err)
-			http.Error(w, "Not authorized", http.StatusUnauthorized)
-			return
+			if err != nil {
+				log.Error(err)
+				http.Error(w, "Not authorized", http.StatusUnauthorized)
+				return
+			}
+
+			query := r.URL.Query()
+
+			signature := query.Get("auth_signature")
+			query.Del("auth_signature")
+
+			queryString := prepareQueryString(query)
+
+			toSign := strings.ToUpper(r.Method) + "\n" + r.URL.Path + "\n" + queryString
+
+			if utils.HashMAC([]byte(toSign), []byte(app.Secret)) == signature {
+				next.ServeHTTP(w, r)
+			} else {
+				log.Error("Not authorized")
+				http.Error(w, "Not authorized", http.StatusUnauthorized)
+			}
 		}
 
-		query := r.URL.Query()
-
-		signature := query.Get("auth_signature")
-		query.Del("auth_signature")
-
-		queryString := prepareQueryString(query)
-
-		toSign := strings.ToUpper(r.Method) + "\n" + r.URL.Path + "\n" + queryString
-
-		if utils.HashMAC([]byte(toSign), []byte(app.Secret)) == signature {
-			next.ServeHTTPC(ctx, w, r)
-		} else {
-			log.Error("Not authorized")
-			http.Error(w, "Not authorized", http.StatusUnauthorized)
-		}
+		return http.HandlerFunc(fn)
 	}
 }
 
 // Check if the application is disabled
-func restCheckAppDisabledHandler(DB db, next goji.Handler) goji.HandlerFunc {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-		appID := pat.Param(ctx, "app_id")
+func checkAppDisabled(DB db) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			appID := chi.URLParam(r, "app_id")
 
-		currentApp, err := DB.GetAppByAppID(appID)
+			currentApp, err := DB.GetAppByAppID(appID)
 
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusForbidden)
-			return
-		}
-
-		if currentApp.ApplicationDisabled {
-			http.Error(w, "Application disabled", http.StatusForbidden)
-			return
-		}
-
-		next.ServeHTTPC(ctx, w, r)
-	}
-}
-
-func recoverHandler(next goji.Handler) goji.HandlerFunc {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if r := recover(); r != nil {
-				log.Errorf("Please verify the url parameters error was: %s", r)
-				http.Error(w, "Not authorized", http.StatusUnauthorized)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusForbidden)
 				return
 			}
-		}()
-		next.ServeHTTPC(ctx, w, r)
+
+			if currentApp.ApplicationDisabled {
+				http.Error(w, "Application disabled", http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
 	}
-}
-
-// commonHandlers combine restCheckAppDisabledHandler and restAuthenticationHandler handlers
-func commonHandlers(DB db, next goji.Handler) goji.HandlerFunc {
-	return recoverHandler(restCheckAppDisabledHandler(DB, restAuthenticationHandler(DB, next)))
-}
-
-func newPostEventsHandler(DB db) goji.HandlerFunc {
-	return commonHandlers(DB, &postEventsHandler{DB})
 }
 
 type postEventsHandler struct{ DB db }
@@ -141,8 +122,8 @@ type postEventsHandler struct{ DB db }
 // Response is an empty JSON hash.
 //
 // POST /apps/{app_id}/events
-func (h *postEventsHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	appID := pat.Param(ctx, "app_id")
+func (h *postEventsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	appID := chi.URLParam(r, "app_id")
 
 	app, err := h.DB.GetAppByAppID(appID)
 
@@ -187,10 +168,6 @@ func (h *postEventsHandler) ServeHTTPC(ctx context.Context, w http.ResponseWrite
 	w.Write([]byte("{}"))
 }
 
-func newGetChannelsHandler(DB db) goji.HandlerFunc {
-	return commonHandlers(DB, &getChannelsHandler{DB})
-}
-
 type getChannelsHandler struct{ DB db }
 
 // Allows fetching a hash of occupied channels (optionally filtered by prefix),
@@ -212,10 +189,10 @@ type getChannelsHandler struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels
-func (h *getChannelsHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (h *getChannelsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
-	appID := pat.Param(ctx, "app_id")
+	appID := chi.URLParam(r, "app_id")
 	filter := query.Get("filter_by_prefix")
 	info := query.Get("info")
 
@@ -282,10 +259,6 @@ func (h *getChannelsHandler) ServeHTTPC(ctx context.Context, w http.ResponseWrit
 	}
 }
 
-func newGetChannelHandler(DB db) goji.HandlerFunc {
-	return commonHandlers(DB, &getChannelHandler{DB})
-}
-
 type getChannelHandler struct{ DB db }
 
 // Fetch info for one channel
@@ -298,19 +271,19 @@ type getChannelHandler struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}
-func (h *getChannelHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (h *getChannelHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
 	query := r.URL.Query()
 
-	appID := pat.Param(ctx, "app_id")
+	appID := chi.URLParam(r, "app_id")
 	app, err := h.DB.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
 	}
 
-	channelName := pat.Param(ctx, "channel_name")
+	channelName := chi.URLParam(r, "channel_name")
 
 	// Channel name could not be empty
 	if strings.TrimSpace(channelName) == "" {
@@ -376,10 +349,6 @@ func (h *getChannelHandler) ServeHTTPC(ctx context.Context, w http.ResponseWrite
 	}
 }
 
-func newGetChannelUsersHandler(DB db) goji.HandlerFunc {
-	return commonHandlers(DB, &getChannelUsersHandler{DB})
-}
-
 type getChannelUsersHandler struct{ DB db }
 
 // Allowed only for presence-channels
@@ -393,9 +362,9 @@ type getChannelUsersHandler struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}/users
-func (h *getChannelUsersHandler) ServeHTTPC(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	appID := pat.Param(ctx, "app_id")
-	channelName := pat.Param(ctx, "channel_name")
+func (h *getChannelUsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	appID := chi.URLParam(r, "app_id")
+	channelName := chi.URLParam(r, "channel_name")
 
 	isPresence := utils.IsPresenceChannel(channelName)
 

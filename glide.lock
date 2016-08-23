@@ -1,20 +1,12 @@
-hash: 0a451841a1f9493d419d658fab8da6863ef5df0645ddea506a225865078c9dcb
-updated: 2016-08-10T22:23:10.989237578-03:00
+hash: ee2de935e70f2a39cbfd2dd16add0736c698b32f5c02409d0c25844d883c91a1
+updated: 2016-08-22T22:55:07.279113421-03:00
 imports:
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 - name: github.com/gorilla/websocket
   version: a69d25be2fe2923a97c2af6849b2f52426f68fc0
-- name: github.com/pusher/pusher-http-go
-  version: 2bba5f217f6f0f4f0c0a9bb11b945b206b32bec5
-- name: goji.io
-  version: e355964ac565b94cf0fc7f218346626529125086
+- name: github.com/pressly/chi
+  version: 12aad88c7d86de2affe686f855b6ed94a07cba9c
   subpackages:
-  - pat
-  - pattern
-  - internal
-- name: golang.org/x/net
-  version: 075e191f18186a8ff2becaf64478e30f4545cdad
-  subpackages:
-  - context
+  - middleware
 testImports: []

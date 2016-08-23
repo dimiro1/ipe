@@ -1,15 +1,14 @@
 package ipe
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"goji.io/pattern"
-
-	"golang.org/x/net/context"
+	"github.com/pressly/chi"
 )
 
 var (
@@ -41,14 +40,15 @@ func init() {
 func Test_getChannels_all(t *testing.T) {
 	appID := testApp.AppID
 
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, pattern.Variable("app_id"), appID)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("app_id", appID)
 
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels", appID), nil)
+	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
 	w := httptest.NewRecorder()
 
 	handler := &getChannelsHandler{database}
-	handler.ServeHTTPC(ctx, w, r)
+	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("w.Code == %d, wants %d", w.Code, http.StatusOK)
@@ -67,14 +67,15 @@ func Test_getChannels_all(t *testing.T) {
 func Test_getChannels_filter_by_presence_prefix(t *testing.T) {
 	appID := testApp.AppID
 
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, pattern.Variable("app_id"), appID)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("app_id", appID)
 
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=presence-", appID), nil)
+	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
 	w := httptest.NewRecorder()
 
 	handler := &getChannelsHandler{database}
-	handler.ServeHTTPC(ctx, w, r)
+	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("w.Code == %d, wants %d", w.Code, http.StatusOK)
@@ -94,14 +95,15 @@ func Test_getChannels_filter_by_presence_prefix(t *testing.T) {
 func Test_getChannels_filter_by_presence_prefix_and_user_count(t *testing.T) {
 	appID := testApp.AppID
 
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, pattern.Variable("app_id"), appID)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("app_id", appID)
 
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=presence-&info=user_count", appID), nil)
+	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
 	w := httptest.NewRecorder()
 
 	handler := &getChannelsHandler{database}
-	handler.ServeHTTPC(ctx, w, r)
+	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("w.Code == %d, wants %d", w.Code, http.StatusOK)
@@ -133,14 +135,15 @@ func Test_getChannels_filter_by_presence_prefix_and_user_count(t *testing.T) {
 func Test_getChannels_filter_by_private_prefix_and_info_user_count(t *testing.T) {
 	appID := testApp.AppID
 
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, pattern.Variable("app_id"), appID)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("app_id", appID)
 
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=private-&info=user_count", appID), nil)
+	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
 	w := httptest.NewRecorder()
 
 	handler := &getChannelsHandler{database}
-	handler.ServeHTTPC(ctx, w, r)
+	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("w.Code == %d, wants %d", w.Code, http.StatusBadRequest)
@@ -150,14 +153,15 @@ func Test_getChannels_filter_by_private_prefix_and_info_user_count(t *testing.T)
 func Test_getChannels_filter_by_public_prefix(t *testing.T) {
 	appID := testApp.AppID
 
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, pattern.Variable("app_id"), appID)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("app_id", appID)
 
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=public-", appID), nil)
+	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
 	w := httptest.NewRecorder()
 
 	handler := &getChannelsHandler{database}
-	handler.ServeHTTPC(ctx, w, r)
+	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("w.Code == %d, wants %d", w.Code, http.StatusOK)
@@ -183,14 +187,15 @@ func Test_getChannels_filter_by_public_prefix(t *testing.T) {
 func Test_getChannels_filter_by_private_prefix(t *testing.T) {
 	appID := testApp.AppID
 
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, pattern.Variable("app_id"), appID)
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("app_id", appID)
 
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=private-", appID), nil)
+	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
 	w := httptest.NewRecorder()
 
 	handler := &getChannelsHandler{database}
-	handler.ServeHTTPC(ctx, w, r)
+	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("w.Code == %d, wants %d", w.Code, http.StatusOK)
