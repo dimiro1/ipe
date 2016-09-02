@@ -74,51 +74,51 @@ func (c *channel) Subscribe(a *app, conn *connection, channelData string) error 
 	subscription := newSubscription(conn, channelData)
 	c.Subscriptions[conn.SocketID] = subscription
 
-	if c.IsPresence() {
-		// User Info Data
-		var info struct {
-			UserID   string          `json:"user_id"`
-			UserInfo json.RawMessage `json:"user_info"`
-		}
-
-		log.Infof("%+v", channelData)
-
-		if err := json.Unmarshal([]byte(channelData), &info); err != nil {
-			log.Error(err)
-			return err
-		}
-
-		js, err := info.UserInfo.MarshalJSON()
-
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-
-		// Update the Subscription
-		subscription.ID = info.UserID
-		subscription.Data = string(js)
-
-		// Publish pusher_internal:member_added
-		c.PublishMemberAddedEvent(a, channelData, subscription)
-		// WebHook
-		a.TriggerMemberAddedHook(c, subscription)
-
-		// pusher_internal:subscription_succeeded
-		data := make(map[string]subscriptionSucceeedEventPresenceData)
-		data["presence"] = newSubscriptionSucceedEventPresenceData(c)
-
-		js, err = json.Marshal(data)
-
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-
-		conn.Publish(newSubscriptionSucceededEvent(c.ChannelID, string(js)))
-	} else {
+	if !c.IsPresence() {
 		conn.Publish(newSubscriptionSucceededEvent(c.ChannelID, "{}"))
+		return nil
 	}
+	// User Info Data
+	var info struct {
+		UserID   string          `json:"user_id"`
+		UserInfo json.RawMessage `json:"user_info"`
+	}
+
+	log.Infof("%+v", channelData)
+
+	if err := json.Unmarshal([]byte(channelData), &info); err != nil {
+		log.Error(err)
+		return err
+	}
+
+	js, err := info.UserInfo.MarshalJSON()
+
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// Update the Subscription
+	subscription.ID = info.UserID
+	subscription.Data = string(js)
+
+	// Publish pusher_internal:member_added
+	c.PublishMemberAddedEvent(a, channelData, subscription)
+	// WebHook
+	a.TriggerMemberAddedHook(c, subscription)
+
+	// pusher_internal:subscription_succeeded
+	data := make(map[string]subscriptionSucceeedEventPresenceData)
+	data["presence"] = newSubscriptionSucceedEventPresenceData(c)
+
+	js, err = json.Marshal(data)
+
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	conn.Publish(newSubscriptionSucceededEvent(c.ChannelID, string(js)))
 
 	// WebHook
 	if c.TotalSubscriptions() == 1 {
