@@ -6,6 +6,19 @@ package ipe
 
 import "testing"
 
+func Benchmark_memdb_GetAppByAppID(b *testing.B) {
+	db := newMemdb()
+	db.AddApp(&app{AppID: "123456", Name: "Example"})
+	db.AddApp(&app{AppID: "654321", Name: "Example2"})
+	db.AddApp(&app{AppID: "678901", Name: "Example3"})
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		db.GetAppByAppID("123456")
+	}
+}
+
 func Test_db_GetAppByAppID(t *testing.T) {
 	app := &app{AppID: "123456", Name: "Example"}
 

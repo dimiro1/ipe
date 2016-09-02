@@ -18,50 +18,38 @@ type db interface {
 	AddApp(*app) error
 }
 
-// memdb is an in memory implementation of db interface
 type memdb struct {
-	IDMutex     sync.Mutex
-	KeyMutex    sync.Mutex
-	AppsByAppID map[string]*app
-	AppsByKey   map[string]*app
+	sync.Mutex
+	Apps []*app
 }
 
-func newMemdb() *memdb {
-	return &memdb{
-		AppsByAppID: make(map[string]*app),
-		AppsByKey:   make(map[string]*app),
-	}
+func newMemdb() db {
+	return &memdb{}
 }
 
 func (db *memdb) AddApp(a *app) error {
-	db.IDMutex.Lock()
-	db.AppsByAppID[a.AppID] = a
-	db.IDMutex.Unlock()
-
-	db.KeyMutex.Lock()
-	db.AppsByKey[a.Key] = a
-	db.KeyMutex.Unlock()
+	db.Lock()
+	db.Apps = append(db.Apps, a)
+	db.Unlock()
 	return nil
 }
 
 // GetAppByAppID returns an App with by appID
 func (db *memdb) GetAppByAppID(appID string) (*app, error) {
-	db.IDMutex.Lock()
-	a, ok := db.AppsByAppID[appID]
-	db.IDMutex.Unlock()
-	if ok {
-		return a, nil
+	for _, a := range db.Apps {
+		if a.AppID == appID {
+			return a, nil
+		}
 	}
 	return nil, errors.New("App not found")
 }
 
 // GetAppByKey returns an App with by key
 func (db *memdb) GetAppByKey(key string) (*app, error) {
-	db.KeyMutex.Lock()
-	a, ok := db.AppsByKey[key]
-	db.KeyMutex.Unlock()
-	if ok {
-		return a, nil
+	for _, a := range db.Apps {
+		if a.Key == key {
+			return a, nil
+		}
 	}
 	return nil, errors.New("App not found")
 }
