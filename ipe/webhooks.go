@@ -12,6 +12,7 @@ import (
 
 	"context"
 	"fmt"
+
 	"github.com/dimiro1/ipe/utils"
 	log "github.com/golang/glog"
 )
@@ -140,7 +141,7 @@ func triggerHook(ctx context.Context, name string, a *app, _ *channel, event hoo
 		return fmt.Errorf("Webhooks are not enabled for app: %s", a.Name)
 	}
 
-	var done chan (bool)
+	var done chan bool
 	defer close(done)
 
 	go func() {
