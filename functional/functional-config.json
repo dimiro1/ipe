@@ -1,6 +1,7 @@
 {
   "Host": ":8080",
-  "Encrypted": false,
+  "SSL": false,
+  "Profiling": true,
   "SSLHost": ":8090",
   "SSLKeyFile": "key.pem",
   "SSLCertFile": "cert.pem",

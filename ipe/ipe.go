@@ -59,6 +59,10 @@ func Start(filename string) {
 		r.Get("/apps/:app_id/channels/:channel_name/users", (&getChannelUsersHandler{db}).ServeHTTP)
 	})
 
+	if conf.Profiling {
+		r.Mount("/debug", middleware.Profiler())
+	}
+
 	if conf.SSL {
 		go func() {
 			log.Infof("Starting HTTPS service on %s ...", conf.SSLHost)

@@ -50,7 +50,8 @@ $ go install github.com/dimiro1/ipe
 ```javascript
 {
 	"Host": ":8080",                    // Required
-	"SSL": false,                       // Required but can be false
+	"SSL": false,                       // Not Required, default is false
+	"Profiling": false,                 // Mount pprof at /debug. Not Required, default is false
 	"SSLHost": ":4433",                 // Required if SSL is true
 	"SSLKeyFile": "A key.pem file",     // Required if SSL is true
 	"SSLCertFile": "A cert.pem file",   // Required if SSL is true

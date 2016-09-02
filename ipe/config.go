@@ -9,6 +9,7 @@ type configFile struct {
 	Host        string // The host, eg: :8080 will start on 0.0.0.0:8080
 	User        string
 	SSL         bool
+	Profiling   bool
 	SSLHost     string
 	SSLKeyFile  string
 	SSLCertFile string
