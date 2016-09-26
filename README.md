@@ -18,7 +18,7 @@ This software is written in Go - the WYSIWYG lang
 * Web Hooks;
 * Client events;
 * Complete REST API;
-* Easy instalation;
+* Easy installation;
 * A single binary without dependencies;
 * Easy configuration;
 * Protocol version 7;
