@@ -79,7 +79,7 @@ func (a *app) TriggerChannelOccupiedHook(c *channel) {
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
 
-	triggerHook(ctx, event.Name, a, c, event)
+	triggerHook(ctx, a, event)
 }
 
 // channel_vacated
@@ -88,7 +88,7 @@ func (a *app) TriggerChannelVacatedHook(c *channel) {
 	event := newChannelVacatedHook(c)
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
-	triggerHook(ctx, event.Name, a, c, event)
+	triggerHook(ctx, a, event)
 }
 
 // {
@@ -108,7 +108,7 @@ func (a *app) TriggerClientEventHook(c *channel, s *subscription, clientEvent st
 
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
-	triggerHook(ctx, event.Name, a, c, event)
+	triggerHook(ctx, a, event)
 }
 
 // {
@@ -120,7 +120,7 @@ func (a *app) TriggerMemberAddedHook(c *channel, s *subscription) {
 	event := newMemberAddedHook(c, s)
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
-	triggerHook(ctx, event.Name, a, c, event)
+	triggerHook(ctx, a, event)
 }
 
 // {
@@ -132,10 +132,10 @@ func (a *app) TriggerMemberRemovedHook(c *channel, s *subscription) {
 	event := newMemberRemovedHook(c, s)
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
-	triggerHook(ctx, event.Name, a, c, event)
+	triggerHook(ctx, a, event)
 }
 
-func triggerHook(ctx context.Context, name string, a *app, _ *channel, event hookEvent) error {
+func triggerHook(ctx context.Context, a *app, event hookEvent) error {
 	if !a.WebHooks {
 		log.Infof("Webhooks are not enabled for app: %s", a.Name)
 		return fmt.Errorf("Webhooks are not enabled for app: %s", a.Name)
@@ -145,7 +145,7 @@ func triggerHook(ctx context.Context, name string, a *app, _ *channel, event hoo
 	defer close(done)
 
 	go func() {
-		log.Infof("Triggering %s event", name)
+		log.Infof("Triggering %s event", event.Name)
 
 		hook := webHook{TimeMs: time.Now().Unix()}
 
@@ -188,7 +188,7 @@ func triggerHook(ctx context.Context, name string, a *app, _ *channel, event hoo
 		}
 
 		if err != nil {
-			log.Errorf("Error posting %s event: %+v", name, err)
+			log.Errorf("Error posting %s event: %+v", event.Name, err)
 		}
 
 		// Successfully terminated
