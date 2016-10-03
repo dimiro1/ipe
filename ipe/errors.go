@@ -6,119 +6,59 @@ package ipe
 
 import "fmt"
 
-// Base interface
-type websocketError interface {
-	GetCode() int
-	GetMsg() string
-}
-
 // Base struct
-type baseWebsocketError struct {
-	Code int
+type websocketError struct {
+	Code *int
 	Msg  string
 }
 
-func (e baseWebsocketError) GetCode() int {
+func (e websocketError) GetCode() *int {
 	return e.Code
 }
 
-func (e baseWebsocketError) GetMsg() string {
+func (e websocketError) GetMsg() string {
 	return e.Msg
 }
 
-func (e baseWebsocketError) Error() string {
+func (e websocketError) Error() string {
 	return fmt.Sprintf("%d: %s", e.Code, e.Msg)
 }
 
-// Unsupprted protocol version
-type unsupportedProtocolVersionError struct {
-	baseWebsocketError
+func newWebsocketError(code int, msg string) websocketError {
+	return websocketError{Code: &code, Msg: msg}
 }
 
-func newUnsupportedProtocolVersionError() unsupportedProtocolVersionError {
-	return unsupportedProtocolVersionError{
-		baseWebsocketError{Code: 4007, Msg: "Unsupported protocol version"},
-	}
-}
+var (
+	// Unsupprted protocol version
+	unsupportedProtocolVersionError = newWebsocketError(4007, "Unsupported protocol version")
 
-// The application does not exists
-// See the configuration file
-type applicationDoesNotExistsError struct {
-	baseWebsocketError
-}
+	// The application does not exists
+	// See the configuration file
+	applicationDoesNotExistsError = newWebsocketError(4001, "Could not found an app with the given key")
 
-func newApplicationDoesNotExistsError() applicationDoesNotExistsError {
-	return applicationDoesNotExistsError{
-		baseWebsocketError{Code: 4001, Msg: "Could not found an app with the given key"},
-	}
-}
+	// The user did not send the protocol version
+	noProtocolVersionSuppliedError = newWebsocketError(4008, "No protocol version supplied")
 
-// The user did not send the protocol version
-type noProtocolVersionSuppliedError struct {
-	baseWebsocketError
-}
+	// When the application is disabled.
+	// See the configuration file
+	applicationDisabledError = newWebsocketError(4003, "Application disabled")
 
-func newNoProtocolVersionSuppliedError() noProtocolVersionSuppliedError {
-	return noProtocolVersionSuppliedError{
-		baseWebsocketError{Code: 4008, Msg: "No protocol version supplied"},
-	}
-}
+	// When the application only accepts SSL connections
+	applicationOnlyAccepsSSLError = newWebsocketError(4000, "Application only accepts SSL connections, reconnect using wss://")
 
-// When the application is disabled.
-// See the configuration file
-type applicationDisabledError struct {
-	baseWebsocketError
-}
+	// When the user send an invalid version
+	invalidVersionStringFormatError = newWebsocketError(4006, "Invalid version string format")
 
-func newApplicationDisabledError() noProtocolVersionSuppliedError {
-	return noProtocolVersionSuppliedError{
-		baseWebsocketError{Code: 4003, Msg: "Application disabled"},
-	}
-}
+	// Used when the error was internal
+	// * Decoding json
+	// * Writing to output
+	genericReconnectImmediatelyError = newWebsocketError(4200, "Generic reconnect immediately")
 
-// When the application only accepts SSL connections
-type applicationOnlyAccepsSSLError struct {
-	baseWebsocketError
-}
+	// When pusher wants to send an Generic error, it only send the message, the code become nil
+	// Currently I do not know how to send nil, so I send GENERIC_ERROR
+	genericError = newWebsocketError(0, "Generic Error")
 
-func newApplicationOnlyAccepsSSLError() applicationOnlyAccepsSSLError {
-	return applicationOnlyAccepsSSLError{
-		baseWebsocketError{Code: 4000, Msg: "Application only accepts SSL connections, reconnect using wss://"},
-	}
-}
+	disabledClientEventsError = websocketError{Msg: "To send client events, you must enable this feature in the Settings."}
 
-// When the user send an invalid version
-type invalidVersionStringFormatError struct {
-	baseWebsocketError
-}
-
-func newInvalidVersionStringFormatError() invalidVersionStringFormatError {
-	return invalidVersionStringFormatError{
-		baseWebsocketError{Code: 4006, Msg: "Invalid version string format"},
-	}
-}
-
-// Used when the error was internal
-// * Decoding json
-// * Writing to output
-type genericReconnectImmediatelyError struct {
-	baseWebsocketError
-}
-
-func newGenericReconnectImmediatelyError() genericReconnectImmediatelyError {
-	return genericReconnectImmediatelyError{
-		baseWebsocketError{Code: 4200, Msg: "Generic reconnect immediately"},
-	}
-}
-
-// When pusher wants to send an Generic error, it only send the message, the code become nil
-// Currently I do not know how to send nil, so I send GENERIC_ERROR
-type genericError struct {
-	baseWebsocketError
-}
-
-func newGenericError(msg string) genericError {
-	return genericError{
-		baseWebsocketError{Code: 0, Msg: msg},
-	}
-}
+	couldNotFoundChannelError = websocketError{Msg: "Could not find a channel with the given id"}
+)

@@ -87,7 +87,7 @@ func onOpen(conn *websocket.Conn, r *http.Request, sessionID string, app *app) e
 	case strings.TrimSpace(p) == "":
 		return newNoProtocolVersionSuppliedError()
 	case protocol != supportedProtocolVersion:
-		return newUnsupportedProtocolVersionError()
+		return unsupportedProtocolVersionError
 	case app.ApplicationDisabled:
 		return newApplicationDisabledError()
 	case app.OnlySSL:

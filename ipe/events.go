@@ -160,24 +160,17 @@ type errorEvent struct {
 // Create a new error event
 // Pusher protocol is very strange in some parts
 // It send null in some errors.
-func newErrorEvent(code int, message string) errorEvent {
+func newErrorEvent(code *int, message string) errorEvent {
 
 	type dataErrorEvent struct {
 		Code    *int   `json:"code"`
 		Message string `json:"message"`
 	}
 
-	var data = dataErrorEvent{
+	return errorEvent{Event: "pusher:error", Data: dataErrorEvent{
+		Code:    code,
 		Message: message,
-	}
-
-	if code == 0 {
-		data.Code = nil
-	} else {
-		data.Code = &code
-	}
-
-	return errorEvent{Event: "pusher:error", Data: data}
+	}}
 }
 
 // {
