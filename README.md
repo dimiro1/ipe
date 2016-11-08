@@ -1,5 +1,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/dimiro1/ipe)](https://goreportcard.com/report/github.com/dimiro1/ipe)
 
+Try browsing [the code on Sourcegraph](https://sourcegraph.com/github.com/dimiro1/ipe)!
+
 # IPÊ
 
 This software is written in Go - the WYSIWYG lang
