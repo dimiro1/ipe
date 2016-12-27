@@ -18,7 +18,7 @@ import (
 	"github.com/dimiro1/ipe/utils"
 )
 
-// Prepare Querystring
+// Prepare QueryString
 func prepareQueryString(params url.Values) string {
 	var keys []string
 

@@ -89,14 +89,14 @@ func newSubscriptionSucceededEvent(channel, data string) subscriptionSucceededEv
 //        \"count\": 2
 //     }
 // }"
-type subscriptionSucceeedEventPresenceData struct {
+type subscriptionSucceededEventPresenceData struct {
 	Ids   []string               `json:"ids"`
 	Hash  map[string]interface{} `json:"hash"`
 	Count int                    `json:"count"`
 }
 
-func newSubscriptionSucceedEventPresenceData(c *channel) subscriptionSucceeedEventPresenceData {
-	event := subscriptionSucceeedEventPresenceData{}
+func newSubscriptionSucceedEventPresenceData(c *channel) subscriptionSucceededEventPresenceData {
+	event := subscriptionSucceededEventPresenceData{}
 
 	var ids []string
 	hash := make(map[string]interface{}, c.TotalSubscriptions())

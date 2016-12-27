@@ -108,7 +108,7 @@ func (c *channel) Subscribe(a *app, conn *connection, channelData string) error 
 	a.TriggerMemberAddedHook(c, subscription)
 
 	// pusher_internal:subscription_succeeded
-	data := make(map[string]subscriptionSucceeedEventPresenceData)
+	data := make(map[string]subscriptionSucceededEventPresenceData)
 	data["presence"] = newSubscriptionSucceedEventPresenceData(c)
 
 	js, err = json.Marshal(data)
