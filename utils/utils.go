@@ -28,7 +28,7 @@ func HashMAC(message, key []byte) string {
 
 // GenerateSessionID Generate a new random Hash
 func GenerateSessionID() string {
-	return fmt.Sprintf("%d.%d", rand.Intn(math.MaxInt64), rand.Intn(math.MaxInt64))
+	return fmt.Sprintf("%d.%d", rand.Intn(math.MaxInt32), rand.Intn(math.MaxInt32))
 }
 
 // IsChannelNameValid Verify if the channel name is valid
