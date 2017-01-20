@@ -9,6 +9,7 @@ import (
 	"expvar"
 	"fmt"
 	"sync"
+        "time"
 
 	log "github.com/golang/glog"
 )
@@ -93,6 +94,38 @@ func (a *app) PublicChannels() []*channel {
 	return channels
 }
 
+// Start Pinger
+func (a *app) StartPinger(conn *connection) {
+	conn.Pinger = time.NewTicker(time.Second * conn.PingFrequency)
+    go func() {
+        for t := range conn.Pinger.C {
+            _ = t
+            if err := conn.Socket.WriteJSON(newPingEvent()); err != nil {
+				a.Disconnect(conn.SocketID)
+			} else {
+				conn.PongTimer = time.AfterFunc(time.Second * conn.PongTimeout, func(){a.CheckPong(conn)})
+			}
+        }
+    }()
+}
+
+// Check Pong status
+func (a *app) CheckPong(conn *connection) {
+	if conn.PongReceived {
+		conn.PongReceived = false
+	} else {
+		log.Info("Client unreachable, closing connection ", conn.SocketID)
+		a.Disconnect(conn.SocketID)
+	}
+}
+
+// Stop Pinger
+func (a *app) StopPinger(conn *connection) {
+	conn.PongTimer.Stop()
+	conn.Pinger.Stop()
+}
+
+
 // Disconnect Socket
 func (a *app) Disconnect(socketID string) {
 	log.Infof("Disconnecting socket %+v", socketID)
@@ -115,11 +148,13 @@ func (a *app) Disconnect(socketID string) {
 	a.Lock()
 	defer a.Unlock()
 
-	_, exists := a.Connections[conn.SocketID]
+	conn, exists := a.Connections[conn.SocketID]
 
 	if !exists {
 		return
 	}
+
+        a.StopPinger(conn)
 
 	delete(a.Connections, conn.SocketID)
 
@@ -135,6 +170,8 @@ func (a *app) Connect(conn *connection) {
 	a.Connections[conn.SocketID] = conn
 
 	a.Stats.Add("TotalConnections", 1)
+
+        a.StartPinger(conn)
 }
 
 // Find a Connection on this app
