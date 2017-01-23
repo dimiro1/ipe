@@ -121,8 +121,12 @@ func (a *app) CheckPong(conn *connection) {
 
 // Stop Pinger
 func (a *app) StopPinger(conn *connection) {
-	conn.PongTimer.Stop()
-	conn.Pinger.Stop()
+	if(conn.PongTimer != nil){
+		conn.PongTimer.Stop()	
+	}
+	if(conn.Pinger != nil){
+		conn.Pinger.Stop()	
+	}
 }
 
 
@@ -136,7 +140,7 @@ func (a *app) Disconnect(socketID string) {
 		log.Infof("Socket not found, %+v", err)
 		return
 	}
-
+	
 	// Unsubscribe from channels
 	for _, c := range a.Channels {
 		if c.IsSubscribed(conn) {
@@ -150,11 +154,11 @@ func (a *app) Disconnect(socketID string) {
 
 	conn, exists := a.Connections[conn.SocketID]
 
+    a.StopPinger(conn)
+	
 	if !exists {
 		return
 	}
-
-        a.StopPinger(conn)
 
 	delete(a.Connections, conn.SocketID)
 
@@ -171,7 +175,7 @@ func (a *app) Connect(conn *connection) {
 
 	a.Stats.Add("TotalConnections", 1)
 
-        a.StartPinger(conn)
+    a.StartPinger(conn)
 }
 
 // Find a Connection on this app
