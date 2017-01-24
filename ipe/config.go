@@ -4,6 +4,15 @@
 
 package ipe
 
+import (
+	"encoding/json"
+	log "github.com/golang/glog"
+	"math/rand"
+	"os"
+	"sync"
+	"time"
+)
+
 // The config file
 type configFile struct {
 	Host        string // The host, eg: :8080 will start on 0.0.0.0:8080
@@ -29,6 +38,8 @@ type configApp struct {
 	URLWebHook          string
 }
 
+var configLock = new(sync.RWMutex)
+
 func newAppFromConfig(a configApp) *app {
 	return newApp(
 		a.Name,
@@ -41,4 +52,28 @@ func newAppFromConfig(a configApp) *app {
 		a.WebHooks,
 		a.URLWebHook,
 	)
+}
+
+func loadConfig(filename string) configFile {
+	var conf configFile
+
+	rand.Seed(time.Now().Unix())
+	file, err := os.Open(filename)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	// Reading config
+	if err := json.NewDecoder(file).Decode(&conf); err != nil {
+		log.Fatal(err)
+	}
+
+	configLock.Lock()
+	var config = conf
+	configLock.Unlock()
+
+	return config
 }

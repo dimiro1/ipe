@@ -5,11 +5,10 @@
 package ipe
 
 import (
-	"encoding/json"
-	"math/rand"
 	"net/http"
 	"os"
-	"time"
+	"os/signal"
+	"syscall"
 
 	log "github.com/golang/glog"
 	"github.com/pressly/chi"
@@ -19,23 +18,7 @@ import (
 // Start Parse the configuration file and starts the ipe server
 // It Panic if could not start the HTTP or HTTPS server
 func Start(filename string) {
-	var conf configFile
-
-	rand.Seed(time.Now().Unix())
-	file, err := os.Open(filename)
-
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
-	defer file.Close()
-
-	// Reading config
-	if err := json.NewDecoder(file).Decode(&conf); err != nil {
-		log.Error(err)
-		return
-	}
+	conf := loadConfig(filename)
 
 	// Using a in memory database
 	db := newMemdb()
@@ -69,6 +52,22 @@ func Start(filename string) {
 			log.Fatal(http.ListenAndServeTLS(conf.SSLHost, conf.SSLCertFile, conf.SSLKeyFile, r))
 		}()
 	}
+
+	s := make(chan os.Signal, 1)
+	signal.Notify(s, syscall.SIGHUP)
+	go func() {
+		for {
+			<-s
+			conf = loadConfig(filename)
+			for _, a := range conf.Apps {
+				if exists, _ := db.GetAppByAppID(a.AppID); exists != nil {
+					continue
+				}
+				db.AddApp(newAppFromConfig(a))
+			}
+			log.Info("Reloaded config")
+		}
+	}()
 
 	log.Infof("Starting HTTP service on %s ...", conf.Host)
 	log.Fatal(http.ListenAndServe(conf.Host, r))
