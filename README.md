@@ -1,3 +1,7 @@
+# Maintainer Needed
+
+Unfortunatelly I am not using this software in production anymore and also I do not have many free time available to keep evolving this project, so, if you are interested in maintaining it, please, send me a message [dimiro1 at gmail] with your ideas on how you can maintain/evolve this project.
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/dimiro1/ipe)](https://goreportcard.com/report/github.com/dimiro1/ipe)
 
 Try browsing [the code on Sourcegraph](https://sourcegraph.com/github.com/dimiro1/ipe)!
