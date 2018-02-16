@@ -20,13 +20,18 @@ type connection struct {
 	SocketID  string
 	Socket    socket
 	CreatedAt time.Time
+	Pinger *time.Ticker
+	PingFrequency time.Duration
+	PongTimer *time.Timer
+	PongTimeout time.Duration
+	PongReceived bool
 }
 
 // Create a new Subscriber
 func newConnection(socketID string, s socket) *connection {
 	log.Infof("Creating a new Subscriber %+v", socketID)
 
-	return &connection{SocketID: socketID, Socket: s, CreatedAt: time.Now()}
+	return &connection{SocketID: socketID, Socket: s, CreatedAt: time.Now(), PingFrequency: 120, PongTimeout: 10}
 }
 
 // Publish the message to websocket atached to this client

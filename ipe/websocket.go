@@ -50,6 +50,8 @@ func handleMessages(conn *websocket.Conn, sessionID string, app *app) {
 		switch event.Event {
 		case "pusher:ping":
 			onPing(conn)
+		case "pusher:pong":
+			onPong(conn, sessionID, app)
 		case "pusher:subscribe":
 			onSubscribe(conn, sessionID, app, message)
 		case "pusher:unsubscribe":
@@ -116,6 +118,14 @@ func onPing(conn *websocket.Conn) {
 	if err := conn.WriteJSON(newPongEvent()); err != nil {
 		emitWSError(newGenericReconnectImmediatelyError(), conn)
 	}
+}
+
+func onPong(conn *websocket.Conn, socketID string, app *app) {
+	connect, err := app.FindConnection(socketID)
+	if err != nil {
+		return
+	}
+	connect.PongReceived = true
 }
 
 func onClientEvent(conn *websocket.Conn, sessionID string, app *app, message []byte) {
