@@ -9,6 +9,7 @@ StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=ipe
 ExecStart=/path/to/ipe -logtostderr -config="path_to_config.json"
+ExecReload=/usr/bin/kill -1 $MAINPID
 
 [Install]
 WantedBy=multi-user.target
