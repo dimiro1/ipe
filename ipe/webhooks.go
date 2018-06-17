@@ -141,7 +141,7 @@ func triggerHook(ctx context.Context, a *app, event hookEvent) error {
 		return fmt.Errorf("Webhooks are not enabled for app: %s", a.Name)
 	}
 
-	var done chan bool
+	done := make(chan bool)
 	defer close(done)
 
 	go func() {
