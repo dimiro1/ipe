@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package ipe
+package api
 
 import (
 	"encoding/json"
@@ -13,10 +13,16 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
-	"github.com/pressly/chi"
+	"github.com/gorilla/mux"
 
-	"github.com/dimiro1/ipe/utils"
+	"ipe/events"
+	"ipe/storage"
+	"ipe/utils"
 )
+
+// // Maximum event size permitted 10 kB
+// See: http://blogs.gnome.org/cneumair/2008/09/30/1-kb-1024-bytes-no-1-kb-1000-bytes/
+const maxDataEventSize = 10 * 1000
 
 // Prepare QueryString
 func prepareQueryString(params url.Values) string {
@@ -47,12 +53,15 @@ func prepareQueryString(params url.Values) string {
 //  * The request path (e.g. /some/resource)
 //  * The query parameters sorted by key, with keys converted to lowercase, then joined as in the query string.
 //    Note that the string must not be url escaped (e.g. given the keys auth_key: foo, Name: Something else, you get auth_key=foo&name=Something else)
-func authenticationHandler(DB db) func(http.Handler) http.Handler {
+func Authentication(storage storage.Storage) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			appID := chi.URLParam(r, "app_id")
+			var (
+				pathVars = mux.Vars(r)
+				appID    = pathVars["app_id"]
+			)
 
-			app, err := DB.GetAppByAppID(appID)
+			app, err := storage.GetAppByAppID(appID)
 
 			if err != nil {
 				log.Error(err)
@@ -82,12 +91,15 @@ func authenticationHandler(DB db) func(http.Handler) http.Handler {
 }
 
 // Check if the application is disabled
-func checkAppDisabled(DB db) func(http.Handler) http.Handler {
+func CheckAppDisabled(storage storage.Storage) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			appID := chi.URLParam(r, "app_id")
+			var (
+				pathVars = mux.Vars(r)
+				appID    = pathVars["app_id"]
+			)
 
-			currentApp, err := DB.GetAppByAppID(appID)
+			currentApp, err := storage.GetAppByAppID(appID)
 
 			if err != nil {
 				http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusForbidden)
@@ -105,7 +117,11 @@ func checkAppDisabled(DB db) func(http.Handler) http.Handler {
 	}
 }
 
-type postEventsHandler struct{ DB db }
+type PostEvents struct{ storage storage.Storage }
+
+func NewPostEvents(storage storage.Storage) *PostEvents {
+	return &PostEvents{storage: storage}
+}
 
 // ServeHTTPC An event consists of a name and data (typically JSON) which may be sent to all subscribers to a particular channel or channels.
 // This is conventionally known as triggering an event.
@@ -122,10 +138,13 @@ type postEventsHandler struct{ DB db }
 // Response is an empty JSON hash.
 //
 // POST /apps/{app_id}/events
-func (h *postEventsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	appID := chi.URLParam(r, "app_id")
+func (h *PostEvents) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var (
+		pathVars = mux.Vars(r)
+		appID    = pathVars["app_id"]
+	)
 
-	app, err := h.DB.GetAppByAppID(appID)
+	app, err := h.storage.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
@@ -160,15 +179,24 @@ func (h *postEventsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, c := range input.Channels {
 		channel := app.FindOrCreateChannelByChannelID(c)
 
-		app.Publish(channel, rawEvent{Event: input.Name, Channel: c, Data: input.Data}, input.SocketID)
+		if err := app.Publish(channel, events.Raw{Event: input.Name, Channel: c, Data: input.Data}, input.SocketID); err != nil {
+			log.Errorf("error publishing event %+v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 	}
 
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("{}"))
+	if _, err := w.Write([]byte("{}")); err != nil {
+		log.Errorf("unexpected error while writing into response %+v", err)
+	}
 }
 
-type getChannelsHandler struct{ DB db }
+type GetChannels struct{ storage storage.Storage }
+
+func NewGetChannels(storage storage.Storage) *GetChannels {
+	return &GetChannels{storage: storage}
+}
 
 // Allows fetching a hash of occupied channels (optionally filtered by prefix),
 // and optionally one or more attributes for each channel.
@@ -189,14 +217,15 @@ type getChannelsHandler struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels
-func (h *getChannelsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-
-	appID := chi.URLParam(r, "app_id")
-	filter := query.Get("filter_by_prefix")
-	info := query.Get("info")
-
-	attributes := strings.Split(info, ",")
+func (h *GetChannels) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var (
+		pathVars   = mux.Vars(r)
+		queryVars  = r.URL.Query()
+		appID      = pathVars["app_id"]
+		filter     = queryVars.Get("filter_by_prefix")
+		info       = queryVars.Get("info")
+		attributes = strings.Split(info, ",")
+	)
 
 	requestedUserCount := false
 
@@ -213,7 +242,7 @@ func (h *getChannelsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app, err := h.DB.GetAppByAppID(appID)
+	app, err := h.storage.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
@@ -225,30 +254,30 @@ func (h *getChannelsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "presence-":
 		for _, c := range app.PresenceChannels() {
 			if requestedUserCount {
-				channels[c.ChannelID] = struct {
+				channels[c.ID] = struct {
 					UserCount int `json:"user_count"`
 				}{
 					c.TotalUsers(),
 				}
 			} else {
-				channels[c.ChannelID] = struct{}{}
+				channels[c.ID] = struct{}{}
 			}
 		}
 	case "public-":
 		for _, c := range app.PublicChannels() {
-			channels[c.ChannelID] = struct{}{}
+			channels[c.ID] = struct{}{}
 		}
 	case "private-":
 		for _, c := range app.PrivateChannels() {
-			channels[c.ChannelID] = struct{}{}
+			channels[c.ID] = struct{}{}
 		}
 	default:
-		for _, c := range app.Channels {
-			channels[c.ChannelID] = struct{}{}
+		for _, c := range app.Channels() {
+			channels[c.ID] = struct{}{}
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.Header().Set("Content-Type", "application/json")
 
 	js := make(map[string]interface{}, 1)
 	js["channels"] = channels
@@ -259,7 +288,11 @@ func (h *getChannelsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type getChannelHandler struct{ DB db }
+type GetChannel struct{ storage storage.Storage }
+
+func NewGetChannel(storage storage.Storage) *GetChannel {
+	return &GetChannel{storage: storage}
+}
 
 // Fetch info for one channel
 //
@@ -271,28 +304,27 @@ type getChannelHandler struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}
-func (h *getChannelHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+func (h *GetChannel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var (
+		pathVars    = mux.Vars(r)
+		queryVars   = r.URL.Query()
+		appID       = pathVars["app_id"]
+		channelName = pathVars["channel_name"]
+		info        = queryVars.Get("info")
+		attributes  = strings.Split(info, ",")
+	)
 
-	query := r.URL.Query()
-
-	appID := chi.URLParam(r, "app_id")
-	app, err := h.DB.GetAppByAppID(appID)
+	app, err := h.storage.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
 	}
-
-	channelName := chi.URLParam(r, "channel_name")
 
 	// Channel name could not be empty
 	if strings.TrimSpace(channelName) == "" {
 		http.Error(w, "Empty channel name", http.StatusBadRequest)
 		return
 	}
-
-	info := query.Get("info")
-	attributes := strings.Split(info, ",")
 
 	// Attributes requested
 	requestedUserCount := false
@@ -341,15 +373,18 @@ func (h *getChannelHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		dtoChannel.SubscriptionCount = channel.TotalSubscriptions()
 	}
 
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
-
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(dtoChannel); err != nil {
 		log.Error(err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }
 
-type getChannelUsersHandler struct{ DB db }
+type GetChannelUsers struct{ storage storage.Storage }
+
+func NewGetChannelUsers(storage storage.Storage) *GetChannelUsers {
+	return &GetChannelUsers{storage: storage}
+}
 
 // Allowed only for presence-channels
 //
@@ -362,9 +397,12 @@ type getChannelUsersHandler struct{ DB db }
 // }
 //
 // GET /apps/{app_id}/channels/{channel_name}/users
-func (h *getChannelUsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	appID := chi.URLParam(r, "app_id")
-	channelName := chi.URLParam(r, "channel_name")
+func (h *GetChannelUsers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var (
+		pathVars    = mux.Vars(r)
+		appID       = pathVars["app_id"]
+		channelName = pathVars["channel_name"]
+	)
 
 	isPresence := utils.IsPresenceChannel(channelName)
 
@@ -373,7 +411,7 @@ func (h *getChannelUsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	app, err := h.DB.GetAppByAppID(appID)
+	app, err := h.storage.GetAppByAppID(appID)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Could not found an app with app_id: %s", appID), http.StatusBadRequest)
@@ -392,7 +430,7 @@ func (h *getChannelUsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 	var users []interface{}
 
-	for _, s := range channel.Subscriptions {
+	for _, s := range channel.Subscriptions() {
 		users = append(users, struct {
 			ID string `json:"id"`
 		}{s.ID})
@@ -400,8 +438,7 @@ func (h *getChannelUsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 
 	result["users"] = users
 
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
-
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(result); err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		log.Error(err)

@@ -2,16 +2,18 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package ipe
+package subscription
+
+import "ipe/connection"
 
 // A Channel Subscription
-type subscription struct {
-	Connection *connection
+type Subscription struct {
+	Connection *connection.Connection
 	ID         string
 	Data       string
 }
 
 // Create a new Subscription
-func newSubscription(conn *connection, data string) *subscription {
-	return &subscription{Connection: conn, Data: data}
+func New(conn *connection.Connection, data string) *Subscription {
+	return &Subscription{Connection: conn, Data: data}
 }

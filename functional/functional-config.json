@@ -14,8 +14,8 @@
       "Name": "App for Functional Test",
       "AppID": "1",
       "UserEvents": true,
-      "WebHooks": false,
-      "URLWebHook": "http://127.0.0.1:4567/php/hook.php"
+      "WebHooks": true,
+      "URLWebHook": "http://127.0.0.1:5000/hook"
     }
   ]
 }

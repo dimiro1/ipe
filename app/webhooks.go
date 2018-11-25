@@ -2,24 +2,26 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package ipe
+package app
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
-	"context"
-	"fmt"
-
-	"github.com/dimiro1/ipe/utils"
 	log "github.com/golang/glog"
+
+	"ipe/channel"
+	"ipe/subscription"
+	"ipe/utils"
 )
 
 const maxTimeout = 3 * time.Second
 
-// A WebHook is sent as a HTTP POST request to the url which you specify.
+// A webHook is sent as a HTTP POST request to the url which you specify.
 // The POST request payload (body) contains a JSON document, and follows the following format:
 // {
 //   "time_ms": 1327078148132
@@ -34,7 +36,7 @@ const maxTimeout = 3 * time.Second
 // You may use a HTTP or a HTTPS url for WebHooks. In most cases HTTP is sufficient, but HTTPS can be useful if your data is sensitive or if you wish to protect against replay attacks for example.
 // Authentication
 //
-// Since anyone could in principle send WebHooks to your application, it’s important to verify that these WebHooks originated from Pusher. Valid WebHooks will therefore contain these headers which contain a HMAC signature of the WebHook payload (body):
+// Since anyone could in principle send WebHooks to your application, it’s important to verify that these WebHooks originated from Pusher. Valid WebHooks will therefore contain these headers which contain a HMAC signature of the webHook payload (body):
 //
 //     X-Pusher-Key: The App Key.
 //     X-Pusher-Signature: A HMAC SHA256 hex digest formed by signing the POST payload (body) with the token’s secret.
@@ -52,43 +54,48 @@ type hookEvent struct {
 	UserID   string      `json:"user_id,omitempty"`
 }
 
-func newChannelOcuppiedHook(channel *channel) hookEvent {
-	return hookEvent{Name: "channel_occupied", Channel: channel.ChannelID}
+func newChannelOcuppiedHook(channel *channel.Channel) hookEvent {
+	return hookEvent{Name: "channel_occupied", Channel: channel.ID}
 }
 
-func newChannelVacatedHook(channel *channel) hookEvent {
-	return hookEvent{Name: "channel_vacated", Channel: channel.ChannelID}
+func newChannelVacatedHook(channel *channel.Channel) hookEvent {
+	return hookEvent{Name: "channel_vacated", Channel: channel.ID}
 }
 
-func newMemberAddedHook(channel *channel, s *subscription) hookEvent {
-	return hookEvent{Name: "member_added", Channel: channel.ChannelID, UserID: s.ID}
+func newMemberAddedHook(channel *channel.Channel, s *subscription.Subscription) hookEvent {
+	return hookEvent{Name: "member_added", Channel: channel.ID, UserID: s.ID}
 }
 
-func newMemberRemovedHook(channel *channel, s *subscription) hookEvent {
-	return hookEvent{Name: "member_removed", Channel: channel.ChannelID, UserID: s.ID}
+func newMemberRemovedHook(channel *channel.Channel, s *subscription.Subscription) hookEvent {
+	return hookEvent{Name: "member_removed", Channel: channel.ID, UserID: s.ID}
 }
 
-func newClientHook(channel *channel, s *subscription, event string, data interface{}) hookEvent {
-	return hookEvent{Name: "client_event", Channel: channel.ChannelID, Event: event, Data: data, SocketID: s.Connection.SocketID}
+func newClientHook(channel *channel.Channel, s *subscription.Subscription, event string, data interface{}) hookEvent {
+	return hookEvent{Name: "client_event", Channel: channel.ID, Event: event, Data: data, SocketID: s.Connection.SocketID}
 }
 
 // channel_occupied
 // { "name": "channel_occupied", "channel": "test_channel" }
-func (a *app) TriggerChannelOccupiedHook(c *channel) {
+func (a *Application) TriggerChannelOccupiedHook(c *channel.Channel) {
 	event := newChannelOcuppiedHook(c)
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
 
-	triggerHook(ctx, a, event)
+	if err := triggerHook(ctx, a, event); err != nil {
+		log.Errorf("triggering webhook %+v", err)
+	}
 }
 
 // channel_vacated
 // { "name": "channel_vacated", "channel": "test_channel" }
-func (a *app) TriggerChannelVacatedHook(c *channel) {
+func (a *Application) TriggerChannelVacatedHook(c *channel.Channel) {
 	event := newChannelVacatedHook(c)
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
-	triggerHook(ctx, a, event)
+
+	if err := triggerHook(ctx, a, event); err != nil {
+		log.Errorf("triggering webhook %+v", err)
+	}
 }
 
 // {
@@ -99,7 +106,7 @@ func (a *app) TriggerChannelVacatedHook(c *channel) {
 //   "socket_id": "socket_id of the sending socket",
 //   "user_id": "user_id associated with the sending socket" # Only for presence channels
 // }
-func (a *app) TriggerClientEventHook(c *channel, s *subscription, clientEvent string, data interface{}) {
+func (a *Application) TriggerClientEventHook(c *channel.Channel, s *subscription.Subscription, clientEvent string, data interface{}) {
 	event := newClientHook(c, s, clientEvent, data)
 
 	if c.IsPresence() {
@@ -108,7 +115,10 @@ func (a *app) TriggerClientEventHook(c *channel, s *subscription, clientEvent st
 
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
-	triggerHook(ctx, a, event)
+
+	if err := triggerHook(ctx, a, event); err != nil {
+		log.Errorf("triggering webhook %+v", err)
+	}
 }
 
 // {
@@ -116,11 +126,14 @@ func (a *app) TriggerClientEventHook(c *channel, s *subscription, clientEvent st
 //   "channel": "presence-your_channel_name",
 //   "user_id": "a_user_id"
 // }
-func (a *app) TriggerMemberAddedHook(c *channel, s *subscription) {
+func (a *Application) TriggerMemberAddedHook(c *channel.Channel, s *subscription.Subscription) {
 	event := newMemberAddedHook(c, s)
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
-	triggerHook(ctx, a, event)
+
+	if err := triggerHook(ctx, a, event); err != nil {
+		log.Errorf("triggering webhook %+v", err)
+	}
 }
 
 // {
@@ -128,21 +141,23 @@ func (a *app) TriggerMemberAddedHook(c *channel, s *subscription) {
 //   "channel": "presence-your_channel_name",
 //   "user_id": "a_user_id"
 // }
-func (a *app) TriggerMemberRemovedHook(c *channel, s *subscription) {
+func (a *Application) TriggerMemberRemovedHook(c *channel.Channel, s *subscription.Subscription) {
 	event := newMemberRemovedHook(c, s)
 	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
-	triggerHook(ctx, a, event)
+
+	if err := triggerHook(ctx, a, event); err != nil {
+		log.Errorf("triggering webhook %+v", err)
+	}
 }
 
-func triggerHook(ctx context.Context, a *app, event hookEvent) error {
+func triggerHook(ctx context.Context, a *Application, event hookEvent) error {
 	if !a.WebHooks {
-		log.Infof("Webhooks are not enabled for app: %s", a.Name)
-		return fmt.Errorf("Webhooks are not enabled for app: %s", a.Name)
+		log.Infof("webhook are not enabled for app: %s", a.Name)
+		return fmt.Errorf("webhooks are not enabled for app: %s", a.Name)
 	}
 
 	done := make(chan bool)
-	defer close(done)
 
 	go func() {
 		log.Infof("Triggering %s event", event.Name)
@@ -170,7 +185,7 @@ func triggerHook(ctx context.Context, a *app, event hookEvent) error {
 			return
 		}
 
-		req.WithContext(ctx)
+		req = req.WithContext(ctx)
 
 		req.Header.Set("User-Agent", "Ipe UA; (+https://github.com/dimiro1/ipe)")
 		req.Header.Set("Content-Type", "application/json")
@@ -184,11 +199,15 @@ func triggerHook(ctx context.Context, a *app, event hookEvent) error {
 
 		// See: http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.html#close_http_resp_body
 		if resp != nil {
-			defer resp.Body.Close()
+			defer func() {
+				if err := resp.Body.Close(); err != nil {
+					log.Errorf("error closing response body %+v", err)
+				}
+			}()
 		}
 
 		if err != nil {
-			log.Errorf("Error posting %s event: %+v", event.Name, err)
+			log.Errorf("error posting %s event: %+v", event.Name, err)
 		}
 
 		// Successfully terminated

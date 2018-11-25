@@ -2,12 +2,14 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package ipe
+package events
 
 import (
 	"encoding/json"
 
 	log "github.com/golang/glog"
+
+	"ipe/subscription"
 )
 
 // {
@@ -18,24 +20,24 @@ import (
 //         "channelData": "extra data"
 //     }
 // }
-type subscribeEventData struct {
+type SubscribeData struct {
 	Channel     string `json:"channel"`
 	Auth        string `json:"auth,omitempty"`
 	ChannelData string `json:"channel_data,omitempty"`
 }
 
-type subscribeEvent struct {
-	Event string             `json:"event"`
-	Data  subscribeEventData `json:"data"`
+type Subscribe struct {
+	Event string        `json:"event"`
+	Data  SubscribeData `json:"data"`
 }
 
 // Create a new subscribe event with the specified channel and data
-func newSubscribeEvent(channel, auth, channelData string) subscribeEvent {
-	data := subscribeEventData{Channel: channel, Auth: auth, ChannelData: channelData}
-	return subscribeEvent{Event: "pusher:subscribe", Data: data}
+func NewSubscribe(channel, auth, channelData string) Subscribe {
+	data := SubscribeData{Channel: channel, Auth: auth, ChannelData: channelData}
+	return Subscribe{Event: "pusher:subscribe", Data: data}
 }
 
-type unsubscribeEventData struct {
+type UnsubscribeData struct {
 	Channel string `json:"channel"`
 }
 
@@ -45,30 +47,30 @@ type unsubscribeEventData struct {
 //         "channel": "The channel"
 //     }
 // }
-type unsubscribeEvent struct {
-	Event string               `json:"event"`
-	Data  unsubscribeEventData `json:"data"`
+type Unsubscribe struct {
+	Event string          `json:"event"`
+	Data  UnsubscribeData `json:"data"`
 }
 
 // Create a new unsubscribe event for the specified channel
-func newUnsubscribeEvent(channel string) unsubscribeEvent {
-	data := unsubscribeEventData{Channel: channel}
-	return unsubscribeEvent{Event: "pusher:unsubscribe", Data: data}
+func NewUnsubscribe(channel string) Unsubscribe {
+	data := UnsubscribeData{Channel: channel}
+	return Unsubscribe{Event: "pusher:unsubscribe", Data: data}
 }
 
 // {
 //     "event": "pusher_internal:subscription_succeeded",
 //     "channel": "the channel"
 // }
-type subscriptionSucceededEvent struct {
+type SubscriptionSucceeded struct {
 	Event   string `json:"event"`
 	Channel string `json:"channel"`
 	Data    string `json:"data"`
 }
 
 // Create a new subscription succeed event for the specified channel
-func newSubscriptionSucceededEvent(channel, data string) subscriptionSucceededEvent {
-	return subscriptionSucceededEvent{Event: "pusher_internal:subscription_succeeded", Channel: channel, Data: data}
+func NewSubscriptionSucceeded(channel, data string) SubscriptionSucceeded {
+	return SubscriptionSucceeded{Event: "pusher_internal:subscription_succeeded", Channel: channel, Data: data}
 }
 
 // Data Subscription Succeed
@@ -89,22 +91,26 @@ func newSubscriptionSucceededEvent(channel, data string) subscriptionSucceededEv
 //        \"count\": 2
 //     }
 // }"
-type subscriptionSucceededEventPresenceData struct {
+type SubscriptionSucceededPresenceData struct {
 	Ids   []string               `json:"ids"`
 	Hash  map[string]interface{} `json:"hash"`
 	Count int                    `json:"count"`
 }
 
-func newSubscriptionSucceedEventPresenceData(c *channel) subscriptionSucceededEventPresenceData {
-	event := subscriptionSucceededEventPresenceData{}
+func NewSubscriptionSucceedPresenceData(subscriptions map[string]*subscription.Subscription) SubscriptionSucceededPresenceData {
+	event := SubscriptionSucceededPresenceData{}
 
-	var ids []string
-	hash := make(map[string]interface{}, c.TotalSubscriptions())
+	var (
+		ids  []string
+		hash = make(map[string]interface{}, len(subscriptions))
+	)
 
-	for _, s := range c.Subscriptions {
+	for _, s := range subscriptions {
 		// Do you have any other idea?
 		var js interface{}
-		json.Unmarshal([]byte(s.Data), &js)
+		if err := json.Unmarshal([]byte(s.Data), &js); err != nil {
+			continue
+		}
 
 		hash[s.ID] = js
 		ids = append(ids, s.ID)
@@ -112,7 +118,7 @@ func newSubscriptionSucceedEventPresenceData(c *channel) subscriptionSucceededEv
 
 	event.Ids = ids
 	event.Hash = hash
-	event.Count = c.TotalSubscriptions()
+	event.Count = len(subscriptions)
 
 	return event
 }
@@ -121,28 +127,28 @@ func newSubscriptionSucceedEventPresenceData(c *channel) subscriptionSucceededEv
 //     "event": "pusher:pong",
 //     "data": {}
 // }
-type pongEvent struct {
+type Pong struct {
 	Event string `json:"event"`
 	Data  string `json:"data"`
 }
 
 // Create a new pong event
-func newPongEvent() pongEvent {
-	return pongEvent{Event: "pusher:pong", Data: "{}"}
+func NewPong() Pong {
+	return Pong{Event: "pusher:pong", Data: "{}"}
 }
 
 // {
 //     "event": "pusher:ping",
 //     "data": {}
 // }
-type pingEvent struct {
+type Ping struct {
 	Event string `json:"event"`
 	Data  string `json:"data"`
 }
 
 // Create a new ping event
-func newPingEvent() pingEvent {
-	return pingEvent{Event: "pusher:ping", Data: "{}"}
+func NewPing() Ping {
+	return Ping{Event: "pusher:ping", Data: "{}"}
 }
 
 // {
@@ -152,7 +158,7 @@ func newPingEvent() pingEvent {
 //         "code": 4000
 //     }
 // }
-type errorEvent struct {
+type Error struct {
 	Event string      `json:"event"`
 	Data  interface{} `json:"data"`
 }
@@ -160,14 +166,11 @@ type errorEvent struct {
 // Create a new error event
 // Pusher protocol is very strange in some parts
 // It send null in some errors.
-func newErrorEvent(code int, message string) errorEvent {
-
-	type dataErrorEvent struct {
+func NewError(code int, message string) Error {
+	var data = struct {
 		Code    *int   `json:"code"`
 		Message string `json:"message"`
-	}
-
-	var data = dataErrorEvent{
+	}{
 		Message: message,
 	}
 
@@ -177,7 +180,7 @@ func newErrorEvent(code int, message string) errorEvent {
 		data.Code = &code
 	}
 
-	return errorEvent{Event: "pusher:error", Data: data}
+	return Error{Event: "pusher:error", Data: data}
 }
 
 // {
@@ -187,27 +190,25 @@ func newErrorEvent(code int, message string) errorEvent {
 //       "activity_timeout" : 120
 //     }
 // }
-type connectionEstablishedEventData struct {
-	SocketID        string `json:"socket_id"`
-	ActivityTimeout int    `json:"activity_timeout"`
-}
-
-type connectionEstablishedEvent struct {
+type ConnectionEstablished struct {
 	Event string `json:"event"`
 	Data  string `json:"data"`
 }
 
 // Create a new connection established event using the specified socketId
-func newConnectionEstablishedEvent(socketID string) connectionEstablishedEvent {
-	data := connectionEstablishedEventData{SocketID: socketID, ActivityTimeout: 120}
-
-	b, err := json.Marshal(data)
+func NewConnectionEstablished(socketID string) ConnectionEstablished {
+	b, err := json.Marshal(struct {
+		SocketID        string `json:"socket_id"`
+		ActivityTimeout int    `json:"activity_timeout"`
+	}{
+		SocketID: socketID, ActivityTimeout: 120,
+	})
 
 	if err != nil {
 		panic("events: Could not Marshal json ConnectionEstablishedEvent")
 	}
 
-	return connectionEstablishedEvent{Event: "pusher:connection_established", Data: string(b)}
+	return ConnectionEstablished{Event: "pusher:connection_established", Data: string(b)}
 }
 
 // {
@@ -215,14 +216,14 @@ func newConnectionEstablishedEvent(socketID string) connectionEstablishedEvent {
 //   "channel": "presence-example-channel",
 //   "data": String
 // }
-type memberAddedEvent struct {
+type MemberAdded struct {
 	Event   string `json:"event"`
 	Channel string `json:"channel"`
 	Data    string `json:"data"`
 }
 
-func newMemberAddedEvent(channel, data string) memberAddedEvent {
-	return memberAddedEvent{Event: "pusher_internal:member_added", Channel: channel, Data: data}
+func NewMemberAdded(channel, data string) MemberAdded {
+	return MemberAdded{Event: "pusher_internal:member_added", Channel: channel, Data: data}
 }
 
 // {
@@ -230,24 +231,24 @@ func newMemberAddedEvent(channel, data string) memberAddedEvent {
 //   "channel": "presence-example-channel",
 //   "data": String
 // }
-type memberRemovedEvent struct {
+type MemberRemoved struct {
 	Event   string `json:"event"`
 	Channel string `json:"channel"`
 	Data    string `json:"data"`
 }
 
-func newMemberRemovedEvent(channel string, s *subscription) memberRemovedEvent {
+func NewMemberRemoved(channel string, userID string) MemberRemoved {
 	data, err := json.Marshal(struct {
 		UserID string `json:"user_id"`
 	}{
-		UserID: s.ID,
+		UserID: userID,
 	})
 
 	if err != nil {
 		log.Error(err)
 	}
 
-	return memberRemovedEvent{Event: "pusher_internal:member_removed", Channel: channel, Data: string(data)}
+	return MemberRemoved{Event: "pusher_internal:member_removed", Channel: channel, Data: string(data)}
 }
 
 // {
@@ -255,19 +256,19 @@ func newMemberRemovedEvent(channel string, s *subscription) memberRemovedEvent {
 //     "channel": "The channel",
 //     "data": {}
 // }
-type rawEvent struct {
+type Raw struct {
 	Event   string          `json:"event"`
 	Channel string          `json:"channel"`
 	Data    json.RawMessage `json:"data"`
 }
 
-type responseEvent struct {
+type Response struct {
 	Event   string      `json:"event"`
 	Channel string      `json:"channel"`
 	Data    interface{} `json:"data"`
 }
 
 // The response event that is broadcasted to the client sockets
-func newResponseEvent(name, channel string, data interface{}) responseEvent {
-	return responseEvent{Event: name, Channel: channel, Data: data}
+func NewResponse(name, channel string, data interface{}) Response {
+	return Response{Event: name, Channel: channel, Data: data}
 }

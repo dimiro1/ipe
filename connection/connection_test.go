@@ -2,23 +2,18 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-package ipe
+package connection
 
-import "testing"
-
-// mockSocket is a mock implementation of socket
-// used in the test suite
-type mockSocket struct{}
-
-func (s mockSocket) WriteJSON(i interface{}) error {
-	return nil
-}
+import (
+	"ipe/mocks"
+	"testing"
+)
 
 func TestNewConnection(t *testing.T) {
 	expectedSocketID := "socketID"
-	expectedSocket := mockSocket{}
+	expectedSocket := mocks.MockSocket{}
 
-	c := newConnection(expectedSocketID, expectedSocket)
+	c := New(expectedSocketID, expectedSocket)
 
 	if c.SocketID != expectedSocketID {
 		t.Errorf("c.SocketID == %s, wants %s", c.SocketID, expectedSocketID)
@@ -29,6 +24,6 @@ func TestNewConnection(t *testing.T) {
 	}
 
 	if c.CreatedAt.IsZero() {
-		t.Errorf("c.CreatedAt.IsZero() == %t, wants %t", c.CreatedAt.IsZero(), false)
+		t.Errorf("c.createdAt.IsZero() == %t, wants %t", c.CreatedAt.IsZero(), false)
 	}
 }

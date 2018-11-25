@@ -1,4 +1,4 @@
-package ipe
+package events
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 )
 
 func Test_newErrorEvent_with_invalid_code(t *testing.T) {
-	event := newErrorEvent(0, "The error message")
+	event := NewError(0, "The error message")
 
 	data, _ := json.Marshal(event)
 	expected := `{"event":"pusher:error","data":{"code":null,"message":"The error message"}}`
@@ -18,7 +18,7 @@ func Test_newErrorEvent_with_invalid_code(t *testing.T) {
 }
 
 func Test_newErrorEvent_with_valid_code(t *testing.T) {
-	event := newErrorEvent(4007, "Unsupported protocol version")
+	event := NewError(4007, "Unsupported protocol version")
 
 	data, _ := json.Marshal(event)
 	expected := `{"event":"pusher:error","data":{"code":4007,"message":"Unsupported protocol version"}}`

@@ -1,53 +1,66 @@
-package ipe
+package api
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
-	"github.com/pressly/chi"
+	"github.com/gorilla/mux"
+
+	"ipe/app"
+	channel2 "ipe/channel"
+	"ipe/connection"
+	"ipe/mocks"
+	"ipe/storage"
 )
 
 var (
-	testApp  *app
-	database db
+	testApp  *app.Application
+	database storage.Storage
+	id       = 0
 )
+
+func newTestApp() *app.Application {
+	a := app.NewApplication("Test", strconv.Itoa(id), "123", "123", false, false, true, false, "")
+	id++
+
+	return a
+}
 
 func init() {
 	testApp = newTestApp()
 
-	channel := newChannel("presence-c1")
+	channel := channel2.New("presence-c1")
 	testApp.AddChannel(channel)
-	testApp.AddChannel(newChannel("c2"))
-	testApp.AddChannel(newChannel("private-c3"))
+	testApp.AddChannel(channel2.New("c2"))
+	testApp.AddChannel(channel2.New("private-c3"))
 
-	conn := newConnection("123.456", mockSocket{})
-	testApp.Subscribe(channel, conn, "{}")
+	conn := connection.New("123.456", mocks.MockSocket{})
+	_ = testApp.Subscribe(channel, conn, "{}")
 
-	conn = newConnection("321.654", mockSocket{})
-	testApp.Subscribe(channel, conn, "{}")
+	conn = connection.New("321.654", mocks.MockSocket{})
+	_ = testApp.Subscribe(channel, conn, "{}")
 
-	db := newMemdb()
-	db.AddApp(testApp)
+	_storage := storage.NewInMemory()
+	_ = _storage.AddApp(testApp)
 
-	database = db
+	database = _storage
 }
 
-// All Channels
+// All channels
 func Test_getChannels_all(t *testing.T) {
 	appID := testApp.AppID
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("app_id", appID)
-
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels", appID), nil)
-	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
+	r = mux.SetURLVars(r, map[string]string{
+		"app_id": appID,
+	})
 	w := httptest.NewRecorder()
 
-	handler := &getChannelsHandler{database}
+	handler := &GetChannels{database}
 	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
@@ -55,7 +68,7 @@ func Test_getChannels_all(t *testing.T) {
 	}
 
 	data := make(map[string]interface{})
-	json.Unmarshal(w.Body.Bytes(), &data)
+	_ = json.Unmarshal(w.Body.Bytes(), &data)
 
 	channels := data["channels"].(map[string]interface{})
 
@@ -67,14 +80,13 @@ func Test_getChannels_all(t *testing.T) {
 func Test_getChannels_filter_by_presence_prefix(t *testing.T) {
 	appID := testApp.AppID
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("app_id", appID)
-
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=presence-", appID), nil)
-	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
+	r = mux.SetURLVars(r, map[string]string{
+		"app_id": appID,
+	})
 	w := httptest.NewRecorder()
 
-	handler := &getChannelsHandler{database}
+	handler := &GetChannels{database}
 	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
@@ -82,7 +94,7 @@ func Test_getChannels_filter_by_presence_prefix(t *testing.T) {
 	}
 
 	data := make(map[string]interface{})
-	json.Unmarshal(w.Body.Bytes(), &data)
+	_ = json.Unmarshal(w.Body.Bytes(), &data)
 
 	channels := data["channels"].(map[string]interface{})
 
@@ -95,14 +107,13 @@ func Test_getChannels_filter_by_presence_prefix(t *testing.T) {
 func Test_getChannels_filter_by_presence_prefix_and_user_count(t *testing.T) {
 	appID := testApp.AppID
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("app_id", appID)
-
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=presence-&info=user_count", appID), nil)
-	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
+	r = mux.SetURLVars(r, map[string]string{
+		"app_id": appID,
+	})
 	w := httptest.NewRecorder()
 
-	handler := &getChannelsHandler{database}
+	handler := &GetChannels{database}
 	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
@@ -110,7 +121,7 @@ func Test_getChannels_filter_by_presence_prefix_and_user_count(t *testing.T) {
 	}
 
 	data := make(map[string]interface{})
-	json.Unmarshal(w.Body.Bytes(), &data)
+	_ = json.Unmarshal(w.Body.Bytes(), &data)
 
 	channels := data["channels"].(map[string]interface{})
 
@@ -135,14 +146,13 @@ func Test_getChannels_filter_by_presence_prefix_and_user_count(t *testing.T) {
 func Test_getChannels_filter_by_private_prefix_and_info_user_count(t *testing.T) {
 	appID := testApp.AppID
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("app_id", appID)
-
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=private-&info=user_count", appID), nil)
-	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
+	r = mux.SetURLVars(r, map[string]string{
+		"app_id": appID,
+	})
 	w := httptest.NewRecorder()
 
-	handler := &getChannelsHandler{database}
+	handler := &GetChannels{database}
 	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusBadRequest {
@@ -153,14 +163,13 @@ func Test_getChannels_filter_by_private_prefix_and_info_user_count(t *testing.T)
 func Test_getChannels_filter_by_public_prefix(t *testing.T) {
 	appID := testApp.AppID
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("app_id", appID)
-
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=public-", appID), nil)
-	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
+	r = mux.SetURLVars(r, map[string]string{
+		"app_id": appID,
+	})
 	w := httptest.NewRecorder()
 
-	handler := &getChannelsHandler{database}
+	handler := &GetChannels{database}
 	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
@@ -169,7 +178,7 @@ func Test_getChannels_filter_by_public_prefix(t *testing.T) {
 
 	data := make(map[string]interface{})
 
-	json.Unmarshal(w.Body.Bytes(), &data)
+	_ = json.Unmarshal(w.Body.Bytes(), &data)
 
 	channels := data["channels"].(map[string]interface{})
 
@@ -187,14 +196,13 @@ func Test_getChannels_filter_by_public_prefix(t *testing.T) {
 func Test_getChannels_filter_by_private_prefix(t *testing.T) {
 	appID := testApp.AppID
 
-	rctx := chi.NewRouteContext()
-	rctx.URLParams.Add("app_id", appID)
-
 	r, _ := http.NewRequest("GET", fmt.Sprintf("/apps/%s/channels?filter_by_prefix=private-", appID), nil)
-	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, rctx))
+	r = mux.SetURLVars(r, map[string]string{
+		"app_id": appID,
+	})
 	w := httptest.NewRecorder()
 
-	handler := &getChannelsHandler{database}
+	handler := &GetChannels{database}
 	handler.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
@@ -203,7 +211,7 @@ func Test_getChannels_filter_by_private_prefix(t *testing.T) {
 
 	data := make(map[string]interface{})
 
-	json.Unmarshal(w.Body.Bytes(), &data)
+	_ = json.Unmarshal(w.Body.Bytes(), &data)
 
 	channels := data["channels"].(map[string]interface{})
 
