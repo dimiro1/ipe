@@ -1,3 +1,5 @@
+"use strict";
+
 let assert = chai.assert;
 
 let APP_KEY = "278d525bdf162c739803";
@@ -17,7 +19,6 @@ function getPusher(auth) {
         authEndpoint: auth,
         enabledTransports: ["ws"],
         disabledTransports: ["flash"],
-        cluster: "hello", // Should be ignored
     });
 }
 
@@ -53,7 +54,7 @@ describe("Pusher", function () {
             let pusher = getPusher(AUTH);
 
             let channel = pusher.subscribe('public-channel');
-            channel.bind("pusher:subscription_succeeded", function (data) {
+            channel.bind("pusher:subscription_succeeded", function () {
                 assert.ok(true, "Connected to the channel");
                 done();
             });
@@ -63,7 +64,7 @@ describe("Pusher", function () {
             let pusher = getPusher(AUTH);
 
             let channel = pusher.subscribe('private-channel');
-            channel.bind("pusher:subscription_succeeded", function (data) {
+            channel.bind("pusher:subscription_succeeded", function () {
                 assert.ok(true, "Connected to the channel");
                 done();
             });
@@ -73,7 +74,7 @@ describe("Pusher", function () {
             let pusher = getPusher(AUTH_PRESENCE);
 
             let channel = pusher.subscribe('presence-channel');
-            channel.bind("pusher:subscription_succeeded", function (data) {
+            channel.bind("pusher:subscription_succeeded", function () {
                 assert.ok(true, "Connected to the channel");
                 done();
             });
@@ -85,13 +86,13 @@ describe("Pusher", function () {
             let pusher = getPusher(AUTH);
             let channel = pusher.subscribe('private-webhook');
 
-            channel.bind("pusher:subscription_succeeded", function (data) {
+            channel.bind("pusher:subscription_succeeded", function () {
                 console.log("subscribed");
             });
 
-            channel.bind("mywebhook", function (data) {
-                console.log(data);
+            channel.bind("channel_occupied", function (data) {
                 assert.equal(data, "The Webhoook from server");
+                pusher.unsubscribe('private-webhook');
                 done();
             });
         });
@@ -102,11 +103,11 @@ describe("Pusher", function () {
             let pusher = getPusher(AUTH);
             let channel = pusher.subscribe('public-channel');
 
-            channel.bind("pusher:subscription_succeeded", function (data) {
+            channel.bind("pusher:subscription_succeeded", function () {
                 channel.trigger("client-message", "The message");
             });
 
-            pusher.bind("pusher:error", function (data) {
+            pusher.bind("pusher:error", function () {
                 assert.ok(true, "Expected error");
                 done();
             });

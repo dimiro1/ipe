@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,11 +15,10 @@ var client pusher.Client
 
 func init() {
 	client = pusher.Client{
-		AppId:   "1",
-		Key:     "278d525bdf162c739803",
-		Secret:  "7ad3753142a6693b25b9",
-		Host:    ":8080",
-		Cluster: "hello",
+		AppId:  "1",
+		Key:    "278d525bdf162c739803",
+		Secret: "7ad3753142a6693b25b9",
+		Host:   ":8080",
 	}
 }
 
@@ -69,7 +69,18 @@ func hookcallback(res http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(string(bytes))
 
-	_, err = client.Trigger("private-webhook", "mywebhook", "The Webhoook from server")
+	event := struct {
+		Events []struct {
+			Name string `json:"name"`
+		} `json:"events"`
+	}{}
+
+	err = json.NewDecoder(r.Body).Decode(&event)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = client.Trigger("private-webhook", event.Events[0].Name, "The Webhoook from server")
 	if err != nil {
 		panic(err)
 	}
