@@ -1,0 +1,19 @@
+---
+host: ':8080'
+profiling: false
+ssl:
+  enabled: false
+  host: ':4343'
+  key_file: 'key.pem'
+  cert_file: 'cert.pem'
+apps:
+  - name: 'Sample Application'
+    enabled: true
+    only_ssl: false
+    key: '278d525bdf162c739803'
+    secret: '7ad3753142a6693b25b9'
+    app_id: '1'
+    user_events: true
+    webhooks:
+      enabled: true # Default is false
+      url: 'http://127.0.0.1:5000/hook'

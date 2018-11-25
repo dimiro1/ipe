@@ -106,7 +106,7 @@ func CheckAppDisabled(storage storage.Storage) func(http.Handler) http.Handler {
 				return
 			}
 
-			if currentApp.ApplicationDisabled {
+			if !currentApp.Enabled {
 				http.Error(w, "Application disabled", http.StatusForbidden)
 				return
 			}

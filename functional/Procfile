@@ -1,2 +1,2 @@
 client: go run client.go
-server: go run ../cmd/main.go -config ./functional-config.json -alsologtostderr
+server: go run ../cmd/main.go -config ./functional-config.yml -alsologtostderr

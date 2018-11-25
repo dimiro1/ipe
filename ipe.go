@@ -5,7 +5,7 @@
 package ipe
 
 import (
-	"encoding/json"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
@@ -14,6 +14,7 @@ import (
 	log "github.com/golang/glog"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"gopkg.in/yaml.v2"
 
 	"ipe/api"
 	"ipe/app"
@@ -28,21 +29,18 @@ func Start(filename string) {
 	var conf config.File
 
 	rand.Seed(time.Now().Unix())
-	file, err := os.Open(filename)
 
+	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	defer func() {
-		if err := file.Close(); err != nil {
-			log.Error(err)
-		}
-	}()
+	// Expand env vars
+	data = []byte(os.ExpandEnv(string(data)))
 
-	// Reading config
-	if err := json.NewDecoder(file).Decode(&conf); err != nil {
+	// Decoding config
+	if err := yaml.UnmarshalStrict(data, &conf); err != nil {
 		log.Error(err)
 		return
 	}
@@ -58,10 +56,10 @@ func Start(filename string) {
 			a.Key,
 			a.Secret,
 			a.OnlySSL,
-			a.ApplicationDisabled,
+			a.Enabled,
 			a.UserEvents,
-			a.WebHooks,
-			a.URLWebHook,
+			a.WebHooks.Enabled,
+			a.WebHooks.URL,
 		)
 
 		if err := inMemoryStorage.AddApp(application); err != nil {
@@ -96,10 +94,10 @@ func Start(filename string) {
 		api.NewGetChannelUsers(inMemoryStorage),
 	)
 
-	if conf.SSL {
+	if conf.SSL.Enabled {
 		go func() {
-			log.Infof("Starting HTTPS service on %s ...", conf.SSLHost)
-			log.Fatal(http.ListenAndServeTLS(conf.SSLHost, conf.SSLCertFile, conf.SSLKeyFile, router))
+			log.Infof("Starting HTTPS service on %s ...", conf.SSL.Host)
+			log.Fatal(http.ListenAndServeTLS(conf.SSL.Host, conf.SSL.CertFile, conf.SSL.KeyFile, router))
 		}()
 	}
 

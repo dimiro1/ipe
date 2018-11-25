@@ -155,6 +155,7 @@ flymake*
 
 ignore_http/*
 config.json
+config.yml
 *.pem
 build
 .vscode/*

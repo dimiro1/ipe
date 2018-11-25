@@ -152,7 +152,7 @@ func onOpen(conn *websocket.Conn, r *http.Request, sessionID string, app *app.Ap
 		return noProtocolVersionSupplied
 	case protocol != supportedProtocolVersion:
 		return unsupportedProtocolVersion
-	case app.ApplicationDisabled:
+	case !app.Enabled:
 		return applicationDisabled
 	case app.OnlySSL:
 		if r.TLS == nil {

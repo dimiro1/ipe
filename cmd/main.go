@@ -21,7 +21,7 @@ var (
 
 // Main function, initialize the system
 func main() {
-	var filename = flag.String("config", "config.json", "Config file location")
+	var filename = flag.String("config", "config.yml", "Config file location")
 	flag.Parse()
 
 	printBanner()

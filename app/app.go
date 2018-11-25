@@ -22,15 +22,15 @@ import (
 type Application struct {
 	sync.Mutex
 
-	Name                string
-	AppID               string
-	Key                 string
-	Secret              string
-	OnlySSL             bool
-	ApplicationDisabled bool
-	UserEvents          bool
-	WebHooks            bool
-	URLWebHook          string
+	Name       string
+	AppID      string
+	Key        string
+	Secret     string
+	OnlySSL    bool
+	Enabled    bool
+	UserEvents bool
+	WebHooks   bool
+	URLWebHook string
 
 	channels    map[string]*channel.Channel       `json:"-"`
 	connections map[string]*connection.Connection `json:"-"`
@@ -44,22 +44,22 @@ func NewApplication(
 	key,
 	secret string,
 	onlySSL,
-	disabled,
+	enabled,
 	userEvents,
 	webHooks bool,
 	webHookURL string,
 ) *Application {
 
 	a := &Application{
-		Name:                name,
-		AppID:               appID,
-		Key:                 key,
-		Secret:              secret,
-		OnlySSL:             onlySSL,
-		ApplicationDisabled: disabled,
-		UserEvents:          userEvents,
-		WebHooks:            webHooks,
-		URLWebHook:          webHookURL,
+		Name:       name,
+		AppID:      appID,
+		Key:        key,
+		Secret:     secret,
+		OnlySSL:    onlySSL,
+		Enabled:    enabled,
+		UserEvents: userEvents,
+		WebHooks:   webHooks,
+		URLWebHook: webHookURL,
 	}
 
 	a.connections = make(map[string]*connection.Connection)
