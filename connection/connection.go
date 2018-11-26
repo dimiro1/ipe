@@ -5,6 +5,7 @@
 package connection
 
 import (
+	"sync"
 	"time"
 
 	log "github.com/golang/glog"
@@ -17,6 +18,8 @@ type Socket interface {
 
 // Connection An user connection
 type Connection struct {
+	sync.Mutex
+
 	SocketID  string
 	Socket    Socket
 	CreatedAt time.Time
@@ -31,6 +34,9 @@ func New(socketID string, s Socket) *Connection {
 
 // Publish the message to websocket attached to this client
 func (conn *Connection) Publish(m interface{}) {
+	conn.Lock()
+	defer conn.Unlock()
+
 	if err := conn.Socket.WriteJSON(m); err != nil {
 		log.Errorf("error writing json into Socket, %+v", err)
 	}

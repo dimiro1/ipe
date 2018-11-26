@@ -20,7 +20,7 @@ import (
 
 // An App
 type Application struct {
-	sync.Mutex
+	sync.RWMutex
 
 	Name       string
 	AppID      string
@@ -32,8 +32,8 @@ type Application struct {
 	WebHooks   bool
 	URLWebHook string
 
-	channels    map[string]*channel.Channel       `json:"-"`
-	connections map[string]*connection.Connection `json:"-"`
+	channels    map[string]*channel.Channel
+	connections map[string]*connection.Connection
 
 	Stats *expvar.Map `json:"-"`
 }
@@ -71,6 +71,9 @@ func NewApplication(
 
 // Channels returns the full list of channels
 func (a *Application) Channels() []*channel.Channel {
+	a.RLock()
+	defer a.RUnlock()
+
 	var channels []*channel.Channel
 
 	for _, c := range a.channels {
@@ -82,6 +85,9 @@ func (a *Application) Channels() []*channel.Channel {
 
 // Only Presence channels
 func (a *Application) PresenceChannels() []*channel.Channel {
+	a.RLock()
+	defer a.RUnlock()
+
 	var channels []*channel.Channel
 
 	for _, c := range a.channels {
@@ -95,6 +101,9 @@ func (a *Application) PresenceChannels() []*channel.Channel {
 
 // Only Private channels
 func (a *Application) PrivateChannels() []*channel.Channel {
+	a.RLock()
+	defer a.RUnlock()
+
 	var channels []*channel.Channel
 
 	for _, c := range a.channels {
@@ -108,6 +117,9 @@ func (a *Application) PrivateChannels() []*channel.Channel {
 
 // Only Public channels
 func (a *Application) PublicChannels() []*channel.Channel {
+	a.RLock()
+	defer a.RUnlock()
+
 	var channels []*channel.Channel
 
 	for _, c := range a.channels {
@@ -142,15 +154,16 @@ func (a *Application) Disconnect(socketID string) {
 
 	// Remove from Application
 	a.Lock()
-	defer a.Unlock()
-
 	_, exists := a.connections[conn.SocketID]
+	a.Unlock()
 
 	if !exists {
 		return
 	}
 
+	a.Lock()
 	delete(a.connections, conn.SocketID)
+	a.Unlock()
 
 	a.Stats.Add("TotalConnections", -1)
 }
@@ -168,6 +181,9 @@ func (a *Application) Connect(conn *connection.Connection) {
 
 // Find a Connection on this Application
 func (a *Application) FindConnection(socketID string) (*connection.Connection, error) {
+	a.RLock()
+	defer a.RUnlock()
+
 	conn, exists := a.connections[socketID]
 
 	if exists {
@@ -256,6 +272,9 @@ func (a *Application) FindOrCreateChannelByChannelID(n string) *channel.Channel 
 
 // Find the Channel by Channel ID
 func (a *Application) FindChannelByChannelID(n string) (*channel.Channel, error) {
+	a.RLock()
+	defer a.RUnlock()
+
 	c, exists := a.channels[n]
 
 	if exists {
