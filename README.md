@@ -1,20 +1,17 @@
-# Maintainer Needed
-
-Unfortunatelly I am not using this software in production anymore and also I do not have many free time available to keep evolving this project, so, if you are interested in maintaining it, please, send me a message [dimiro1 at gmail] with your ideas on how you can maintain/evolve this project.
-
 [![Go Report Card](https://goreportcard.com/badge/github.com/dimiro1/ipe)](https://goreportcard.com/report/github.com/dimiro1/ipe)
 
 Try browsing [the code on Sourcegraph](https://sourcegraph.com/github.com/dimiro1/ipe)!
 
 # IPÊ
 
-This software is written in Go - the WYSIWYG lang
+An open source Pusher server implementation compatible with Pusher client libraries written in Go.
 
 # Why I wrote this software?
 
 1. I wanted to learn Go and I needed a non trivial application;
 2. I use Pusher in some projects;
 3. I really like Pusher;
+4. I was using Pusher on some projects behind a firewall;
 
 # Features
 
@@ -35,8 +32,6 @@ This software is written in Go - the WYSIWYG lang
 
 You can download pre built binaries from the [releases tab](https://github.com/dimiro1/ipe/releases).
 
-I do not have a Windows machine, so I can only distribute binaries for amd64 linux and amd64 darwin.
-
 # Building
 
 ```console
@@ -53,28 +48,27 @@ $ go install github.com/dimiro1/ipe
 
 ## The server
 
-```javascript
-{
-	"Host": ":8080",                    // Required
-	"SSL": false,                       // Not Required, default is false
-	"Profiling": false,                 // Mount pprof at /debug. Not Required, default is false
-	"SSLHost": ":4433",                 // Required if SSL is true
-	"SSLKeyFile": "A key.pem file",     // Required if SSL is true
-	"SSLCertFile": "A cert.pem file",   // Required if SSL is true
-	"Apps": [                           // Required, A Json arrays with multiple apps
-		{
-			"ApplicationDisabled": false,               // Required but can be false
-			"Secret": "A really secret random string",  // Required
-			"Key": "A random Key string",               // Required
-			"OnlySSL": false,                           // Required but can be false
-			"Name": "The app name",                     // Required
-			"AppID": "The app ID",                      // Required
-			"UserEvents": true,                         // Required but can be false
-			"WebHooks": true,                           // Required but can be false
-			"URLWebHook": "Some URL to send webhooks"   // Required if WebHooks is true
-		}
-	]
-}
+```yaml
+
+---
+host: ":8080"
+profiling: false
+ssl:
+  enabled: false
+  host: ":4343"
+  key_file: "key.pem"
+  cert_file: "cert.pem"
+apps:
+  - name: "Sample Application"
+    enabled: true
+    only_ssl: false
+    key: "278d525bdf162c739803"
+    secret: "${APP_SECRET}" # Expand env vars
+    app_id: "1"
+    user_events: true
+    webhooks:
+      enabled: true
+      url: "http://127.0.0.1:5000/hook"
 
 ```
 
@@ -83,7 +77,7 @@ $ go install github.com/dimiro1/ipe
 ### Client javascript library
 
 ```javascript
-var pusher = new Pusher(APP_KEY, {
+let pusher = new Pusher(APP_KEY, {
   wsHost: 'localhost',
   wsPort: 8080,
   wssPort: 4433,    // Required if encrypted is true
@@ -108,10 +102,29 @@ PHP
 $pusher = new Pusher(APP_KEY, APP_SECRET, APP_ID, DEBUG, "http://localhost", "8080");
 ```
 
+Go
+
+```go
+package main
+
+import "github.com/pusher/pusher-http-go"
+
+func main() {
+	client := pusher.Client{
+        AppId:  "APP_ID",
+        Key:    "APP_KEY",
+        Secret: "APP_SECRET",
+        Host:   ":8080",
+    }
+	
+	// use the client
+}
+```
+
 NodeJS
 
 ```javascript
-var pusher = new Pusher({
+let pusher = new Pusher({
   appId: APP_ID,
   key: APP_KEY,
   secret: APP_SECRET
@@ -144,7 +157,7 @@ Feel free to fork this repo.
 
 # Pusher
 
-Pusher is an excelent service, their service is very reliable. I recomend for everyone.
+Pusher is an excellent service, their service is very reliable. I recommend for everyone.
 
 # Where this name came from?
 
@@ -158,7 +171,7 @@ Claudemiro Alves Feitosa Neto
 
 # LICENSE
 
-Copyright 2014, 2015, 2016 Claudemiro Alves Feitosa Neto. All rights reserved.
+Copyright 2014, 2018 Claudemiro Alves Feitosa Neto. All rights reserved.
 Use of this source code is governed by a MIT-style
 license that can be found in the LICENSE file.
 
