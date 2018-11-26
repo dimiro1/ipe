@@ -142,7 +142,7 @@ func Test_getChannels_filter_by_presence_prefix_and_user_count(t *testing.T) {
 	}
 }
 
-// User count only alowed in Presence channels
+// User count only allowed in Presence channels
 func Test_getChannels_filter_by_private_prefix_and_info_user_count(t *testing.T) {
 	appID := testApp.AppID
 

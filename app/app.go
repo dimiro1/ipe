@@ -18,7 +18,7 @@ import (
 	"ipe/subscription"
 )
 
-// An App
+// Application represents a Pusher application
 type Application struct {
 	sync.RWMutex
 
@@ -38,6 +38,7 @@ type Application struct {
 	Stats *expvar.Map `json:"-"`
 }
 
+// NewApplication returns a new Application
 func NewApplication(
 	name,
 	appID,
@@ -83,7 +84,7 @@ func (a *Application) Channels() []*channel.Channel {
 	return channels
 }
 
-// Only Presence channels
+// PresenceChannels Only Presence channels
 func (a *Application) PresenceChannels() []*channel.Channel {
 	a.RLock()
 	defer a.RUnlock()
@@ -99,7 +100,7 @@ func (a *Application) PresenceChannels() []*channel.Channel {
 	return channels
 }
 
-// Only Private channels
+// PrivateChannels Only Private channels
 func (a *Application) PrivateChannels() []*channel.Channel {
 	a.RLock()
 	defer a.RUnlock()
@@ -115,7 +116,7 @@ func (a *Application) PrivateChannels() []*channel.Channel {
 	return channels
 }
 
-// Only Public channels
+// PublicChannels Only Public channels
 func (a *Application) PublicChannels() []*channel.Channel {
 	a.RLock()
 	defer a.RUnlock()
@@ -179,7 +180,7 @@ func (a *Application) Connect(conn *connection.Connection) {
 	a.Stats.Add("TotalConnections", 1)
 }
 
-// Find a Connection on this Application
+// FindConnection Find a Connection on this Application
 func (a *Application) FindConnection(socketID string) (*connection.Connection, error) {
 	a.RLock()
 	defer a.RUnlock()
@@ -193,7 +194,7 @@ func (a *Application) FindConnection(socketID string) (*connection.Connection, e
 	return nil, errors.New("connection not found")
 }
 
-// DeleteChannel removes the Channel from Application
+// RemoveChannel removes the Channel from Application
 func (a *Application) RemoveChannel(c *channel.Channel) {
 	log.Infof("remove the Channel %s from Application %s", c.ID, a.Name)
 	a.Lock()
@@ -216,7 +217,7 @@ func (a *Application) RemoveChannel(c *channel.Channel) {
 	a.Stats.Add("TotalChannels", -1)
 }
 
-// Add a new Channel to this APP
+// AddChannel Add a new Channel to this APP
 func (a *Application) AddChannel(c *channel.Channel) {
 	log.Infof("adding a new Channel %s to Application %s", c.ID, a.Name)
 
@@ -240,7 +241,7 @@ func (a *Application) AddChannel(c *channel.Channel) {
 	a.Stats.Add("TotalChannels", 1)
 }
 
-// Returns a Channel from this Application
+// FindOrCreateChannelByChannelID Returns a Channel from this Application
 // If not found then the Channel is created and added to this Application
 func (a *Application) FindOrCreateChannelByChannelID(n string) *channel.Channel {
 	c, err := a.FindChannelByChannelID(n)
@@ -270,7 +271,7 @@ func (a *Application) FindOrCreateChannelByChannelID(n string) *channel.Channel 
 	return c
 }
 
-// Find the Channel by Channel ID
+// FindChannelByChannelID Find the Channel by Channel ID
 func (a *Application) FindChannelByChannelID(n string) (*channel.Channel, error) {
 	a.RLock()
 	defer a.RUnlock()
@@ -284,12 +285,16 @@ func (a *Application) FindChannelByChannelID(n string) (*channel.Channel, error)
 	return nil, errors.New("channel does not exists")
 }
 
+// Publish an event into the channel
+// skip the ignore connection
 func (a *Application) Publish(c *channel.Channel, event events.Raw, ignore string) error {
 	a.Stats.Add("TotalUniqueMessages", 1)
 
 	return c.Publish(event, ignore)
 }
 
+// Unsubscribe unsubscribe the given connection from the channel
+// remove the channel from the application if it is empty
 func (a *Application) Unsubscribe(c *channel.Channel, conn *connection.Connection) error {
 	err := c.Unsubscribe(conn)
 	if err != nil {
@@ -303,6 +308,7 @@ func (a *Application) Unsubscribe(c *channel.Channel, conn *connection.Connectio
 	return nil
 }
 
+// Subscribe the connection into the given channel
 func (a *Application) Subscribe(c *channel.Channel, conn *connection.Connection, data string) error {
 	return c.Subscribe(conn, data)
 }

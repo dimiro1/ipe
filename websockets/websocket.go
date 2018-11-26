@@ -34,15 +34,17 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// Websocket handler for real time websocket messages
 type Websocket struct {
 	storage storage.Storage
 }
 
+// NewWebsocket returns a new Websocket handler
 func NewWebsocket(storage storage.Storage) *Websocket {
 	return &Websocket{storage: storage}
 }
 
-// Websocket GET /app/{key}
+// ServeHTTP Websocket GET /app/{key}
 func (h *Websocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	defer func() {

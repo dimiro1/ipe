@@ -6,14 +6,14 @@ package subscription
 
 import "ipe/connection"
 
-// A Channel Subscription
+// Subscription A Channel Subscription
 type Subscription struct {
 	Connection *connection.Connection
 	ID         string
 	Data       string
 }
 
-// Create a new Subscription
+// New Create a new Subscription
 func New(conn *connection.Connection, data string) *Subscription {
 	return &Subscription{Connection: conn, Data: data}
 }

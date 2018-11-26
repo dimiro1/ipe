@@ -86,7 +86,7 @@ func (a *Application) TriggerChannelOccupiedHook(c *channel.Channel) {
 	}
 }
 
-// channel_vacated
+// TriggerChannelVacatedHook channel_vacated
 // { "name": "channel_vacated", "channel": "test_channel" }
 func (a *Application) TriggerChannelVacatedHook(c *channel.Channel) {
 	event := newChannelVacatedHook(c)
@@ -98,6 +98,7 @@ func (a *Application) TriggerChannelVacatedHook(c *channel.Channel) {
 	}
 }
 
+// TriggerClientEventHook client_events
 // {
 //   "name": "client_event",
 //   "channel": "name of the channel the event was published on",
@@ -121,6 +122,7 @@ func (a *Application) TriggerClientEventHook(c *channel.Channel, s *subscription
 	}
 }
 
+// TriggerMemberAddedHook member_added
 // {
 //   "name": "member_added",
 //   "channel": "presence-your_channel_name",
@@ -136,6 +138,7 @@ func (a *Application) TriggerMemberAddedHook(c *channel.Channel, s *subscription
 	}
 }
 
+// TriggerMemberRemovedHook member_removed
 // {
 //   "name": "member_removed",
 //   "channel": "presence-your_channel_name",

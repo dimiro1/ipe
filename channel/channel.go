@@ -18,8 +18,13 @@ import (
 	"ipe/utils"
 )
 
+// Option constructor function for Channel
 type Option func(*Channel)
+
+// ListenerFunc listener function
 type ListenerFunc func(*Channel, *subscription.Subscription)
+
+// ClientEventListenerFunc listener for client events
 type ClientEventListenerFunc func(*Channel, *subscription.Subscription, string, interface{})
 
 // A Channel
@@ -51,30 +56,35 @@ func New(channelID string, options ...Option) *Channel {
 	return c
 }
 
+// WithMemberAddedListener appends the given ListenerFunc into the memberAddedListeners list
 func WithMemberAddedListener(f ListenerFunc) func(*Channel) {
 	return func(c *Channel) {
 		c.memberAddedListeners = append(c.memberAddedListeners, f)
 	}
 }
 
+// WithMemberRemovedListener appends the given ListenerFunc into the memberRemovedListeners list
 func WithMemberRemovedListener(f ListenerFunc) func(*Channel) {
 	return func(c *Channel) {
 		c.memberRemovedListeners = append(c.memberRemovedListeners, f)
 	}
 }
 
+// WithChannelOccupiedListener appends the given ListenerFunc into the channelOccupiedListeners list
 func WithChannelOccupiedListener(f ListenerFunc) func(*Channel) {
 	return func(c *Channel) {
 		c.channelOccupiedListeners = append(c.channelOccupiedListeners, f)
 	}
 }
 
+// WithChannelVacatedListener appends the given ListenerFunc into the channelVacatedListeners list
 func WithChannelVacatedListener(f ListenerFunc) func(*Channel) {
 	return func(c *Channel) {
 		c.channelVacatedListeners = append(c.channelVacatedListeners, f)
 	}
 }
 
+// WithClientEventListener appends the given ListenerFunc into the clientEventListeners list
 func WithClientEventListener(f ClientEventListenerFunc) func(*Channel) {
 	return func(c *Channel) {
 		c.clientEventListeners = append(c.clientEventListeners, f)
@@ -95,32 +105,32 @@ func (c *Channel) Subscriptions() []*subscription.Subscription {
 	return subscriptions
 }
 
-// Return true if the Channel has at least one subscriber
+// IsOccupied Return true if the Channel has at least one subscriber
 func (c *Channel) IsOccupied() bool {
 	return c.TotalSubscriptions() > 0
 }
 
-// Check if the type of the Channel is presence or is private
+// IsPresenceOrPrivate Check if the type of the Channel is presence or is private
 func (c *Channel) IsPresenceOrPrivate() bool {
 	return c.IsPresence() || c.IsPrivate()
 }
 
-// Check if the type of the Channel is public
+// IsPublic Check if the type of the Channel is public
 func (c *Channel) IsPublic() bool {
 	return !c.IsPresenceOrPrivate()
 }
 
-// Check if the type of the Channel is presence
+// IsPresence Check if the type of the Channel is presence
 func (c *Channel) IsPresence() bool {
 	return utils.IsPresenceChannel(c.ID)
 }
 
-// Check if the type of the Channel is private
+// IsPrivate Check if the type of the Channel is private
 func (c *Channel) IsPrivate() bool {
 	return utils.IsPrivateChannel(c.ID)
 }
 
-// Get the total of subscribers
+// TotalSubscriptions Get the total of subscribers
 func (c *Channel) TotalSubscriptions() int {
 	c.RLock()
 	defer c.RUnlock()
@@ -128,7 +138,7 @@ func (c *Channel) TotalSubscriptions() int {
 	return len(c.subscriptions)
 }
 
-// Get the total of users.
+// TotalUsers Get the total of users.
 func (c *Channel) TotalUsers() int {
 	c.RLock()
 	defer c.RUnlock()
@@ -142,7 +152,7 @@ func (c *Channel) TotalUsers() int {
 	return len(total)
 }
 
-// Add a new subscriber to the Channel
+// Subscribe Add a new subscriber to the Channel
 func (c *Channel) Subscribe(conn *connection.Connection, channelData string) error {
 	log.Infof("Subscribing %s to Channel %s", conn.SocketID, c.ID)
 
@@ -219,7 +229,7 @@ func (c *Channel) IsSubscribed(conn *connection.Connection) bool {
 	return exists
 }
 
-// Remove the subscriber from the Channel
+// Unsubscribe Remove the subscriber from the Channel
 // It destroy the Channel if the channels does not have any subscribers.
 func (c *Channel) Unsubscribe(conn *connection.Connection) error {
 	log.Infof("unsubscribe %s from Channel %s", conn.SocketID, c.ID)
@@ -254,7 +264,7 @@ func (c *Channel) Unsubscribe(conn *connection.Connection) error {
 	return nil
 }
 
-// Publish a MemberAddedEvent to all subscriptions
+// PublishMemberAddedEvent Publish a MemberAddedEvent to all subscriptions
 func (c *Channel) PublishMemberAddedEvent(data string, subscription *subscription.Subscription) {
 	c.RLock()
 	defer c.RUnlock()
@@ -266,7 +276,7 @@ func (c *Channel) PublishMemberAddedEvent(data string, subscription *subscriptio
 	}
 }
 
-// Publish a MemberRemovedEvent to all subscriptions
+// PublishMemberRemovedEvent Publish a MemberRemovedEvent to all subscriptions
 func (c *Channel) PublishMemberRemovedEvent(subscription *subscription.Subscription) {
 	c.RLock()
 	defer c.RUnlock()
@@ -279,6 +289,7 @@ func (c *Channel) PublishMemberRemovedEvent(subscription *subscription.Subscript
 }
 
 // Publish messages to all Subscribers
+// skip the ignore connection
 func (c *Channel) Publish(event events.Raw, ignore string) error {
 	c.RLock()
 	defer c.RUnlock()

@@ -4,7 +4,7 @@
 
 package config
 
-// The config file
+// File config file
 type File struct {
 	Host      string        `yaml:"host"` // The host, eg: :8080 will start on 0.0.0.0:8080
 	SSL       SSL           `yaml:"ssl"`
@@ -12,6 +12,7 @@ type File struct {
 	Apps      []Application `yaml:"apps"`
 }
 
+// SSL related configuration options
 type SSL struct {
 	Enabled  bool   `yaml:"enabled"`
 	Host     string `yaml:"host"`
@@ -19,6 +20,7 @@ type SSL struct {
 	CertFile string `yaml:"cert_file"`
 }
 
+// Application related configuration options
 type Application struct {
 	Name       string   `yaml:"name"`
 	AppID      string   `yaml:"app_id"`
@@ -30,6 +32,7 @@ type Application struct {
 	WebHooks   Webhooks `yaml:"webhooks"`
 }
 
+// Webhooks related configuration options
 type Webhooks struct {
 	Enabled bool   `yaml:"enabled"`
 	URL     string `yaml:"url"`

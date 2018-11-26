@@ -25,7 +25,7 @@ type Connection struct {
 	CreatedAt time.Time
 }
 
-// Create a new Subscriber
+// New Create a new Subscriber
 func New(socketID string, s Socket) *Connection {
 	log.Infof("Creating a new Subscriber %+v", socketID)
 

@@ -43,7 +43,7 @@ func prepareQueryString(params url.Values) string {
 	return strings.Join(pieces, "&")
 }
 
-// Authenticate pusher
+// Authentication Authenticate pusher
 // see: https://gist.github.com/mloughran/376898
 //
 // The signature is a HMAC SHA256 hex digest.
@@ -90,7 +90,7 @@ func Authentication(storage storage.Storage) func(http.Handler) http.Handler {
 	}
 }
 
-// Check if the application is disabled
+// CheckAppDisabled Check if the application is disabled
 func CheckAppDisabled(storage storage.Storage) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
@@ -117,13 +117,15 @@ func CheckAppDisabled(storage storage.Storage) func(http.Handler) http.Handler {
 	}
 }
 
+// PostEvents handle post events
 type PostEvents struct{ storage storage.Storage }
 
+// NewPostEvents return a new PostEvents handler
 func NewPostEvents(storage storage.Storage) *PostEvents {
 	return &PostEvents{storage: storage}
 }
 
-// ServeHTTPC An event consists of a name and data (typically JSON) which may be sent to all subscribers to a particular channel or channels.
+// ServeHTTP An event consists of a name and data (typically JSON) which may be sent to all subscribers to a particular channel or channels.
 // This is conventionally known as triggering an event.
 //
 // The body should contain a Hash of parameters encoded as JSON where data parameter itself is JSON encoded.
@@ -192,13 +194,15 @@ func (h *PostEvents) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetChannels handle get channels
 type GetChannels struct{ storage storage.Storage }
 
+// NewGetChannels return a new GetChannels handler
 func NewGetChannels(storage storage.Storage) *GetChannels {
 	return &GetChannels{storage: storage}
 }
 
-// Allows fetching a hash of occupied channels (optionally filtered by prefix),
+// ServeHTTP Allows fetching a hash of occupied channels (optionally filtered by prefix),
 // and optionally one or more attributes for each channel.
 //
 // Notes:
@@ -288,13 +292,15 @@ func (h *GetChannels) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetChannel handle get channel
 type GetChannel struct{ storage storage.Storage }
 
+// NewGetChannel return a new GetChannel handler
 func NewGetChannel(storage storage.Storage) *GetChannel {
 	return &GetChannel{storage: storage}
 }
 
-// Fetch info for one channel
+// ServeHTTP Fetch info for one channel
 //
 // Example:
 // {
@@ -380,13 +386,15 @@ func (h *GetChannel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetChannelUsers handle get users from a channel
 type GetChannelUsers struct{ storage storage.Storage }
 
+// NewGetChannelUsers return a new GetChannelUsers handler
 func NewGetChannelUsers(storage storage.Storage) *GetChannelUsers {
 	return &GetChannelUsers{storage: storage}
 }
 
-// Allowed only for presence-channels
+// ServeHTTP Allowed only for presence-channels
 //
 // Example:
 // {

@@ -19,15 +19,18 @@ type Storage interface {
 	AddApp(application *app.Application) error
 }
 
+// InMemory in memory implementation of Storage
 type InMemory struct {
 	sync.RWMutex
 	Apps []*app.Application
 }
 
+// NewInMemory returns an InMemory storage
 func NewInMemory() Storage {
 	return &InMemory{}
 }
 
+// AddApp adds app into memory
 func (db *InMemory) AddApp(application *app.Application) error {
 	db.Lock()
 	defer db.Unlock()
