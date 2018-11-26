@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-// storage represents a app database
+// Storage represents a app database
 // For now it there is only one memory database implementation
 // but in the future I can write a sql implementation
 type Storage interface {

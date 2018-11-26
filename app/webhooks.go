@@ -74,7 +74,7 @@ func newClientHook(channel *channel.Channel, s *subscription.Subscription, event
 	return hookEvent{Name: "client_event", Channel: channel.ID, Event: event, Data: data, SocketID: s.Connection.SocketID}
 }
 
-// channel_occupied
+// TriggerChannelOccupiedHook channel_occupied
 // { "name": "channel_occupied", "channel": "test_channel" }
 func (a *Application) TriggerChannelOccupiedHook(c *channel.Channel) {
 	event := newChannelOcuppiedHook(c)

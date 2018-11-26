@@ -39,7 +39,7 @@ func NewSubscribe(channel, auth, channelData string) Subscribe {
 	return Subscribe{Event: "pusher:subscribe", Data: data}
 }
 
-// UnsubscribeData
+// UnsubscribeData event data
 type UnsubscribeData struct {
 	Channel string `json:"channel"`
 }
@@ -56,7 +56,7 @@ type Unsubscribe struct {
 	Data  UnsubscribeData `json:"data"`
 }
 
-// Create a new unsubscribe event for the specified channel
+// NewUnsubscribe Create a new unsubscribe event for the specified channel
 func NewUnsubscribe(channel string) Unsubscribe {
 	data := UnsubscribeData{Channel: channel}
 	return Unsubscribe{Event: "pusher:unsubscribe", Data: data}
@@ -73,7 +73,7 @@ type SubscriptionSucceeded struct {
 	Data    string `json:"data"`
 }
 
-// Create a new subscription succeed event for the specified channel
+// NewSubscriptionSucceeded Create a new subscription succeed event for the specified channel
 func NewSubscriptionSucceeded(channel, data string) SubscriptionSucceeded {
 	return SubscriptionSucceeded{Event: "pusher_internal:subscription_succeeded", Channel: channel, Data: data}
 }

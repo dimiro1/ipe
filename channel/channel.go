@@ -27,7 +27,7 @@ type ListenerFunc func(*Channel, *subscription.Subscription)
 // ClientEventListenerFunc listener for client events
 type ClientEventListenerFunc func(*Channel, *subscription.Subscription, string, interface{})
 
-// A Channel
+// Channel represents an application channel
 type Channel struct {
 	sync.RWMutex
 
@@ -43,7 +43,7 @@ type Channel struct {
 	clientEventListeners     []ClientEventListenerFunc
 }
 
-// Create a new Channel
+// New Create a new Channel
 func New(channelID string, options ...Option) *Channel {
 	log.Infof("Creating a new Channel: %s", channelID)
 
