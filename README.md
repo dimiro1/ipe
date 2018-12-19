@@ -44,6 +44,14 @@ or simply
 $ go install github.com/dimiro1/ipe
 ```
 
+Building from a local checkout
+
+```console
+$ git clone https://github.com/dimiro1/ipe.git
+$ cd ipe/cmd
+$ go build -o ipe
+```
+
 # How to configure?
 
 ## The server
