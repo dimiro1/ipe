@@ -10,7 +10,7 @@ apps:
   - name: "Sample Application"
     enabled: true
     only_ssl: false
-    key: "278d525bdf162c739803"
+    key: "${APP_KEY}"
     secret: "${APP_SECRET}" # Expand env vars
     app_id: "1"
     user_events: true

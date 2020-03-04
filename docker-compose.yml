@@ -1,0 +1,18 @@
+version: '3.3'
+services: 
+  app:
+    container_name: 'ipe-service'
+    build: .
+    environment: 
+      APP_SECRET: "testing-server"
+      APP_KEY: "testing-server"
+      AUTH_TOKEN: "7kAWddg6ADHx"
+    ports:
+      - 8080:8080
+      - 5000:5000
+    logging:
+      driver: json-file
+    dns:
+     - 8.8.8.8
+     - 4.4.4.4
+

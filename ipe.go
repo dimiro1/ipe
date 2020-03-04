@@ -11,6 +11,8 @@ import (
 	"os"
 	"time"
 
+	"encoding/json"
+
 	log "github.com/golang/glog"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -73,6 +75,39 @@ func Start(filename string) {
 
 	router.Path("/app/{key}").Methods("GET").Handler(
 		websockets.NewWebsocket(inMemoryStorage),
+	)
+
+	router.Path("/app/create").Methods("POST").Handler(
+		api.NewCreateApplication(inMemoryStorage),
+	)
+
+	router.HandleFunc("/apps/all",
+		func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			log.Error(os.Getenv("AUTH_TOKEN"))
+			if authHeader != os.Getenv("AUTH_TOKEN") {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{ "Error":  "Unauthorized access" }`))
+				return
+			}
+
+			out, err := json.Marshal(inMemoryStorage.GetAllApps())
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{ ` + string(out) + ` }`))
+			if err != nil {
+				log.Error("Error", err)
+			}
+		},
+	)
+
+	router.HandleFunc("/app/test",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`Working Test route`))
+		},
 	)
 
 	appsRouter := router.PathPrefix("/apps/{app_id}").Subrouter()

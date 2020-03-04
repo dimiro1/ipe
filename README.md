@@ -27,6 +27,8 @@ An open source Pusher server implementation compatible with Pusher client librar
 * Protocol version 7;
 * Multiple apps in the same instance;
 * Drop in replacement for pusher server;
+* Dynamically add clients via api
+* Get all clients via api
 
 # Download pre built binaries
 
@@ -141,6 +143,113 @@ let pusher = new Pusher({
 });
 
 ```
+
+# API Access
+
+### To create client api with credentials call
+
+```
+{host}/app/create
+```
+
+with Authorization header token (via env)
+
+Example 
+
+```
+curl --location --request POST 'http://127.0.0.1:8080/app/create' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: 7kAWg6ADHx' \
+--data-raw '{
+	"name" : "Testing 5",
+  "appID" : "5",
+  "key" : "testing-5",
+  "secret" : "testing-5",
+  "onlySSL" : false,
+  "webHookURL":"https://webhook.site/e4cf00c5-c379-4c19-8eb4-a32e6002728b5"
+}'
+```
+
+
+responds
+
+```
+{
+    "Message": "Testing 5 Successfully added to pusher server!",
+    "apps": [
+        {
+            "Name": "Sample Application",
+            "AppID": "1",
+            "Key": "",
+            "Secret": "",
+            "OnlySSL": false,
+            "Enabled": true,
+            "UserEvents": true,
+            "WebHooks": true,
+            "URLWebHook": "http://0.0.0.0:5000/hook"
+        },
+        {
+            "Name": "Testing 5",
+            "AppID": "5",
+            "Key": "testing-5",
+            "Secret": "testing-5",
+            "OnlySSL": false,
+            "Enabled": true,
+            "UserEvents": true,
+            "WebHooks": true,
+            "URLWebHook": "https://webhook.site/e4cf00c5-c379-4c19-8eb4-a32e6002728b5"
+        }
+    ]
+}
+```
+
+
+### To get all clients
+
+```
+{host}/app/all
+```
+
+Example
+
+```
+curl --location --request GET 'http://127.0.0.1:8080/apps/all' \
+--header 'Authorization: 7kAWg6ADHx'
+```
+
+Respose will be
+
+```
+{
+    [
+        {
+            "Name": "Sample Application",
+            "AppID": "1",
+            "Key": "",
+            "Secret": "",
+            "OnlySSL": false,
+            "Enabled": true,
+            "UserEvents": true,
+            "WebHooks": true,
+            "URLWebHook": "http://0.0.0.0:5000/hook"
+        },
+        {
+            "Name": "Testing 5",
+            "AppID": "5",
+            "Key": "testing-5",
+            "Secret": "testing-5",
+            "OnlySSL": false,
+            "Enabled": true,
+            "UserEvents": true,
+            "WebHooks": true,
+            "URLWebHook": "https://webhook.site/e4cf00c5-c379-4c19-8eb4-a32e6002728b5"
+        }
+    ]
+}
+```
+
+
+
 
 # Logging
 
