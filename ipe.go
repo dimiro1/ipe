@@ -84,7 +84,6 @@ func Start(filename string) {
 	router.HandleFunc("/apps/all",
 		func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
-			log.Error(os.Getenv("AUTH_TOKEN"))
 			if authHeader != os.Getenv("AUTH_TOKEN") {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
