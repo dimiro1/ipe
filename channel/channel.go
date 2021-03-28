@@ -164,7 +164,7 @@ func (c *Channel) Subscribe(conn *connection.Connection, channelData string) err
 	if c.IsPresence() {
 		// User Info Data
 		var info struct {
-			UserID   string          `json:"user_id"`
+			UserID   utils.UserID    `json:"user_id"`
 			UserInfo json.RawMessage `json:"user_info"`
 		}
 
@@ -184,7 +184,7 @@ func (c *Channel) Subscribe(conn *connection.Connection, channelData string) err
 
 		c.Lock()
 		// Update the Subscription
-		_subscription.ID = info.UserID
+		_subscription.ID = info.UserID.GetID()
 		_subscription.Data = string(js)
 		c.Unlock()
 

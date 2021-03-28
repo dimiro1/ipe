@@ -8,10 +8,12 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -49,4 +51,41 @@ func IsPresenceChannel(channelName string) bool {
 // IsClientEvent Verify if the event name represents a client event type
 func IsClientEvent(event string) bool {
 	return strings.HasPrefix(event, "client-")
+}
+
+type ValueType string
+
+const (
+	String ValueType = "string"
+	Int    ValueType = "int"
+)
+
+type UserID struct {
+	strVal    string
+	intVal    int64
+	valueType ValueType
+}
+
+func (u *UserID) UnmarshalJSON(bytes []byte) error {
+	var (
+		err error
+	)
+
+	if bytes[0] == '"' {
+		err = json.Unmarshal(bytes, &u.strVal)
+		u.valueType = String
+	} else {
+		err = json.Unmarshal(bytes, &u.intVal)
+		u.valueType = Int
+	}
+
+	return err
+}
+
+func (u *UserID) GetID() string {
+	if u.valueType == Int {
+		return strconv.FormatInt(u.intVal, 10)
+	}
+
+	return u.strVal
 }
